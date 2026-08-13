@@ -3,11 +3,7 @@ import jwt from 'jsonwebtoken';
 import AppError from '../../shared/utils/AppError';
 import { userRepository } from '../user/user.repository';
 import type { LoginInput } from './auth.schema';
-
-const jwtSecret = process.env.JWT_SECRET;
-if (!jwtSecret) {
-  throw new Error('JWT_SECRET must be defined in environment variables');
-}
+import { env } from '../../config/env';
 
 export const authService = {
   login: async (input: LoginInput) => {
@@ -36,7 +32,7 @@ export const authService = {
         email: user.email,
         role: user.role,
       },
-      jwtSecret,
+      env.JWT_SECRET,
       { expiresIn: '1h' },
     );
 

@@ -3,6 +3,7 @@ import { AuthUser } from "../types/express";
 import jwt from "jsonwebtoken";
 import AppError from "../utils/AppError";
 import { asyncHandler } from "../handlers/asyncHandler";
+import { env } from "../../config/env";
 
 function getBearerToken(req: Request): string | null {
   const header = req.headers.authorization;
@@ -20,7 +21,7 @@ export const authenticate = asyncHandler(
       throw new AppError("Unauthorized", 401);
     }
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as AuthUser;
+    const payload = jwt.verify(token, env.JWT_SECRET) as AuthUser;
 
     req.user = payload;
 

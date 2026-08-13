@@ -1,4 +1,3 @@
-import "dotenv/config";
 import express, { Request, Response } from "express";
 import path from "path";
 import cors from "cors";
@@ -8,11 +7,11 @@ import { errorHandler } from "./shared/handlers/errorHandler";
 import { authenticate } from "./shared/middleware/authenticate";
 import authRoutes from "./modules/auth/auth.routes";
 import publicRoutes from "./modules/public/public.routes";
+import { env } from "./config/env";
 
 const app = express();
-const port = process.env.PORT || 5000;
 const allowedOrigins = [
-  process.env.CORS_ORIGIN,
+  env.CORS_ORIGIN,
   "http://localhost:3000",
   "https://price-service-sandy.vercel.app",
 ].filter(Boolean) as string[];
@@ -45,11 +44,6 @@ app.use("/reports/files", express.static(reportsDir));
 app.get("/", (_req: Request, res: Response) => {
   res.json({ message: "PresyoSerbisyo backend is running" });
 });
-app.get("/api/test", (_req: Request, res: Response) => {
-  console.log("process.env.CORS_ORIGIN =", process.env.CORS_ORIGIN);
-  console.log("allowedOrigins =", allowedOrigins);
-  res.json({ message: "TEST API" });
-});
 
 app.use((_req: Request, res: Response) => {
   res.status(404).json({ error: "Not found" });
@@ -57,6 +51,4 @@ app.use((_req: Request, res: Response) => {
 
 app.use(errorHandler);
 
-app.listen(port, () => {
-  console.log(`Server running on http://localhost:${port}`);
-});
+export default app;

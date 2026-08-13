@@ -5,6 +5,7 @@ import ExcelJS from 'exceljs';
 import { prisma } from '../../prisma';
 import type { Prisma } from '@prisma/client';
 import type { ReportTypeEnum } from './report.schema';
+import { env } from '../../config/env';
 
 export type ReportFormat = 'PDF' | 'EXCEL';
 export type ReportGeneratorPayload = {
@@ -187,7 +188,7 @@ export async function generateReportFile(payload: ReportGeneratorPayload) {
     await generateExcel(reportPath, records);
   }
 
-  const baseUrl = process.env.BACKEND_BASE_URL ?? `http://localhost:${process.env.PORT ?? 5000}`;
+  const baseUrl = env.BACKEND_BASE_URL ?? `http://localhost:${env.PORT}`;
   return {
     fileUrl: `${baseUrl}/reports/files/${filename}`,
     filename,
