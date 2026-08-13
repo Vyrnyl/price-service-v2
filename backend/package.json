@@ -12,6 +12,7 @@
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
     "create:admin": "npx tsx scripts/create-admin-user.ts",
+    "seed": "npx tsx prisma/seed.ts",
     "test": "tsx --test src/**/*.test.ts",
     "test:watch": "tsx --test --watch src/**/*.test.ts"
   },
