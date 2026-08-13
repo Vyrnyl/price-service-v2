@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { MdLockOutline, MdOutlineMailOutline } from "react-icons/md";
 import { normalizeUserRole } from "@/shared/services/auth";
-import { useLogin } from "../hooks/useLogin";
+import { useLogin } from "../hooks/use-login";
 import { type LoginInput } from "../auth.schema";
 
 const getRedirectPath = (role: string | undefined) => {

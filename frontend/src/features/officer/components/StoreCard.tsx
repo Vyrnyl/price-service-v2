@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { IoMdArrowForward } from "react-icons/io";
 import { MdCalendarToday, MdEdit, MdLocationOn, MdStore } from "react-icons/md";
 import { Store } from "@/features/officer/types";
-import { getStoreStatus } from "./storeStatus";
+import { getStoreStatus } from "./store-status";
 
 export default function StoreCard({
   store,

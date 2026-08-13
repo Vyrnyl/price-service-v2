@@ -6,7 +6,7 @@ import { CreateStoreDialog } from "@/features/officer/components/CreateStoreDial
 import { StoreRegistryHeader } from "./components/StoreRegistryHeader";
 import { StoreRegistryToolbar } from "./components/StoreRegistryToolbar";
 import { StoreRegistryGrid } from "./components/StoreRegistryGrid";
-import { useStoreRegistryState } from "@/features/officer/store/storeHooks";
+import { useStoreRegistryState } from "@/features/officer/store/use-stores";
 import { StorePriceRecordsModal } from "@/features/officer/store/StorePriceRecordsModal";
 import { StoreRegistryPageProps } from "@/features/officer/types";
 import { ICON_BUTTON_CLASSES } from "./constants";

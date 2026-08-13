@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { mapBackendPriceRecord, fetchCommodities, fetchStores, fetchStorePriceRecords, saveStore } from "@/features/officer/store/storeApi";
+import { mapBackendPriceRecord, fetchCommodities, fetchStores, fetchStorePriceRecords, saveStore } from "@/features/officer/store/stores.api";
 import type { Store, StoreFormData } from "@/features/officer/types";
 import type { PriceRecord } from "@/features/officer/price-records.types";
-import { getStoreStatus } from "@/features/officer/components/storeStatus";
+import { getStoreStatus } from "@/features/officer/components/store-status";
 
 const RECENTLY_UPDATED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
