@@ -53,14 +53,14 @@ model Store {
 model PriceRecord {
   id          String    @id @default(uuid()) @db.Uuid
   commodityId String    @db.Uuid
-  storeId     String    @db.Uuid
+  storeId     String?   @db.Uuid
   userId      String    @db.Uuid
   price       Decimal   @db.Decimal(20, 4)
   dateAndTime DateTime
   status      PriceStatus
   createdAt   DateTime  @default(now())
   commodity   Commodity @relation(fields: [commodityId], references: [id])
-  store       Store     @relation(fields: [storeId], references: [id])
+  store       Store?    @relation(fields: [storeId], references: [id], onDelete: SetNull)
   user        User      @relation(fields: [userId], references: [id])
 }
 

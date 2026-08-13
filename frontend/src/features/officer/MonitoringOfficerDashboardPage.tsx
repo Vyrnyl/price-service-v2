@@ -63,7 +63,7 @@ export default function MonitoringOfficerDashboardPage() {
   const [totalStores, setTotalStores] = useState(0);
   const [totalPriceRecords, setTotalPriceRecords] = useState(0);
   const [latestStores, setLatestStores] = useState<Array<{ id: string; name: string; location: string; createdAt: string }>>([]);
-  const [latestPriceRecords, setLatestPriceRecords] = useState<Array<{ id: string; commodity: { name: string }; store: { name: string }; price: string; createdAt: string }>>([]);
+  const [latestPriceRecords, setLatestPriceRecords] = useState<Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>>([]);
   const [latestReports, setLatestReports] = useState<Array<{ id: string; type: string; period: string; createdAt: string }>>([]);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function MonitoringOfficerDashboardPage() {
         const [commoditiesResponse, storesResponse, priceRecordsResponse, reportsResponse] = await Promise.all([
           apiFetch<{ status: string; data: unknown[] }>("/api/commodities"),
           apiFetch<{ status: string; data: Array<{ id: string; name: string; location: string; createdAt: string }> }>("/api/stores"),
-          apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string }; price: string; createdAt: string }> }>("/api/price-records"),
+          apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }> }>("/api/price-records"),
           apiFetch<{ status: string; data: Array<{ id: string; type: string; period: string; createdAt: string }> }>("/api/reports"),
         ]);
 
@@ -184,7 +184,7 @@ export default function MonitoringOfficerDashboardPage() {
                     latestPriceRecords.map((record) => (
                       <div key={record.id} className="rounded-2xl bg-white p-3 shadow-sm">
                         <p className="font-semibold text-on-surface">{record.commodity.name}</p>
-                        <p className="text-body-sm text-on-surface-variant">{record.store.name}</p>
+                        <p className="text-body-sm text-on-surface-variant">{record.store?.name ?? "Unknown store"}</p>
                         <p className="mt-2 text-[11px] text-on-surface-variant">{new Date(record.createdAt).toLocaleDateString()} • {record.price}</p>
                       </div>
                     ))
