@@ -4,7 +4,7 @@
 > Update this file at the end of every work session and every time a Feature Loop step is completed.
 > The plan of *what to build* lives in [build-plan.md](build-plan.md); this file records *what is done*.
 
-**Last updated:** 2026-08-13 · **Current phase:** R2 (not started) · **Current feature:** R2.1
+**Last updated:** 2026-08-13 · **Current phase:** R3 (not started) · **Current feature:** R3.1
 
 > **Context.** PresyoSerbisyo was built before these standards existed. The nine product modules below are recorded **retroactively** — they work, but none has been verified against the Definition of Done ([build-plan.md](build-plan.md) §3), which is why most sit at ◕ rather than ●. The refactor phases R0–R3 close that gap.
 >
@@ -37,13 +37,13 @@ Recount after every status change.
 | Phase P — Existing product (retro) | 9 | 0 | 0 | 0 | 9 | 0 | 0 |
 | Phase R0 — Critical security | 3 | 0 | 0 | 0 | 0 | 3 | 0 |
 | Phase R1 — Dead code & layout | 5 | 0 | 0 | 0 | 0 | 5 | 0 |
-| Phase R2 — Backend spine | 6 | 6 | 0 | 0 | 0 | 0 | 0 |
+| Phase R2 — Backend spine | 6 | 0 | 0 | 0 | 0 | 6 | 0 |
 | Phase R3 — Domain restructure | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
 | Phase 1 — Shared UI primitives | 3 | 3 | 0 | 0 | 0 | 0 | 0 |
 | Phase 2 — Product gaps | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
-| **Total** | **39** | **17** | **0** | **0** | **13** | **9** | **0** |
+| **Total** | **39** | **11** | **0** | **0** | **13** | **15** | **0** |
 
-**Overall completion: 9 / 39 features meet the Definition of Done (23%)**
+**Overall completion: 15 / 39 features meet the Definition of Done (38%)**
 
 > The low percentage reflects the **Definition of Done**, not brokenness. The app runs and all three roles work end to end. What's missing across the board: RBAC middleware, visible write feedback (no toast component exists), and service-layer unit tests.
 
@@ -237,25 +237,36 @@ Built before the standards existed. Recorded here so [progress.md](progress.md) 
 
 # Phase R2 — Backend Spine & Versioning
 
-### R2.1 Test Runner — ☐
-- **Scope:** `npm test` script. **6 tests already pass** — they just cannot be invoked.
+### R2.1 Test Runner — ●
+- **Scope:** `npm test` + `npm run test:watch` scripts (`tsx --test src/**/*.test.ts`).
+- **Verification:** `npm test` reports 9/9 passing.
 
-### R2.2 `server.ts` Split + Typed Env — ☐
-- **Scope:** `config/env.ts` (Zod, fails fast), `server.ts`, remove `JWT_SECRET!`.
-- **Blockers:** resolves B-4
+### R2.2 `server.ts` Split + Typed Env — ●
+- **Scope:** `src/config/env.ts` (Zod over `DATABASE_URL`, `JWT_SECRET`, `PORT`, `CORS_ORIGIN`, `BACKEND_BASE_URL`; throws with a readable message on boot if invalid), `src/server.ts` (new entrypoint), `src/app.ts` (no longer calls `listen()`, exports the app). Every `process.env.X` reader in the request path (`prisma.ts`, `auth.service.ts`, `authenticate.ts`, `report.generator.ts`) now imports from `config/env`; the `JWT_SECRET!` non-null assertion is gone. `scripts/create-admin-user.ts` intentionally left alone — its optional CLI-override envs aren't part of the app's runtime contract.
+- **Bonus:** deleted `GET /api/test` (B-26) while restructuring `app.ts` — a debug leftover that logged env values to the console on every hit.
+- **Verification:** `tsc` clean, 9/9 tests pass. Manually verified: `JWT_SECRET=""` now fails immediately with a readable error instead of on first request; server boots correctly on `server.ts`; `/api/test` now 404s even when authenticated.
+- **Blockers:** resolves B-4 ✅, B-26 ✅
 
-### R2.3 `/api/v1` Versioning — ☐
-- **Scope:** 3 backend mounts + 3 BFF edits. **Requires runtime verification** — `tsc` cannot catch a wrong path.
+### R2.3 `/api/v1` Versioning — ●
+- **Scope:** 3 backend mounts (`app.ts`) + 3 BFF edits (`app/api/[...path]/route.ts` rewrites `/api/*` → `/api/v1/*`; `app/api/auth/{login,me}/route.ts` point at `/api/v1/auth/*`). All 30 `/api/...` call sites in components unchanged.
+- **Verification:** `tsc` cannot catch a wrong path, so this was exercised end-to-end against the running app: logged in through the actual frontend login route, confirmed `/api/auth/me`, read `/api/commodities` + `/api/stores` + `/api/users` through the catch-all proxy, then wrote a full chain (commodity → store → price record) through the same proxy and read it back.
 
-### R2.4 Remove `any` From Shared Handlers — ☐
+### R2.4 Remove `any` From Shared Handlers — ●
+- **Scope:** `asyncHandler.ts` (typed `AsyncRouteHandler`), `errorHandler.ts` (`err: unknown` + existing `instanceof` narrowing). Also caught `helper.ts`'s `parseOrThrow(schema: any, data: any)` — not in the original 2-file list but violated the same "no `any` in `src/shared/`" done gate; it has zero callers (dead code) but was typed properly (`ZodType<T>`, `unknown`) rather than deleted, since deletion was outside this task's scope.
+- **Verification:** `tsc` clean, 9/9 tests pass, zero `any` remaining anywhere in `src/shared/`.
 
-### R2.5 Add Missing Indexes — ☐
-- **Scope:** 9 indexes + migration.
-- **Blockers:** resolves B-10
+### R2.5 Add Missing Indexes — ●
+- **Scope:** all 9 indexes from [database-design.md](database-design.md) §6 + migration `20260813081157_add_missing_indexes`: `PriceRecord.{commodityId,storeId,userId,dateAndTime}` + composite `(commodityId, dateAndTime)`, `SRP` composite `(commodityId, effectiveDate)`, `Report.generatedBy`, `Forecast.commodityId`, `Store.userId`.
+- **Verification:** purely additive migration applied cleanly (`prisma migrate status` clean); `tsc` clean, 9/9 tests pass.
+- **Blockers:** resolves B-10 ✅
 
-### R2.6 Seed Script — ☐
-- **Scope:** ~90 days of price data so ARIMA produces a real forecast.
-- **Blockers:** resolves B-12
+### R2.6 Seed Script — ●
+- **Scope:** `prisma/seed.ts` — 1 ADMIN + 1 OFFICER user (idempotent upsert), 10 commodities each with an SRP, 5 stores, 910 price records (91 days × 10 commodities) with a mild upward drift + noise so ARIMA sees a real trend rather than flat/random data. Status computed with the same COMPLIANT/OVERPRICE/UNDERPRICE comparison the repository already uses. `npm run seed` script; `prisma.config.ts` wires the same command into `migrations.seed` so `prisma migrate reset` auto-seeds too.
+- **Verification:** ran against the live database — generated a real 7-day ARIMA forecast (0.98–0.99 confidence, smooth trend converging toward the SRP, not a flat line); spot-checked `/`, `/login`, `/commodity-list`, `/price-analysis` all render 200 with seeded data present.
+- **Notes:** the seed was left in place on the live Neon DB (not cleaned up like the throwaway verification users in earlier phases) — it's demo data, not test residue. Seeded credentials: `admin@presyoserbisyo.gov.ph` / `officer@presyoserbisyo.gov.ph`, password `Password123!`.
+- **Blockers:** resolves B-12 ✅
+
+**Phase R2 exit criteria met:** `npm test` runs from a script, boot fails fast on bad config, all traffic on `/api/v1`, seeded DB producing real forecasts.
 
 ---
 
@@ -337,15 +348,15 @@ Verified continuously, re-checked at each phase exit ([build-plan.md](build-plan
 | **B-1** | ✅ | **Privilege escalation — RESOLVED.** `authorize(...roles)` middleware now attached to all 7 protected route files; `/api/users` restricted to `ADMIN`. Verified: OFFICER token gets 403 on `/api/users` and on writes to `/api/commodities`; ADMIN unaffected. | Backend security | R0.1 |
 | **B-2** | ✅ | **Null-deref crash — RESOLVED.** `schema.prisma` now matches the DB (`storeId String?`, `store Store?`); `MonitoringOfficerDashboardPage.tsx` guards `record.store?.name ?? "Unknown store"`. Verified: deleting a store leaves `GET /api/price-records` at 200 with `store: null`. | Schema / frontend | R0.2 |
 | **B-3** | 🟠 | 5 utilities (`.text-primary` et al.) redefined in `globals.css` as hardcoded hexes with `!important`, shadowing the tokens they name — token changes silently fail. | Styling | 1.2 |
-| **B-4** | 🟠 | No typed env validation; `process.env.JWT_SECRET!` defers a config error to first request. | Backend | R2.2 |
+| **B-4** | ✅ | **RESOLVED.** `config/env.ts` validates all env vars at boot via Zod; fails fast with a readable message. | Backend | R2.2 |
 | **B-5** | ✅ | **RESOLVED.** All backend shared code consolidated into `src/shared/{handlers,middleware,utils,types}/`; no competing type dirs remain. | Backend layout | R1.3 |
 | **B-6** | 🟡 | No `audit_logs` table — the cross-cutting audit requirement has no storage. | Database | 2.2 |
 | **B-7** | 🟡 | No `updated_at` on any model; no `last_login_at`. | Database | — |
 | **B-8** | 🟡 | `Commodity.status` / `.category` are unconstrained free-text. | Database | — |
 | **B-9** | 🟡 | `datasource` block declares no `url`; connection comes from the adapter. | Database | — |
-| **B-10** | 🟡 | Only one index in the entire database; every FK is unindexed. | Database | R2.5 |
+| **B-10** | ✅ | **RESOLVED.** All 9 recommended indexes added. | Database | R2.5 |
 | **B-11** | 🟡 | No uniqueness rule on duplicate price records; no non-negative price CHECK. | Database | — |
-| **B-12** | 🟡 | No seed script. | Database | R2.6 |
+| **B-12** | ✅ | **RESOLVED.** `prisma/seed.ts` + `npm run seed`. | Database | R2.6 |
 | **B-13** | 🟠 | No success/warning/info tokens — `PriceStatus`, the app's key signal, is styled ad-hoc per component. | Styling | 1.2 |
 | **B-14** | 🟡 | Two icon libraries in use (`react-icons` + Material Symbols). | Styling | — |
 | **B-15** | 🟡 | Nine `--font-*` tokens all resolve to the same Inter stack. | Styling | 1.2 |
@@ -359,7 +370,7 @@ Verified continuously, re-checked at each phase exit ([build-plan.md](build-plan
 | **B-23** | 🟠 | No toast/alert component — **no mutation gives visible feedback**, failing the Definition of Done for every write feature. | Frontend | 1.3 |
 | **B-24** | ✅ | **RESOLVED.** All 9 orphaned files deleted (confirmed zero importers first). | Frontend | R1.1 |
 | **B-25** | ✅ | **RESOLVED.** `dist/` and generated report artifacts untracked; `.gitignore` added. | Repo hygiene | R1.2 |
-| **B-26** | 🟡 | `GET /api/test` debug route logs env values to console. | Backend | R2.2 |
+| **B-26** | ✅ | **RESOLVED.** Route deleted. | Backend | R2.2 |
 | **B-27** | 🟠 | Generated reports are written to the backend's local disk and served from `/reports/files` — they do not survive an ephemeral redeploy, and horizontal scaling serves 404s from whichever instance didn't generate the file. **Blocks production deployment.** | Backend / infra | 2.4 |
 
 ---
