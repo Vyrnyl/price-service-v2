@@ -10,7 +10,7 @@ import {
   MdSearch,
 } from "react-icons/md";
 import { PriceRecordsTable, type PriceRecord } from "@/features/price-record";
-import { getPublicCommodities, type PublicCommodityItem } from "./api/commodity.api";
+import { getPublicCommodities, type PublicCommodityItem } from "../services/commodity.api";
 
 interface CommodityRow {
   id: string;

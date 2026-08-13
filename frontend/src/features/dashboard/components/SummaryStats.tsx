@@ -6,7 +6,7 @@ import {
   MdOutlineStoreMallDirectory,
   MdOutlineUpdate,
 } from "react-icons/md";
-import { getPublicCommodities, type PublicCommodityItem } from "../commodity/api/commodity.api";
+import { getPublicCommodities, type PublicCommodityItem } from "@/features/commodity";
 
 interface SummaryState {
   commodityCount: number;

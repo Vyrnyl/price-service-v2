@@ -5,9 +5,9 @@ import {
   MdStorefront,
   MdTrendingUp,
 } from "react-icons/md";
-import { getPublicCommodities, type PublicCommodityItem } from "../commodity/api/commodity.api";
-import HeroSection from "./HeroSection";
-import SummaryStats from "./SummaryStats";
+import { getPublicCommodities, type PublicCommodityItem } from "@/features/commodity";
+import HeroSection from "../components/HeroSection";
+import SummaryStats from "../components/SummaryStats";
 
 interface RecentSrpUpdate {
   name: string;

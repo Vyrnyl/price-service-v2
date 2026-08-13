@@ -1,4 +1,4 @@
-import AdminDashboardPage from "../../../features/admin/components/AdminDashboardPage";
+import AdminDashboardPage from "@/features/admin";
 
 export default function AdminRoute() {
   return <AdminDashboardPage />;

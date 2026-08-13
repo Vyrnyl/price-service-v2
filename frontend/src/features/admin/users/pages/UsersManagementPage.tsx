@@ -8,14 +8,14 @@ import {
   MdOutlineShield,
   MdOutlineVisibility,
 } from "react-icons/md";
-import { createUser, getUsers, updateUser, updateUserStatus } from "../api/users.api";
+import { createUser, getUsers, updateUser, updateUserStatus } from "../services/users.api";
 import { ApiError } from "../../../../shared/services/api";
-import type { CreateUserFormSchema, UpdateUserFormSchema } from "../users.schema";
+import type { CreateUserFormSchema, UpdateUserFormSchema } from "../schemas/users.schema";
 import type { User, UserRole } from "../types/users.types";
-import AddUserDialog from "./AddUserDialog";
-import UsersSearchFilters from "./UsersSearchFilters";
-import UsersStatsSection from "./UsersStatsSection";
-import UsersTable from "./UsersTable";
+import AddUserDialog from "../components/AddUserDialog";
+import UsersSearchFilters from "../components/UsersSearchFilters";
+import UsersStatsSection from "../components/UsersStatsSection";
+import UsersTable from "../components/UsersTable";
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);

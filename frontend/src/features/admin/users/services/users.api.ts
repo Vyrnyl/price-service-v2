@@ -1,6 +1,6 @@
 import { apiFetch } from "../../../../shared/services/api";
 import type { AddUserForm, User } from "../types/users.types";
-import type { UpdateUserFormSchema } from "../users.schema";
+import type { UpdateUserFormSchema } from "../schemas/users.schema";
 
 export async function getUsers() {
   return apiFetch<User[]>("/api/users", {

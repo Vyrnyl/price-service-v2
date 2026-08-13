@@ -7,7 +7,7 @@ import {
   type CreateUserFormSchema,
   updateUserSchema,
   type UpdateUserFormSchema,
-} from "../users.schema";
+} from "../schemas/users.schema";
 
 type DialogFormValues = CreateUserFormSchema | UpdateUserFormSchema;
 

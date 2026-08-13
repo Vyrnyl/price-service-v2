@@ -2,7 +2,7 @@
 
 import { MdEdit, MdOutlineChevronLeft, MdOutlineChevronRight, MdSearch } from "react-icons/md";
 import type { ComponentType } from "react";
-import type { CommodityItem } from "../api/commodity.api";
+import type { CommodityItem } from "../services/commodity.api";
 import type { CommodityStatus } from "../commodity.schema";
 
 export type CommodityRow = {

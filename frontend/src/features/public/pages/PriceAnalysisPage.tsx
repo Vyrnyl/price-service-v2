@@ -11,14 +11,14 @@ import {
   getPublicCommodities,
   getPublicForecastByCommodityId,
   type PublicCommodityItem,
-} from "../commodity/api/commodity.api";
-import { DailyChangesPanel } from "./components/price-analysis/DailyChangesPanel";
-import { ForecastDetailModal } from "./components/price-analysis/ForecastDetailModal";
-import { ForecastMethodPanel } from "./components/price-analysis/ForecastMethodPanel";
-import { ForecastSummaryPanel } from "./components/price-analysis/ForecastSummaryPanel";
-import { PriceAnalysisHeader } from "./components/price-analysis/PriceAnalysisHeader";
-import { PriceAnalysisSummaryCards } from "./components/price-analysis/PriceAnalysisSummaryCards";
-import { PriceTrendPanel } from "./components/price-analysis/PriceTrendPanel";
+} from "@/features/commodity";
+import { DailyChangesPanel } from "../components/price-analysis/DailyChangesPanel";
+import { ForecastDetailModal } from "../components/price-analysis/ForecastDetailModal";
+import { ForecastMethodPanel } from "../components/price-analysis/ForecastMethodPanel";
+import { ForecastSummaryPanel } from "../components/price-analysis/ForecastSummaryPanel";
+import { PriceAnalysisHeader } from "../components/price-analysis/PriceAnalysisHeader";
+import { PriceAnalysisSummaryCards } from "../components/price-analysis/PriceAnalysisSummaryCards";
+import { PriceTrendPanel } from "../components/price-analysis/PriceTrendPanel";
 
 const rangeOptions = ["Week", "Month"] as const;
 

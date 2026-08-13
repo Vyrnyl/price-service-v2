@@ -11,10 +11,10 @@ import {
   MdOutlineTrendingUp,
   MdOutlineWarning,
 } from "react-icons/md";
-import AddCommodityDialog from "./components/AddCommodityDialog";
-import CommoditySummaryCards from "./components/CommoditySummaryCards";
-import CommodityTable, { type CommodityRow } from "./components/CommodityTable";
-import UpdateSrpDialog from "./components/UpdateSrpDialog";
+import AddCommodityDialog from "../components/AddCommodityDialog";
+import CommoditySummaryCards from "../components/CommoditySummaryCards";
+import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
+import UpdateSrpDialog from "../components/UpdateSrpDialog";
 import {
   createCommodity,
   getCommodityById,
@@ -23,9 +23,9 @@ import {
   type CommodityDetailsItem,
   type CommodityItem,
   type CreateCommodityPayload,
-} from "./api/commodity.api";
-import { createSrp } from "./api/srp.api";
-import type { CommodityStatus } from "./commodity.schema";
+} from "../services/commodity.api";
+import { createSrp } from "../services/srp.api";
+import type { CommodityStatus } from "../commodity.schema";
 import type { UserRole } from "@/shared/services/auth";
 
 function mapCommodityToRow(item: CommodityItem, index: number) {
