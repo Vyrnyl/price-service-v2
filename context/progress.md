@@ -4,11 +4,11 @@
 > Update this file at the end of every work session and every time a Feature Loop step is completed.
 > The plan of *what to build* lives in [build-plan.md](build-plan.md); this file records *what is done*.
 
-**Last updated:** 2026-08-13 · **Current phase:** Phase 1 (not started) · **Current feature:** 1.1
+**Last updated:** 2026-08-13 · **Current phase:** Phase 1 (in progress) · **Current feature:** 1.2
 
 > **Context.** PresyoSerbisyo was built before these standards existed. The nine product modules below are recorded **retroactively** — they work, but none has been verified against the Definition of Done ([build-plan.md](build-plan.md) §3), which is why most sit at ◕ rather than ●. The refactor phases R0–R3 close that gap.
 >
-> **All refactor phases (R0–R3) are complete.** Both critical defects (B-1 privilege escalation, B-2 null-deref crash) are resolved, the `PUBLIC` role is removed, dead code is gone, shared code lives in `src/shared/` on both sides, the backend spine is versioned under `/api/v1` with typed env validation and a seed script, and every frontend/backend module now matches its target domain shape. Phase 1 (shared UI primitives) is next — the first phase that runs the full Feature Loop rather than the Refactor Gate.
+> **All refactor phases (R0–R3) are complete**, and Phase 1.1 (base component set) is done. Both critical defects (B-1 privilege escalation, B-2 null-deref crash) are resolved, the `PUBLIC` role is removed, dead code is gone, shared code lives in `src/shared/` on both sides, the backend spine is versioned under `/api/v1` with typed env validation and a seed script, and every frontend/backend module now matches its target domain shape. 10 shared UI components (`Button`, `Card`, `Badge`, `Modal`, `Toast`, `Alert`, `Input`, `Select`, `FormGroup`, `PageShell`) exist and are demoed at `/component-gallery` — **not yet adopted by any existing page**. Phase 1.2 (status tokens + card convergence) is next.
 
 ---
 
@@ -39,11 +39,11 @@ Recount after every status change.
 | Phase R1 — Dead code & layout | 5 | 0 | 0 | 0 | 0 | 5 | 0 |
 | Phase R2 — Backend spine | 6 | 0 | 0 | 0 | 0 | 6 | 0 |
 | Phase R3 — Domain restructure | 4 | 0 | 0 | 0 | 0 | 4 | 0 |
-| Phase 1 — Shared UI primitives | 3 | 3 | 0 | 0 | 0 | 0 | 0 |
+| Phase 1 — Shared UI primitives | 3 | 2 | 0 | 0 | 0 | 1 | 0 |
 | Phase 2 — Product gaps | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
-| **Total** | **39** | **7** | **0** | **0** | **13** | **19** | **0** |
+| **Total** | **39** | **6** | **0** | **0** | **13** | **20** | **0** |
 
-**Overall completion: 19 / 39 features meet the Definition of Done (49%)**
+**Overall completion: 20 / 39 features meet the Definition of Done (51%)**
 
 > The low percentage reflects the **Definition of Done**, not brokenness. The app runs and all three roles work end to end. What's missing across the board: RBAC middleware, visible write feedback (no toast component exists), and service-layer unit tests.
 
@@ -297,7 +297,16 @@ Built before the standards existed. Recorded here so [progress.md](progress.md) 
 
 # Phase 1 — Shared UI Primitives
 
-### 1.1 Base Component Set — ☐
+### 1.1 Base Component Set — ●
+- **Screens:** Component gallery page (`/component-gallery`, all roles, no auth) rendering every component in every variant.
+- **Components built:** `Button`, `Card`, `Badge`, `Modal`, `Toast` (+ `ToastProvider`/`useToast`), `Alert`, `Input`, `Select`, `FormGroup`, `PageShell` — all in `frontend/src/shared/components/`.
+- **Files:** the 10 components above, `frontend/src/app/(public)/component-gallery/page.tsx`, `ToastProvider` mounted in `frontend/src/app/layout.tsx`.
+- **Done gate:** gallery renders every component in every variant at 1024/768/480; registry updated. **Met** — visually verified by the user 2026-08-13.
+- **Loop notes:** steps 3–5 (Contract, Wire Read, Wire Write) don't apply — these are pure presentational primitives with no data domain, so there's nothing to fetch or persist. Went straight from visual verify (step 2) to Done. Several Definition of Done items are correspondingly **N/A**: real-data reads, end-to-end writes, RBAC (all roles by design), and service-layer unit tests (no service layer). What *does* apply — full UI matching ui-rules.md, responsive at 1024/768/480, loading/error states (Button's `loading`, Input/Select's `hasError`) — is met.
+- **Design decision:** built against the **documented** ui-rules.md §6 recipe (`rounded-full` buttons, token-based modal overlay `bg-inverse-surface/40`), not the drifted inline markup already in the app (`rounded-xl` buttons, non-token `bg-slate-950/40` overlays). This means the gallery's components visually diverge from existing pages right now — expected, since existing pages migrate onto these incrementally rather than in this feature.
+- **Remaining:** **No existing page has been migrated onto these components yet** — `PageShell` isn't used by the 10 pages still inlining `min-h-screen lg:ml-72`; `Button`/`Modal`/`Input` etc. aren't used by any existing form or dialog. That adoption is follow-up work, not blocking Phase 1.1's own Done gate. `Toast` is fully functional (provider mounted, gallery demos it) but not yet wired into any real mutation — that's explicitly Phase 1.3. Badge/Alert/Toast are limited to `primary`/`secondary`/`error`/`neutral` variants pending Phase 1.2's status tokens (B-13). Modal has no focus trap (pre-existing accessibility gap, not closed by this component).
+- **Blockers:** partially resolves B-18 (PageShell exists, not adopted), B-21 (Button/Input/Select/FormGroup exist, not adopted), B-22 (Modal exists, not adopted), B-23 (Toast/Alert exist; Toast not wired to mutations — full resolution is Phase 1.3)
+
 ### 1.2 Status Tokens & Card Convergence — ☐
 ### 1.3 Write Feedback (Toasts) — ☐
 
@@ -395,4 +404,5 @@ The *next step* field matters most: write it so someone with zero context can pi
 
 | Date | Worked on | Outcome | Next step |
 |---|---|---|---|
+| 2026-08-13 | All of R0–R3 (18 refactor features, 20 commits), then Phase 1.1 (10 shared UI primitives + gallery page) | **R0**: closed B-1 (privilege escalation) and B-2 (null-deref crash), removed `PUBLIC` role. **R1**: deleted 9 dead files, stopped tracking build output, moved shared code to `src/shared/` both sides, kebab-case renames. **R2**: test runner wired, `server.ts`/`config/env.ts` split with fail-fast validation, `/api/v1` versioning, `any` removed from shared handlers, 9 missing indexes added, seed script built (DB now has real demo data — 10 commodities, 5 stores, 910 price records, producing genuine ARIMA forecasts). **R3**: split `features/officer/` into `price-record/`/`stores/`/`report/` domains, normalized every other feature to the standard shape, added `index.ts` to all 9 backend modules (catching and fixing 2 latent type-duplication bugs along the way). **Phase 1.1**: built `Button`/`Card`/`Badge`/`Modal`/`Toast`/`Alert`/`Input`/`Select`/`FormGroup`/`PageShell` against the documented ui-rules.md §6 recipe, demoed at `/component-gallery`, visually verified by the user. `ui-registry.md` reconciled (was badly stale after the R1–R3 moves) and updated with all new components. Overall completion: 1/39 → 20/39 (51%). Every refactor step verified `tsc` clean + manually exercised against the running app/live DB, not just verified by inspection. | Start **Phase 1.2** — add success/warning/info tokens to `globals.css` (B-13), remove the 5 `!important`-shadowed hardcoded color utilities (B-3), converge the card recipe (radius/background/shadow all vary right now — B-17), fix the undefined `text-body-md` (B-19). Then **1.3** wires `Toast` (built in 1.1, not yet used) into every create/update/delete across all features (B-23). Neither existing pages' buttons/modals/forms nor the card recipe have been migrated onto the new Phase 1.1 components yet — that adoption is separate, incremental follow-up work, not blocking on 1.2/1.3. |
 | 2026-08-13 | Context pack install + full documentation pass; D-3/D-6/D-7 settled | Pack relocated from nested `context/` to repo root so skill links resolve. All 8 docs written from the real codebase. Baseline verified: backend `tsc` clean, frontend `tsc` clean, 6/6 tests pass. 27 blockers catalogued, incl. **2 critical (B-1 privilege escalation, B-2 null-deref crash)**. Refactor planned per-file as Phases R0–R3. All 7 decisions now settled — added R0.3 (remove `PUBLIC` role) and 2.4 (report storage independence). **Zero code files modified.** | Start **R0.1** — build `backend/src/shared/middleware/authorize.ts` and attach it to all 7 protected route files per [build-plan.md](build-plan.md) R0.1. Then R0.2, then R0.3 (**query for existing `PUBLIC` users before migrating**). Work happens in `c:\WebDev\AD\price-service-v2`; the original `price-service` is the untouched backup. |

@@ -40,7 +40,7 @@ All paths are relative to `frontend/`.
 | Design tokens (colors, radius, spacing) | `src/app/globals.css` → `@theme inline` | [ui-rules.md](ui-rules.md) §2 |
 | Type scale (`.text-h1-desktop` … `.text-label-caps`) | `src/app/globals.css` | [ui-rules.md](ui-rules.md) §4 |
 | `.data-card-shadow` · `.animate-stats` · `.scrollbar-none` | `src/app/globals.css` | [ui-rules.md](ui-rules.md) §4 |
-| Badge pills (`.badge` + variants) | **not implemented** | [ui-rules.md](ui-rules.md) §4 — blocked on status tokens (B-13) |
+| Badge pills | built — `src/shared/components/Badge.tsx` | 4 variants (`primary`/`secondary`/`error`/`neutral`); `success`/`warning`/`info` variants pending status tokens (B-13, Phase 1.2) |
 
 ---
 
@@ -48,16 +48,36 @@ All paths are relative to `frontend/`.
 
 | Component | Status | File | Exact classes |
 |---|---|---|---|
-| AppShell | built | `src/components/AppShell.tsx` | `flex min-h-screen flex-col` · main: `flex-1 pb-8 md:pb-10` |
-| ClientAppShell | built | `src/components/ClientAppShell.tsx` | none — `usePathname` wrapper around AppShell |
-| TopAppBar | built | `src/components/TopAppBar.tsx` | `sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-outline-variant bg-surface px-container-margin-mobile py-stack-md shadow-sm md:px-container-margin-desktop` |
-| NavigationDrawer | built | `src/components/NavigationDrawer.tsx` | nav item: `mx-2 mt-2 flex items-center gap-4 rounded-full px-6 py-3 text-on-surface-variant transition-all hover:bg-surface-variant` |
-| FooterSection | built | `src/components/FooterSection.tsx` | `flex w-full lg:ml-72 lg:max-w-[calc(100%-18rem)] flex-col items-center justify-between gap-stack-md border-t border-outline-variant bg-surface-container-highest px-container-margin-mobile py-stack-lg md:flex-row md:px-container-margin-desktop` |
-| ~~MobileBottomNav~~ | **🗑️ delete (D-3)** | `src/components/MobileBottomNav.tsx` | Non-functional scaffolding — hardcoded `Home/Search/Alerts/Profile` `<div>`s, no links, no routing, static `active` flag. Destinations don't exist in this app. Do **not** reuse; a real bottom nav is Phase 1.1. |
-| ~~RoleSwitcher~~ | **🗑️ delete (D-3)** | `src/components/RoleSwitcher.tsx` | Non-functional scaffolding — local `useState` that calls nothing, using lowercase role strings that don't match the `UserRole` enum. |
-| *Page shell wrapper* | **not extracted** | — | `min-h-screen lg:ml-72` — **repeated verbatim in 10 page components**. Should be one component (B-18) |
+| AppShell | built | `src/shared/components/AppShell.tsx` | `flex min-h-screen flex-col` · main: `flex-1 pb-8 md:pb-10` |
+| ClientAppShell | built | `src/shared/components/ClientAppShell.tsx` | none — `usePathname` wrapper around AppShell |
+| TopAppBar | built | `src/shared/components/TopAppBar.tsx` | `sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-outline-variant bg-surface px-container-margin-mobile py-stack-md shadow-sm md:px-container-margin-desktop` |
+| NavigationDrawer | built | `src/shared/components/NavigationDrawer.tsx` | nav item: `mx-2 mt-2 flex items-center gap-4 rounded-full px-6 py-3 text-on-surface-variant transition-all hover:bg-surface-variant` |
+| FooterSection | built | `src/shared/components/FooterSection.tsx` | `flex w-full lg:ml-72 lg:max-w-[calc(100%-18rem)] flex-col items-center justify-between gap-stack-md border-t border-outline-variant bg-surface-container-highest px-container-margin-mobile py-stack-lg md:flex-row md:px-container-margin-desktop` |
+| PageShell | built | `src/shared/components/PageShell.tsx` | `min-h-screen lg:ml-72` + any extra `className` — extracts the wrapper that was repeated verbatim in 10 page components (B-18). **Not yet adopted by existing pages** — they keep their inline `<main className="min-h-screen lg:ml-72">` until migrated; only new work (starting with the component gallery) uses it. |
 
-`AppShell` renders TopAppBar → NavigationDrawer → main → FooterSection. It does **not** render `MobileBottomNav`, which is why that component is orphaned.
+`AppShell` renders TopAppBar → NavigationDrawer → main → FooterSection.
+
+> **R1.1 update (2026-08-13):** `MobileBottomNav` and `RoleSwitcher` are deleted per D-3 — no longer in the tree. `src/components/` and `src/lib/` no longer exist; everything moved to `src/shared/{components,services,utils}/` (R1.4). `FieldError` moved out of `features/officer/` to `src/shared/components/FieldError.tsx` — B-20 resolved.
+
+---
+
+## 1a. Shared UI Primitives (Phase 1.1)
+
+Base component set built against the **documented** [ui-rules.md](ui-rules.md) §6 recipe, not the drifted inline markup found across existing pages (see the warning at the top of this file). Existing pages are **not yet migrated onto these** — that happens incrementally as each page is next touched. Demoed in full at `/component-gallery` (all roles, no auth).
+
+| Component | Status | File | Variants / notes |
+|---|---|---|---|
+| Button | built | `src/shared/components/Button.tsx` | `primary`/`secondary`/`danger` × `sm`/`md`; `loading` (spinner), `disabled`. `rounded-full` per the documented spec — diverges from existing inline buttons, which are `rounded-xl` (the drift this component is meant to converge, not match) |
+| Card | built | `src/shared/components/Card.tsx` | `rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow` — the one canonical recipe, per §6 |
+| Badge | built | `src/shared/components/Badge.tsx` | `primary`/`secondary`/`error`/`neutral`; `success`/`warning`/`info` pending status tokens (B-13, Phase 1.2) |
+| Modal | built | `src/shared/components/Modal.tsx` | Overlay `bg-inverse-surface/40` (token-based, replaces the non-token `bg-slate-950/40` in 5 duplicated modals — B-22) + `rounded-xl bg-surface-container-lowest` container. Escape-to-close, click-outside-to-close, `role="dialog"`/`aria-modal`. **No focus trap** — that gap (noted in the Cross-Cutting Checklist) is not closed by this component |
+| Toast | built | `src/shared/components/Toast.tsx` | `ToastProvider` (mounted in root `layout.tsx`) + `useToast()` hook, `primary`/`error`/`neutral` variants, auto-dismiss 4s, manual dismiss. Closes B-23's "no visible write feedback" gap at the component level — **not yet wired into any mutation**, that's Phase 1.3 |
+| Alert | built | `src/shared/components/Alert.tsx` | `error`/`neutral`; inline banner, `role="alert"` |
+| Input | built | `src/shared/components/Input.tsx` | `forwardRef` (works with `react-hook-form`'s `register()`); `hasError` prop for the error border/ring treatment |
+| Select | built | `src/shared/components/Select.tsx` | Same pattern as Input |
+| FormGroup | built | `src/shared/components/FormGroup.tsx` | Composes label + field + `FieldError`; matches the `space-y-1.5` field wrapper pattern already used everywhere |
+
+**Gallery page**: `src/app/(public)/component-gallery/page.tsx` — renders every component in every variant; visually verified at 1024/768/480 by the user on 2026-08-13.
 
 ---
 
@@ -69,16 +89,14 @@ All paths are relative to `frontend/`.
 | UsersStatsSection | built | `src/features/admin/users/components/UsersStatsSection.tsx` | `grid gap-4 sm:grid-cols-2 xl:grid-cols-4` |
 | CommodityTable | built | `src/features/commodity/components/CommodityTable.tsx` | `flex min-h-105 flex-1 flex-col rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8` |
 | CommoditySummaryCards | built | `src/features/commodity/components/CommoditySummaryCards.tsx` | `flex flex-wrap gap-6` |
-| PriceRecordsTable | built | `src/features/officer/components/PriceRecordsTable.tsx` | row actions: `flex flex-wrap items-center gap-2` |
-| StoreCard | built | `src/features/officer/components/StoreCard.tsx` | title: `mb-1 truncate font-h3-desktop text-h3-desktop text-on-surface` (compact variant: `text-sm font-semibold`) |
-| StoreRegistryGrid | built | `src/features/officer/components/StoreRegistryGrid.tsx` | empty state: `rounded-2xl border border-dashed border-outline-variant bg-white p-8 text-center text-body-md text-on-surface-variant` — ⚠️ `text-body-md` **is not defined** in `globals.css` (B-19) |
-| StoreRegistryHeader | built | `src/features/officer/components/StoreRegistryHeader.tsx` | `mb-2 flex items-center gap-2 text-primary` |
-| RecentReportCard | built | `src/features/officer/reports/components/RecentReportCard.tsx` | `rounded-3xl border border-outline-variant bg-white p-5` |
-| ReportTypeCard | built | `src/features/officer/reports/components/ReportTypeCard.tsx` | badge: `absolute right-4 top-4` |
-| HeroSection | built | `src/features/dashboard/HeroSection.tsx` | `relative overflow-hidden bg-white px-container-margin-mobile py-16 md:px-container-margin-desktop md:py-24` |
-| SummaryStats | built | `src/features/dashboard/SummaryStats.tsx` | `bg-surface-container-low px-container-margin-mobile py-12 md:px-container-margin-desktop` |
-| FeaturedSection | built **⚠️ orphaned** | `src/features/dashboard/FeaturedSection.tsx` | `px-container-margin-mobile py-12 md:px-container-margin-desktop` |
-| TopCommoditiesGrid | built **⚠️ orphaned** | `src/features/dashboard/TopCommoditiesGrid.tsx` | `px-container-margin-mobile py-12 md:px-container-margin-desktop` |
+| PriceRecordsTable | built | `src/features/price-record/components/PriceRecordsTable.tsx` | row actions: `flex flex-wrap items-center gap-2` |
+| StoreCard | built | `src/features/stores/components/StoreCard.tsx` | title: `mb-1 truncate font-h3-desktop text-h3-desktop text-on-surface` (compact variant: `text-sm font-semibold`) |
+| StoreRegistryGrid | built | `src/features/stores/components/StoreRegistryGrid.tsx` | empty state: `rounded-2xl border border-dashed border-outline-variant bg-white p-8 text-center text-body-md text-on-surface-variant` — ⚠️ `text-body-md` **is not defined** in `globals.css` (B-19) |
+| StoreRegistryHeader | built | `src/features/stores/components/StoreRegistryHeader.tsx` | `mb-2 flex items-center gap-2 text-primary` |
+| RecentReportCard | built | `src/features/report/components/RecentReportCard.tsx` | `rounded-3xl border border-outline-variant bg-white p-5` |
+| ReportTypeCard | built | `src/features/report/components/ReportTypeCard.tsx` | badge: `absolute right-4 top-4` |
+| HeroSection | built | `src/features/dashboard/components/HeroSection.tsx` | `relative overflow-hidden bg-white px-container-margin-mobile py-16 md:px-container-margin-desktop md:py-24` |
+| SummaryStats | built | `src/features/dashboard/components/SummaryStats.tsx` | `bg-surface-container-low px-container-margin-mobile py-12 md:px-container-margin-desktop` |
 | PriceAnalysisHeader | built | `src/features/public/components/price-analysis/PriceAnalysisHeader.tsx` | `text-2xl font-semibold tracking-tight text-on-surface sm:text-3xl md:text-4xl` — ⚠️ raw sizes instead of the type scale |
 | PriceAnalysisSummaryCards | built | `src/features/public/components/price-analysis/PriceAnalysisSummaryCards.tsx` | `grid gap-3 sm:gap-4 sm:grid-cols-2 xl:grid-cols-3` |
 | ForecastSummaryPanel | built | `src/features/public/components/price-analysis/ForecastSummaryPanel.tsx` | `flex flex-col gap-4 sm:gap-6` |
@@ -103,15 +121,15 @@ The dashboard "price trend graphs" and "commodity comparison" visualizations des
 
 | Component | Status | File | Exact classes |
 |---|---|---|---|
-| FieldError | built | `src/features/officer/components/FieldError.tsx` | `mt-1 text-xs font-medium text-error` |
-| PriceRecordForm | built | `src/features/officer/components/PriceRecordForm.tsx` | `mx-auto w-full max-w-3xl rounded-3xl border border-outline-variant bg-surface-container-lowest p-6 shadow-[0_24px_80px_rgba(15,23,42,0.12)]` — ⚠️ arbitrary inline shadow |
-| PriceRecordFilters | built | `src/features/officer/components/PriceRecordFilters.tsx` | `grid gap-4 rounded-3xl border border-outline-variant bg-white p-5 data-card-shadow md:p-6` |
+| FieldError | built | `src/shared/components/FieldError.tsx` | `mt-1 text-xs font-medium text-error` |
+| PriceRecordForm | built | `src/features/price-record/components/PriceRecordForm.tsx` | `mx-auto w-full max-w-3xl rounded-3xl border border-outline-variant bg-surface-container-lowest p-6 shadow-[0_24px_80px_rgba(15,23,42,0.12)]` — ⚠️ arbitrary inline shadow |
+| PriceRecordFilters | built | `src/features/price-record/components/PriceRecordFilters.tsx` | `grid gap-4 rounded-3xl border border-outline-variant bg-white p-5 data-card-shadow md:p-6` |
 | UsersSearchFilters | built | `src/features/admin/users/components/UsersSearchFilters.tsx` | `flex flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between` |
-| StoreRegistryToolbar | built | `src/features/officer/components/StoreRegistryToolbar.tsx` | `rounded-2xl border border-outline-variant bg-white p-6 shadow-sm` |
+| StoreRegistryToolbar | built | `src/features/stores/components/StoreRegistryToolbar.tsx` | `rounded-2xl border border-outline-variant bg-white p-6 shadow-sm` |
 
-`FieldError` is the shared validation-message component. It currently lives under `features/officer/` but is used across features — it belongs in `shared/components/` (B-20).
+`FieldError` is the shared validation-message component — lives in `src/shared/components/` (moved there in R1.4, B-20 resolved).
 
-Forms use `react-hook-form` + Zod resolvers. There is no shared `Input` / `Select` / `FormGroup` component; field markup is repeated per form (B-21).
+Forms use `react-hook-form` + Zod resolvers. Shared `Input` / `Select` / `FormGroup` components now exist (§1a, Phase 1.1) — **existing forms still use inline field markup** (as shown in the entries above); migrating them is follow-up work, not yet done (B-21 partially resolved: the component exists, adoption doesn't).
 
 ---
 
@@ -119,8 +137,8 @@ Forms use `react-hook-form` + Zod resolvers. There is no shared `Input` / `Selec
 
 | Component | Status | File | Exact classes |
 |---|---|---|---|
-| ExportFormatButton | built | `src/features/officer/reports/components/ExportFormatButton.tsx` | label: `text-body-sm font-semibold` |
-| *Button* | **not extracted** | — | No shared Button component exists. Primary/secondary button classes are repeated inline across every page (B-21) |
+| ExportFormatButton | built | `src/features/report/components/ExportFormatButton.tsx` | label: `text-body-sm font-semibold` |
+| Button | built | `src/shared/components/Button.tsx` | See §1a — Phase 1.1. Existing inline primary/secondary button classes across pages are **not yet migrated** onto this (B-21 partially resolved) |
 
 ---
 
@@ -130,14 +148,13 @@ Forms use `react-hook-form` + Zod resolvers. There is no shared `Input` / `Selec
 |---|---|---|---|
 | AddUserDialog | built | `src/features/admin/users/components/AddUserDialog.tsx` | error text: `mt-1 text-xs font-medium text-error` |
 | AddCommodityDialog | built | `src/features/commodity/components/AddCommodityDialog.tsx` | error text: `mt-1 text-xs font-medium text-error` |
-| CommodityDetailsDialog | built **⚠️ orphaned** | `src/features/commodity/components/CommodityDetailsDialog.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
 | UpdateSrpDialog | built | `src/features/commodity/components/UpdateSrpDialog.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
-| CreateStoreDialog | built | `src/features/officer/components/CreateStoreDialog.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
-| StorePriceRecordsModal | built | `src/features/officer/store/StorePriceRecordsModal.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
+| CreateStoreDialog | built | `src/features/stores/components/CreateStoreDialog.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
+| StorePriceRecordsModal | built | `src/features/stores/components/StorePriceRecordsModal.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
 | ForecastDetailModal | built | `src/features/public/components/price-analysis/ForecastDetailModal.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6` — ⚠️ diverges from the other five |
-| *Modal shell* | **not extracted** | — | The overlay recipe is duplicated in 5 modals; `bg-slate-950/40` is a non-token color (B-22) |
-| Toast | **not implemented** | — | [build-plan.md](build-plan.md) Definition of Done requires visible write feedback; there is none (B-23) |
-| Alert | **not implemented** | — | (B-23) |
+| Modal | built | `src/shared/components/Modal.tsx` | See §1a — Phase 1.1. The 5 duplicated overlay copies above are **not yet migrated** onto this (B-22 partially resolved: the shell exists, adoption doesn't) |
+| Toast | built | `src/shared/components/Toast.tsx` | See §1a — Phase 1.1. Provider mounted globally; **not yet wired into any create/update/delete** — that's Phase 1.3 (B-23 partially resolved) |
+| Alert | built | `src/shared/components/Alert.tsx` | See §1a — Phase 1.1 |
 | Progress bar | **not implemented** | — | (B-23) |
 
 ---
@@ -160,19 +177,16 @@ Route-level feature pages. Listed for completeness — these compose the compone
 | Page | Status | File |
 |---|---|---|
 | LoginPage | built | `src/features/auth/components/LoginPage.tsx` |
-| DashboardPage | built | `src/features/dashboard/DashboardPage.tsx` |
-| AdminDashboardPage | built | `src/features/admin/components/AdminDashboardPage.tsx` |
-| UsersManagementPage | built | `src/features/admin/users/components/UsersManagementPage.tsx` |
-| UsersManagementPage *(duplicate)* | built **⚠️ orphaned** | `src/features/admin/components/UsersManagementPage.tsx` |
-| CommodityManagementPage | built | `src/features/commodity/CommodityManagementPage.tsx` |
-| CommodityListPage | built | `src/features/commodity/CommodityListPage.tsx` |
-| MonitoringOfficerDashboardPage | built | `src/features/officer/MonitoringOfficerDashboardPage.tsx` |
-| PriceRecordsPage | built | `src/features/officer/PriceRecordsPage.tsx` |
-| StoreRegistryPage | built | `src/features/officer/StoreRegistryPage.tsx` |
-| ReportGenerationPage | built | `src/features/officer/reports/ReportGenerationPage.tsx` |
-| ReportGenerationPage *(duplicate)* | built **⚠️ orphaned** | `src/features/officer/ReportGenerationPage.tsx` |
-| PriceAnalysisPage | built | `src/features/public/PriceAnalysisPage.tsx` |
-| PublicUserDashboardPage | built **⚠️ orphaned** | `src/features/public/PublicUserDashboardPage.tsx` |
+| DashboardPage | built | `src/features/dashboard/pages/DashboardPage.tsx` |
+| AdminDashboardPage | built | `src/features/admin/pages/AdminDashboardPage.tsx` |
+| UsersManagementPage | built | `src/features/admin/users/pages/UsersManagementPage.tsx` |
+| CommodityManagementPage | built | `src/features/commodity/pages/CommodityManagementPage.tsx` |
+| CommodityListPage | built | `src/features/commodity/pages/CommodityListPage.tsx` |
+| MonitoringOfficerDashboardPage | built | `src/features/officer/pages/MonitoringOfficerDashboardPage.tsx` |
+| PriceRecordsPage | built | `src/features/price-record/pages/PriceRecordsPage.tsx` |
+| StoreRegistryPage | built | `src/features/stores/pages/StoreRegistryPage.tsx` |
+| ReportGenerationPage | built | `src/features/report/pages/ReportGenerationPage.tsx` |
+| PriceAnalysisPage | built | `src/features/public/pages/PriceAnalysisPage.tsx` |
 
 ---
 
@@ -182,3 +196,5 @@ Route-level feature pages. Listed for completeness — these compose the compone
 |---|---|---|
 | 2026-08-13 | All | Registry populated from the existing codebase — 43 components catalogued, 8 flagged orphaned, 6 shared primitives identified as missing. |
 | 2026-08-13 | MobileBottomNav, RoleSwitcher | Marked 🗑️ delete per D-3 — both inspected and found to be non-functional template scaffolding, not usable components. |
+| 2026-08-13 | All | Reconciled every file path after refactor phases R1–R3: `src/components/`→`src/shared/components/`, `src/lib/`→`src/shared/{services,utils}/`, `features/officer/`→`features/{price-record,stores,report,officer}/` domain split, and every other feature's `pages/`/`components/`/`services/` normalization. Removed 8 deleted orphans (MobileBottomNav, RoleSwitcher, FeaturedSection, TopCommoditiesGrid, CommodityDetailsDialog, PublicUserDashboardPage, and the 2 duplicate UsersManagementPage/ReportGenerationPage entries) — they no longer exist in the tree. `FieldError` now correctly shown under Layout's shared note (B-20 resolved). |
+| 2026-08-13 | Button, Card, Badge, Modal, Toast, Alert, Input, Select, FormGroup, PageShell | Phase 1.1 — the base component set Phase 0.2 never produced. All 10 added under §1a, built against the documented ui-rules.md §6 recipe rather than the drifted inline markup already in the app. Demoed at `/component-gallery`, visually verified at 1024/768/480 by the user. None of the 10 have been adopted by existing pages yet — that's incremental follow-up, not part of this feature. |
