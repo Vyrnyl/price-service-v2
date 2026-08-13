@@ -4,11 +4,11 @@
 > Update this file at the end of every work session and every time a Feature Loop step is completed.
 > The plan of *what to build* lives in [build-plan.md](build-plan.md); this file records *what is done*.
 
-**Last updated:** 2026-08-13 · **Current phase:** R3 (not started) · **Current feature:** R3.1
+**Last updated:** 2026-08-13 · **Current phase:** Phase 1 (not started) · **Current feature:** 1.1
 
 > **Context.** PresyoSerbisyo was built before these standards existed. The nine product modules below are recorded **retroactively** — they work, but none has been verified against the Definition of Done ([build-plan.md](build-plan.md) §3), which is why most sit at ◕ rather than ●. The refactor phases R0–R3 close that gap.
 >
-> **Phase R0 is complete.** Both critical defects (B-1 privilege escalation, B-2 null-deref crash) are resolved and verified against the live database. The `PUBLIC` role has also been removed (R0.3). Phase R1 (dead code & shared layout) is next.
+> **All refactor phases (R0–R3) are complete.** Both critical defects (B-1 privilege escalation, B-2 null-deref crash) are resolved, the `PUBLIC` role is removed, dead code is gone, shared code lives in `src/shared/` on both sides, the backend spine is versioned under `/api/v1` with typed env validation and a seed script, and every frontend/backend module now matches its target domain shape. Phase 1 (shared UI primitives) is next — the first phase that runs the full Feature Loop rather than the Refactor Gate.
 
 ---
 
@@ -38,12 +38,12 @@ Recount after every status change.
 | Phase R0 — Critical security | 3 | 0 | 0 | 0 | 0 | 3 | 0 |
 | Phase R1 — Dead code & layout | 5 | 0 | 0 | 0 | 0 | 5 | 0 |
 | Phase R2 — Backend spine | 6 | 0 | 0 | 0 | 0 | 6 | 0 |
-| Phase R3 — Domain restructure | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
+| Phase R3 — Domain restructure | 4 | 0 | 0 | 0 | 0 | 4 | 0 |
 | Phase 1 — Shared UI primitives | 3 | 3 | 0 | 0 | 0 | 0 | 0 |
 | Phase 2 — Product gaps | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
-| **Total** | **39** | **11** | **0** | **0** | **13** | **15** | **0** |
+| **Total** | **39** | **7** | **0** | **0** | **13** | **19** | **0** |
 
-**Overall completion: 15 / 39 features meet the Definition of Done (38%)**
+**Overall completion: 19 / 39 features meet the Definition of Done (49%)**
 
 > The low percentage reflects the **Definition of Done**, not brokenness. The app runs and all three roles work end to end. What's missing across the board: RBAC middleware, visible write feedback (no toast component exists), and service-layer unit tests.
 
@@ -272,13 +272,26 @@ Built before the standards existed. Recorded here so [progress.md](progress.md) 
 
 # Phase R3 — Feature Domain Restructure
 
-### R3.1 Split `features/officer/` Into Domains — ☐
-- **Scope:** new `price-record/`, `stores/`, `report/` features; `officer/` reduced to its dashboard.
-- **Notes:** `admin/price-records` and `admin/stores` import from `features/officer/` today — the folder is a role, not a domain.
+### R3.1 Split `features/officer/` Into Domains — ●
+- **Scope:** new `features/price-record/`, `features/stores/`, `features/report/`; `features/officer/` reduced to just the officer dashboard. Each gets an `index.ts` public surface; 7 route files + `CommodityListPage.tsx` (cross-feature consumer) repointed.
+- **Deviation from plan:** `officer/types.ts` and `officer/constants.ts` were slated to stay as `officer.types.ts`/`officer.constants.ts` (dashboard-scoped), but their actual content was 100% Store-domain (used exclusively by store-registry components, never the dashboard) — moved to `features/stores/` instead. 3 generic form-styling constants shared by both the store dialog and the price-record form got a new `shared/constants/form.constants.ts` home rather than living oddly in one domain.
+- **Verification:** `tsc` clean. Logged in as both seeded ADMIN and OFFICER accounts and hit every affected route authenticated (not just the unauthenticated redirect) — all render 200 with real data.
 
-### R3.2 Normalize Remaining Features — ☐
-### R3.3 Normalize Imports — ☐
-### R3.4 Backend Module `index.ts` + `.types.ts` — ☐
+### R3.2 Normalize Remaining Features — ●
+- **Scope:** `admin/`, `admin/users/`, `commodity/`, `dashboard/`, `public/`, `auth/` brought to the `{components,hooks,pages,services,types}/` + `index.ts` shape.
+- **Deviation from plan:** `admin/components/AdminDashboardPage.tsx` (the admin's own dashboard, live and imported by `app/(protected)/admin/page.tsx`) wasn't in the plan's file list at all — normalized the same way as everything else (`admin/pages/AdminDashboardPage.tsx`).
+- **Verification:** `tsc` clean. All 14 routes across public/admin/officer render 200 authenticated, server log clean.
+
+### R3.3 Normalize Imports — ● *(no changes needed)*
+- **Scope:** replace `../../../../features/...` with `@/features/...`; route `page.tsx` files import only from a feature's `index.ts`.
+- **Notes:** already satisfied as a side effect of doing R3.1/R3.2 properly — every route consumer was fixed with the `@/` alias as it was touched. Swept the whole tree for both `../../` crossing a feature boundary and deep `@/features/X/{pages,components,...}` imports from `app/`: zero of either.
+
+### R3.4 Backend Module `index.ts` + `.types.ts` — ●
+- **Scope:** `index.ts` added to all 9 backend modules; `routes/index.ts` and `app.ts` import from module indexes; the 2 genuine cross-module dependencies (`auth` → `user`'s repository, `public` → `forecast`'s service) go through the target module's index too.
+- **Bonus fixes found while tracing exports:** `user.service.ts` was importing `CreateUserInput`/`UpdateUserInput` from `user.repository.ts` (defined there as raw `Prisma.UserCreateInput`/`UserUpdateInput`) while the actual value flowing through was the Zod-validated shape from `user.schema.ts` — a different type sharing the name, previously papered over with an `as` cast at each call site. Now imports the real type; casts removed. `report.generator.ts` independently redefined `ReportFormat`/`ReportGeneratorPayload`, structurally identical to `report.schema.ts`'s Zod-inferred `CreateReportInput` — consolidated. `price-record.repository.ts` and `price-record.service.ts` each independently defined `CreatePriceRecordWithUserInput` (exact duplicate) — extracted to a new `price-record.types.ts`.
+- **Verification:** `tsc` clean, 9/9 tests pass. Both cross-module paths exercised specifically against the running app (login via auth→user; `/api/v1/public/forecasts/:id` via public→forecast) plus all 7 other route groups — all 200.
+
+**Phase R3 exit criteria met:** `tsc` green, `npm test` green, full manual walkthrough of all three roles.
 
 ---
 
