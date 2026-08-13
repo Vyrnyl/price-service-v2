@@ -9,8 +9,7 @@ import {
   MdOutlineChevronRight,
   MdSearch,
 } from "react-icons/md";
-import PriceRecordsTable from "@/features/officer/components/PriceRecordsTable";
-import type { PriceRecord } from "@/features/officer/price-records.types";
+import { PriceRecordsTable, type PriceRecord } from "@/features/price-record";
 import { getPublicCommodities, type PublicCommodityItem } from "./api/commodity.api";
 
 interface CommodityRow {

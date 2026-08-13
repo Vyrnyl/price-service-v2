@@ -1,4 +1,4 @@
-import StoreRegistryPage from "../../../../features/officer/StoreRegistryPage";
+import StoreRegistryPage from "@/features/stores";
 
 export default function OfficerStoreRoute() {
   return <StoreRegistryPage showAssignedOfficer={false} />;

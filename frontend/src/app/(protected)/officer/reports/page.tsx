@@ -1,4 +1,4 @@
-import ReportGenerationPage from "../../../../features/officer/reports/ReportGenerationPage";
+import ReportGenerationPage from "@/features/report";
 
 export default function OfficerReportsRoute() {
   return <ReportGenerationPage />;
