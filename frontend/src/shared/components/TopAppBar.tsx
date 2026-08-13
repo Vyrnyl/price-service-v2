@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MdOutlineAnalytics, MdMenu, MdClose } from "react-icons/md";
 import { LuLogIn } from "react-icons/lu";
 import { useEffect, useState } from "react";
-import { getRoleFromServer, type UserRole } from "@/lib/auth";
+import { getRoleFromServer, type UserRole } from "@/shared/services/auth";
 
 export default function TopAppBar({
   activePath,

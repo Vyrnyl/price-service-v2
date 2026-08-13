@@ -1,4 +1,4 @@
-import { apiFetch } from "../../../lib/api";
+import { apiFetch } from "../../../shared/services/api";
 import type { CommodityStatus } from "../commodity.schema";
 import type { SrpItem } from "./srp.api";
 

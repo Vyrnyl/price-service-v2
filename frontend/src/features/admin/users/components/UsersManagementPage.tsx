@@ -9,7 +9,7 @@ import {
   MdOutlineVisibility,
 } from "react-icons/md";
 import { createUser, getUsers, updateUser, updateUserStatus } from "../api/users.api";
-import { ApiError } from "../../../../lib/api";
+import { ApiError } from "../../../../shared/services/api";
 import type { CreateUserFormSchema, UpdateUserFormSchema } from "../users.schema";
 import type { User, UserRole } from "../types/users.types";
 import AddUserDialog from "./AddUserDialog";

@@ -1,5 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
-import { verifyToken } from "./lib/jwt";
+import { verifyToken } from "./shared/utils/jwt";
 
 const PROTECTED_PREFIXES = ["/admin", "/officer"];
 

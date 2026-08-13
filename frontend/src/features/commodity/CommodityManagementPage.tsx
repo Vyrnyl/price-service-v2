@@ -26,7 +26,7 @@ import {
 } from "./api/commodity.api";
 import { createSrp } from "./api/srp.api";
 import type { CommodityStatus } from "./commodity.schema";
-import type { UserRole } from "@/lib/auth";
+import type { UserRole } from "@/shared/services/auth";
 
 function mapCommodityToRow(item: CommodityItem, index: number) {
   const latestSrp = item.srps?.[0];

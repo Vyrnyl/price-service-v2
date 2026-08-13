@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { verifyToken } from "../../../../lib/jwt";
+import { verifyToken } from "../../../../shared/utils/jwt";
 
 function normalizeJwtRole(role: string | null) {
   if (role === "ADMIN") return "admin";

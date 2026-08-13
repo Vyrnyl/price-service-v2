@@ -16,7 +16,7 @@ import {
   getRoleFromServer,
   logoutFromServer,
   type UserRole,
-} from "../lib/auth";
+} from "../services/auth";
 
 type NavLink = { href: string; icon: React.ElementType; label: string };
 

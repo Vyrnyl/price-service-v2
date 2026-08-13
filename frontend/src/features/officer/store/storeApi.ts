@@ -1,5 +1,5 @@
 import type { StoreFormData } from "@/features/officer/types";
-import { apiFetch } from "@/lib/api";
+import { apiFetch } from "@/shared/services/api";
 import type { Store } from "@/features/officer/types";
 import type { CommodityOption, PriceRecord } from "@/features/officer/price-records.types";
 

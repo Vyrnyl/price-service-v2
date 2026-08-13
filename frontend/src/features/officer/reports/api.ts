@@ -1,4 +1,4 @@
-import { apiFetch } from "@/lib/api";
+import { apiFetch } from "@/shared/services/api";
 import type { BackendReport, CreateReportPayload } from "./types";
 
 export async function getReports() {

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { MdAdd, MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
-import { apiFetch } from "@/lib/api";
+import { apiFetch } from "@/shared/services/api";
 import PriceRecordForm from "@/features/officer/components/PriceRecordForm";
 import PriceRecordFilters from "@/features/officer/components/PriceRecordFilters";
 import PriceRecordsTable from "@/features/officer/components/PriceRecordsTable";

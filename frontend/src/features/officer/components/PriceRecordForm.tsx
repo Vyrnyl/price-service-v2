@@ -1,7 +1,7 @@
 "use client";
 
 import { type FormEvent } from "react";
-import { FieldError } from "@/features/officer/components/FieldError";
+import { FieldError } from "@/shared/components/FieldError";
 import { INPUT_CLASSES, INPUT_ERROR_CLASSES, PRIMARY_BUTTON_CLASSES } from "@/features/officer/constants";
 import type {
   CommodityOption,

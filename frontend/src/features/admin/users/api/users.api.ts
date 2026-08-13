@@ -1,4 +1,4 @@
-import { apiFetch } from "../../../../lib/api";
+import { apiFetch } from "../../../../shared/services/api";
 import type { AddUserForm, User } from "../types/users.types";
 import type { UpdateUserFormSchema } from "../users.schema";
 

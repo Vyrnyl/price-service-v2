@@ -1,6 +1,6 @@
 import { type FormEvent } from "react";
 import { StoreFormData } from "@/features/officer/types";
-import { FieldError } from "./FieldError";
+import { FieldError } from "@/shared/components/FieldError";
 import { INPUT_CLASSES, INPUT_ERROR_CLASSES, PRIMARY_BUTTON_CLASSES } from "@/features/officer/constants";
 
 export function CreateStoreDialog({

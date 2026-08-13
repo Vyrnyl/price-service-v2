@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ComponentType } from "react";
-import { apiFetch } from "../../../lib/api";
+import { apiFetch } from "../../../shared/services/api";
 import { MdOutlineInventory2, MdOutlineTrendingUp, MdOutlineStorefront } from "react-icons/md";
 import { FiUsers } from "react-icons/fi";
 import { IoFilterOutline } from "react-icons/io5";

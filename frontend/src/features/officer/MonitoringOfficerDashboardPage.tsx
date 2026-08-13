@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MdInventory2, MdNotificationsActive, MdSearch, MdStore, MdTrendingUp } from "react-icons/md";
-import { apiFetch } from "@/lib/api";
+import { apiFetch } from "@/shared/services/api";
 
 const stats = [
   {

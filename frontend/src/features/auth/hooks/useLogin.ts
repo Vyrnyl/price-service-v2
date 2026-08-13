@@ -2,7 +2,7 @@
 
 import { useCallback, useState } from "react";
 import { z } from "zod";
-import { apiFetch, ApiError } from "../../../lib/api";
+import { apiFetch, ApiError } from "../../../shared/services/api";
 import { loginSchema, type LoginInput } from "../auth.schema";
 
 export type LoginFieldErrors = Partial<Record<keyof LoginInput, string>>;

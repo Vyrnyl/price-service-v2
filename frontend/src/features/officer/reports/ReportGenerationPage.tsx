@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { MdDownload } from "react-icons/md";
-import { apiFetch } from "@/lib/api";
+import { apiFetch } from "@/shared/services/api";
 import { reportTypes, exportFormats } from "./data";
 import ExportFormatButton from "./components/ExportFormatButton";
 import RecentReportCard from "./components/RecentReportCard";
