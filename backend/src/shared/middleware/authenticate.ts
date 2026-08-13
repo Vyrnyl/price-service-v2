@@ -1,8 +1,8 @@
 import { Request, Response, NextFunction } from "express";
-import { AuthUser } from "../../types/express";
+import { AuthUser } from "../types/express";
 import jwt from "jsonwebtoken";
 import AppError from "../utils/AppError";
-import { asyncHandler } from "../utils/asyncHandler";
+import { asyncHandler } from "../handlers/asyncHandler";
 
 function getBearerToken(req: Request): string | null {
   const header = req.headers.authorization;

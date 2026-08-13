@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { asyncHandler } from "../../utils/asyncHandler";
+import { asyncHandler } from "../../shared/handlers/asyncHandler";
 import { authService } from "./auth.service";
 import { loginSchema } from "./auth.schema";
 

@@ -4,8 +4,8 @@ import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import apiRoutes from "./routes";
-import { errorHandler } from "./middleware/error.middleware";
-import { authenticate } from "./middleware/auth.middleware";
+import { errorHandler } from "./shared/handlers/errorHandler";
+import { authenticate } from "./shared/middleware/authenticate";
 import authRoutes from "./modules/auth/auth.routes";
 import publicRoutes from "./modules/public/public.routes";
 

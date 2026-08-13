@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { userService } from './user.service';
 import { createUserSchema, updateUserSchema, userIdParamSchema } from './user.schema';
 

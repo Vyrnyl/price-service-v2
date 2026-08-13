@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { priceRecordService, type CreatePriceRecordWithUserInput } from './price-record.service';
 import { createPriceRecordSchema, updatePriceRecordSchema, priceRecordIdParamSchema } from './price-record.schema';
-import type { AuthUser } from '../../../types/express';
+import type { AuthUser } from '../../shared/types/express';
 
 export const priceRecordController = {
   createPriceRecord: async (req: Request, res: Response) => {

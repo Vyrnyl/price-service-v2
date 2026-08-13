@@ -1,6 +1,6 @@
 import 'dotenv/config';
 import { prisma } from '../src/prisma';
-import { passwordUtils } from '../src/utils/passwordUtils';
+import { passwordUtils } from '../src/shared/utils/password.utils';
 
 type UserRoleInput = 'ADMIN' | 'OFFICER';
 

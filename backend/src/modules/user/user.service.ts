@@ -1,5 +1,5 @@
-import AppError from '../../utils/AppError';
-import { passwordUtils } from '../../utils/passwordUtils';
+import AppError from '../../shared/utils/AppError';
+import { passwordUtils } from '../../shared/utils/password.utils';
 import { CreateUserInput, UpdateUserInput, userRepository } from './user.repository';
 
 export const userService = {

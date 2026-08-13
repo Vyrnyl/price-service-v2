@@ -2,7 +2,7 @@ import { prisma } from '../../prisma';
 import type { Prisma } from '@prisma/client';
 import type { CreateReportInput, UpdateReportInput } from './report.schema';
 import { resolveReportScope } from './report.scope';
-import type { AuthUser } from '../../../types/express';
+import type { AuthUser } from '../../shared/types/express';
 
 export const reportRepository = {
   create: (data: CreateReportInput, userId: string) => {

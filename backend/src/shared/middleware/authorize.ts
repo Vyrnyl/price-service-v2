@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
-import AppError from "../../utils/AppError";
-import { AuthUser } from "../../../types/express";
+import AppError from "../utils/AppError";
+import { AuthUser } from "../types/express";
 
 export const authorize =
   (...roles: AuthUser["role"][]) =>

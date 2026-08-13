@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { commodityService } from './commodity.service';
 import { createCommoditySchema, updateCommoditySchema, commodityIdParamSchema } from './commodity.schema';
 

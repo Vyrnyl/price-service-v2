@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { forecastService } from './forecast.service';
 import { createForecastSchema, updateForecastSchema, forecastIdParamSchema, generateForecastSchema } from './forecast.schema';
 

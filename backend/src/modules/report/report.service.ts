@@ -1,6 +1,6 @@
 import { reportRepository } from './report.repository';
 import type { CreateReportInput, UpdateReportInput } from './report.schema';
-import type { AuthUser } from '../../../types/express';
+import type { AuthUser } from '../../shared/types/express';
 
 export const reportService = {
   createReport: (data: CreateReportInput, userId: string) => reportRepository.create(data, userId),

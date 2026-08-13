@@ -1,4 +1,4 @@
-import type { AuthUser } from '../../../types/express';
+import type { AuthUser } from '../../shared/types/express';
 
 export function resolvePriceRecordScope(authUser?: AuthUser) {
   if (!authUser) {

@@ -1,9 +1,9 @@
 import { Request, Response } from 'express';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { reportService } from './report.service';
 import { createReportSchema, updateReportSchema, reportIdParamSchema } from './report.schema';
 import { generateReportFile } from './report.generator';
-import type { AuthUser } from '../../../types/express';
+import type { AuthUser } from '../../shared/types/express';
 
 export const reportController = {
   createReport: async (req: Request, res: Response) => {

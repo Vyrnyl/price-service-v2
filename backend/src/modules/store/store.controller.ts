@@ -1,8 +1,8 @@
 import { Request, Response } from 'express';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { storeService } from './store.service';
 import { createStoreSchema, updateStoreSchema, storeIdParamSchema } from './store.schema';
-import type { AuthUser } from '../../../types/express';
+import type { AuthUser } from '../../shared/types/express';
 
 export const storeController = {
   createStore: async (req: Request, res: Response) => {

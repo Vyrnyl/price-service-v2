@@ -1,5 +1,5 @@
 import { prisma } from '../../prisma';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { forecastRepository } from './forecast.repository';
 import { forecastArima } from './arima';
 import type { CreateForecastInput, UpdateForecastInput, GenerateForecastInput } from './forecast.schema';

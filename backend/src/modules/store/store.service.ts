@@ -1,6 +1,6 @@
 import { storeRepository } from './store.repository';
 import type { CreateStoreInput, UpdateStoreInput } from './store.schema';
-import type { AuthUser } from '../../../types/express';
+import type { AuthUser } from '../../shared/types/express';
 
 export const storeService = {
   createStore: (data: CreateStoreInput, userId: string) =>

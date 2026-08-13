@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../prisma';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { forecastService } from '../forecast/forecast.service';
 
 export const publicController = {

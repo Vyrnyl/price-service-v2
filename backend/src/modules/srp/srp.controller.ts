@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { srpService } from './srp.service';
 import { createSrpSchema, updateSrpSchema, srpIdParamSchema } from './srp.schema';
 
