@@ -1,6 +1,7 @@
 import AppError from '../../shared/utils/AppError';
 import { passwordUtils } from '../../shared/utils/password.utils';
-import { CreateUserInput, UpdateUserInput, userRepository } from './user.repository';
+import { userRepository } from './user.repository';
+import type { CreateUserInput, UpdateUserInput } from './user.schema';
 
 export const userService = {
   createUser: async (data: CreateUserInput) => {
@@ -12,7 +13,7 @@ export const userService = {
 
     const hashedPassword = await passwordUtils.hashPassword(data.password);
 
-    const { confirmPassword, ...createData } = data as CreateUserInput & { confirmPassword?: string };
+    const { confirmPassword, ...createData } = data;
 
     return userRepository.create({
       ...createData,
@@ -41,7 +42,7 @@ export const userService = {
       };
     }
 
-    const { confirmPassword, ...finalData } = updateData as UpdateUserInput & { confirmPassword?: string };
+    const { confirmPassword, ...finalData } = updateData;
 
     return userRepository.update(id, finalData);
   },

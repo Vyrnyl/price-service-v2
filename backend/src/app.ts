@@ -5,8 +5,8 @@ import cookieParser from "cookie-parser";
 import apiRoutes from "./routes";
 import { errorHandler } from "./shared/handlers/errorHandler";
 import { authenticate } from "./shared/middleware/authenticate";
-import authRoutes from "./modules/auth/auth.routes";
-import publicRoutes from "./modules/public/public.routes";
+import authRoutes from "./modules/auth";
+import publicRoutes from "./modules/public";
 import { env } from "./config/env";
 
 const app = express();

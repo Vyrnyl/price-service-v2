@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { prisma } from '../../prisma';
 import AppError from '../../shared/utils/AppError';
-import { forecastService } from '../forecast/forecast.service';
+import { forecastService } from '../forecast';
 
 export const publicController = {
   getPublicForecastByCommodityId: async (req: Request, res: Response) => {

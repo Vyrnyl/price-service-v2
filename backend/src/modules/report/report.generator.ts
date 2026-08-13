@@ -4,17 +4,10 @@ import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
 import { prisma } from '../../prisma';
 import type { Prisma } from '@prisma/client';
-import type { ReportTypeEnum } from './report.schema';
+import type { CreateReportInput, ReportFormat, ReportTypeEnum } from './report.schema';
 import { env } from '../../config/env';
 
-export type ReportFormat = 'PDF' | 'EXCEL';
-export type ReportGeneratorPayload = {
-  type: ReportTypeEnum;
-  period: string;
-  format: ReportFormat;
-  commodityGroup?: string;
-  storeId?: string;
-};
+export type ReportGeneratorPayload = CreateReportInput;
 
 const REPORTS_DIR = path.resolve(process.cwd(), 'reports');
 

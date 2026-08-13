@@ -1,12 +1,9 @@
 import { prisma } from '../../prisma';
 import type { Prisma } from '@prisma/client';
-import type { CreatePriceRecordInput, UpdatePriceRecordInput } from './price-record.schema';
+import type { UpdatePriceRecordInput } from './price-record.schema';
 import type { AuthUser } from '../../shared/types/express';
 import { resolvePriceRecordScope } from './price-record.scope';
-
-export type CreatePriceRecordWithUserInput = CreatePriceRecordInput & {
-  userId: string;
-};
+import type { CreatePriceRecordWithUserInput } from './price-record.types';
 
 type PriceStatus = 'COMPLIANT' | 'OVERPRICE' | 'UNDERPRICE';
 

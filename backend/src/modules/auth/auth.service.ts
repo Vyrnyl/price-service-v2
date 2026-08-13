@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AppError from '../../shared/utils/AppError';
-import { userRepository } from '../user/user.repository';
+import { userRepository } from '../user';
 import type { LoginInput } from './auth.schema';
 import { env } from '../../config/env';
 

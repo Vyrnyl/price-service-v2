@@ -1,10 +1,7 @@
 import { priceRecordRepository } from './price-record.repository';
-import type { CreatePriceRecordInput, UpdatePriceRecordInput } from './price-record.schema';
+import type { UpdatePriceRecordInput } from './price-record.schema';
 import type { AuthUser } from '../../shared/types/express';
-
-export type CreatePriceRecordWithUserInput = CreatePriceRecordInput & {
-  userId: string;
-};
+import type { CreatePriceRecordWithUserInput } from './price-record.types';
 
 export const priceRecordService = {
   createPriceRecord: (data: CreatePriceRecordWithUserInput) => priceRecordRepository.create(data),
