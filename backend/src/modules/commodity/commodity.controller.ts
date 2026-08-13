@@ -2,19 +2,9 @@ import { Request, Response } from 'express';
 import AppError from '../../utils/AppError';
 import { commodityService } from './commodity.service';
 import { createCommoditySchema, updateCommoditySchema, commodityIdParamSchema } from './commodity.schema';
-import type { AuthUser } from '../../../types/express';
-
-function requireAdmin(user?: AuthUser) {
-  if (!user || user.role !== 'ADMIN') {
-    throw new AppError('Forbidden', 403);
-  }
-}
 
 export const commodityController = {
   createCommodity: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const validated = createCommoditySchema.parse(req.body);
     const commodity = await commodityService.createCommodity(validated);
 
@@ -39,9 +29,6 @@ export const commodityController = {
   },
 
   updateCommodity: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const { id } = commodityIdParamSchema.parse(req.params);
     const data = updateCommoditySchema.parse(req.body);
 
@@ -51,9 +38,6 @@ export const commodityController = {
   },
 
   deleteCommodity: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const { id } = commodityIdParamSchema.parse(req.params);
 
     await commodityService.deleteCommodity(id);

@@ -2,19 +2,9 @@ import { Request, Response } from 'express';
 import AppError from '../../utils/AppError';
 import { srpService } from './srp.service';
 import { createSrpSchema, updateSrpSchema, srpIdParamSchema } from './srp.schema';
-import type { AuthUser } from '../../../types/express';
-
-function requireAdmin(user?: AuthUser) {
-  if (!user || user.role !== 'ADMIN') {
-    throw new AppError('Forbidden', 403);
-  }
-}
 
 export const srpController = {
   createSrp: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const validatedBody = createSrpSchema.parse(req.body);
     const srp = await srpService.createSrp(validatedBody);
 
@@ -39,9 +29,6 @@ export const srpController = {
   },
 
   updateSrp: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const { id } = srpIdParamSchema.parse(req.params);
     const validatedBody = updateSrpSchema.parse(req.body);
     const srp = await srpService.updateSrp(id, validatedBody);
@@ -54,9 +41,6 @@ export const srpController = {
   },
 
   deleteSrp: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const { id } = srpIdParamSchema.parse(req.params);
 
     await srpService.deleteSrp(id);

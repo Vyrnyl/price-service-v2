@@ -1,8 +1,11 @@
 import { Router } from 'express';
 import { asyncHandler } from '../../utils/asyncHandler';
+import { authorize } from '../../shared/middleware/authorize';
 import { priceRecordController } from './price-record.controller';
 
 const router = Router();
+
+router.use(authorize('ADMIN', 'OFFICER'));
 
 router.post('/', asyncHandler(priceRecordController.createPriceRecord));
 router.get('/', asyncHandler(priceRecordController.getPriceRecords));
