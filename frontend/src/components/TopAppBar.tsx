@@ -17,7 +17,7 @@ export default function TopAppBar({
   onMenuToggle: () => void;
   showMenuButton: boolean;
 }) {
-  const [role, setRole] = useState<UserRole>("public");
+  const [role, setRole] = useState<UserRole | null>(null);
 
   useEffect(() => {
     let mounted = true;

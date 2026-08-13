@@ -3,7 +3,7 @@ import { z } from "zod";
 const baseUserSchema = z.object({
   name: z.string().trim().min(1, "Full name is required"),
   email: z.string().trim().email("Enter a valid email address"),
-  role: z.enum(["ADMIN", "OFFICER", "PUBLIC"] as const),
+  role: z.enum(["ADMIN", "OFFICER"] as const),
   isActive: z.boolean(),
 });
 

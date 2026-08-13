@@ -23,7 +23,7 @@ export const authController = {
       | {
           userId: string;
           email: string;
-          role: "ADMIN" | "OFFICER" | "PUBLIC";
+          role: "ADMIN" | "OFFICER";
         }
       | undefined;
 

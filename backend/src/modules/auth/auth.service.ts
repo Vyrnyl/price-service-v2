@@ -26,6 +26,10 @@ export const authService = {
       throw new AppError('Account is inactive', 403);
     }
 
+    if (user.role !== 'ADMIN' && user.role !== 'OFFICER') {
+      throw new AppError('Invalid email or password', 401);
+    }
+
     const token = jwt.sign(
       {
         userId: user.id,

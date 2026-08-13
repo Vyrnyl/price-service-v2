@@ -1,25 +1,25 @@
 import { apiFetch } from "./api";
 
-export type UserRole = "public" | "officer" | "admin";
+export type UserRole = "officer" | "admin";
 
-export function normalizeUserRole(role: string | null | undefined): UserRole {
+export function normalizeUserRole(role: string | null | undefined): UserRole | null {
   const normalized = role?.trim().toLowerCase();
 
-  if (normalized === "admin" || normalized === "officer" || normalized === "public") {
+  if (normalized === "admin" || normalized === "officer") {
     return normalized;
   }
 
-  return "public";
+  return null;
 }
 
-export async function getRoleFromServer(): Promise<UserRole> {
+export async function getRoleFromServer(): Promise<UserRole | null> {
   try {
     const res = await fetch("/api/auth/role", { cache: "no-store" });
-    if (!res.ok) return "public";
+    if (!res.ok) return null;
     const data = await res.json();
     return normalizeUserRole(data?.role);
   } catch {
-    return "public";
+    return null;
   }
 }
 

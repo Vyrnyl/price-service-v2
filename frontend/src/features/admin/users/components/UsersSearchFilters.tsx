@@ -74,17 +74,6 @@ export default function UsersSearchFilters({
         </button>
         <button
           type="button"
-          onClick={() => onRoleFilterChange("PUBLIC")}
-          className={`rounded-full px-4 py-1.5 text-label-caps font-medium transition-colors ${
-            roleFilter === "PUBLIC"
-              ? "bg-primary-container text-on-primary-container"
-              : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
-          }`}
-        >
-          Public
-        </button>
-        <button
-          type="button"
           onClick={() => onActiveFilterChange(!showActiveOnly)}
           className={`rounded-full px-4 py-1.5 text-label-caps font-medium transition-colors ${
             showActiveOnly

@@ -5,7 +5,7 @@ const userSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(8, "Password must be at least 8 characters"),
   confirmPassword: z.string().min(8, "Confirm password must be at least 8 characters"),
-  role: z.enum(["ADMIN", "OFFICER", "PUBLIC"]).optional(),
+  role: z.enum(["ADMIN", "OFFICER"]),
   isActive: z.boolean().optional(),
 });
 
@@ -22,7 +22,7 @@ const updateUserBaseSchema = z.object({
   email: z.string().email().optional(),
   password: z.string().min(8).optional(),
   confirmPassword: z.string().min(8).optional(),
-  role: z.enum(["ADMIN", "OFFICER", "PUBLIC"]).optional(),
+  role: z.enum(["ADMIN", "OFFICER"]).optional(),
   isActive: z.boolean().optional(),
 });
 

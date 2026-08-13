@@ -11,7 +11,7 @@ model User {
   name      String
   email     String       @unique
   password  String
-  role      UserRole     @default(PUBLIC)
+  role      UserRole
   isActive  Boolean      @default(true)
   createdAt DateTime     @default(now())
   prices    PriceRecord[]
@@ -87,7 +87,6 @@ model Forecast {
 enum UserRole {
   ADMIN
   OFFICER
-  PUBLIC
 }
 
 enum PriceStatus {

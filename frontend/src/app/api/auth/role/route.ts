@@ -5,7 +5,6 @@ import { verifyToken } from "../../../../lib/jwt";
 function normalizeJwtRole(role: string | null) {
   if (role === "ADMIN") return "admin";
   if (role === "OFFICER") return "officer";
-  if (role === "PUBLIC") return "public";
   return null;
 }
 
@@ -15,15 +14,15 @@ export async function GET() {
     const token = cookieStore.get("accessToken")?.value;
 
     if (!token) {
-      return NextResponse.json({ role: "public" });
+      return NextResponse.json({ role: null });
     }
 
     const payload = await verifyToken(token);
     const rawRole = typeof payload.role === "string" ? payload.role : null;
-    const role = normalizeJwtRole(rawRole) ?? "public";
+    const role = normalizeJwtRole(rawRole);
 
     return NextResponse.json({ role });
   } catch (err) {
-    return NextResponse.json({ role: "public" });
+    return NextResponse.json({ role: null });
   }
 }

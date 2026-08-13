@@ -4,13 +4,12 @@ import { useState } from "react";
 import { type UserRole } from "../lib/auth";
 
 const roles: { value: UserRole; label: string }[] = [
-  { value: "public", label: "Public User" },
   { value: "officer", label: "Monitoring Officer" },
   { value: "admin", label: "Admin" },
 ];
 
 export default function RoleSwitcher() {
-  const [role, setRole] = useState<UserRole>("public");
+  const [role, setRole] = useState<UserRole>("officer");
 
   return (
     <div className="flex items-center gap-2 rounded-xl border border-outline-variant bg-surface-container-low px-2 py-1">

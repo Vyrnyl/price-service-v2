@@ -18,10 +18,23 @@ import {
   type UserRole,
 } from "../lib/auth";
 
-const roleSpecificLinks: Record<
-  UserRole,
-  Array<{ href: string; icon: React.ElementType; label: string }>
-> = {
+type NavLink = { href: string; icon: React.ElementType; label: string };
+
+const publicLinks: NavLink[] = [
+  { href: "/", icon: MdOutlineDashboard, label: "Dashboard" },
+  {
+    href: "/commodity-list",
+    icon: MdOutlineInventory2,
+    label: "Commodity List",
+  },
+  {
+    href: "/price-analysis",
+    icon: MdOutlineTrendingUp,
+    label: "Price Analysis",
+  },
+];
+
+const roleSpecificLinks: Record<UserRole, NavLink[]> = {
   admin: [
     { href: "/admin", icon: MdOutlineDashboard, label: "Admin Dashboard" },
     {
@@ -64,20 +77,7 @@ const roleSpecificLinks: Record<
       label: "Reports",
     },
   ],
-  public: [
-    { href: "/", icon: MdOutlineDashboard, label: "Dashboard" },
-    {
-      href: "/commodity-list",
-      icon: MdOutlineInventory2,
-      label: "Commodity List",
-    },
-    {
-      href: "/price-analysis",
-      icon: MdOutlineTrendingUp,
-      label: "Price Analysis",
-    },
-  ],
-} as const;
+};
 
 export default function NavigationDrawer({
   activePath,
@@ -88,20 +88,20 @@ export default function NavigationDrawer({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [role, setRole] = useState<UserRole | null>(null);
+  const [role, setRole] = useState<UserRole | "guest" | null>(null);
   const router = useRouter();
 
   useEffect(() => {
     let mounted = true;
     getRoleFromServer().then((r) => {
-      if (mounted) setRole(r);
+      if (mounted) setRole(r ?? "guest");
     });
     return () => {
       mounted = false;
     };
   }, [activePath]);
 
-  const links = role ? roleSpecificLinks[role] : [];
+  const links = role === "admin" || role === "officer" ? roleSpecificLinks[role] : publicLinks;
 
   const handleLogout = async () => {
     try {
@@ -110,7 +110,7 @@ export default function NavigationDrawer({
       console.error("Logout failed", error);
     }
 
-    setRole("public");
+    setRole("guest");
     router.push("/login");
     onClose();
   };
@@ -159,7 +159,7 @@ export default function NavigationDrawer({
               </Link>
             );
           })}
-            {role !== "public" ? (
+            {role !== "guest" ? (
               <button
                 type="button"
                 onClick={handleLogout}

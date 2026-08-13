@@ -10,7 +10,6 @@ function isProtectedRoute(pathname: string) {
 function normalizeJwtRole(role: string | null) {
   if (role === "ADMIN") return "admin";
   if (role === "OFFICER") return "officer";
-  if (role === "PUBLIC") return "public";
   return null;
 }
 

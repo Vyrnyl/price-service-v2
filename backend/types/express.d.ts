@@ -4,7 +4,7 @@ import { JwtPayload } from "jsonwebtoken";
 export interface AuthUser {
   userId: string;
   email: string;
-  role: "ADMIN" | "OFFICER" | "PUBLIC";
+  role: "ADMIN" | "OFFICER";
 }
 
 declare global {
