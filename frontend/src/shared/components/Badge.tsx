@@ -1,0 +1,26 @@
+import type { HTMLAttributes, ReactNode } from "react";
+
+type BadgeVariant = "primary" | "secondary" | "error" | "neutral";
+
+interface BadgeProps extends HTMLAttributes<HTMLSpanElement> {
+  variant?: BadgeVariant;
+  children: ReactNode;
+}
+
+const VARIANT_CLASSES: Record<BadgeVariant, string> = {
+  primary: "bg-primary-fixed text-on-primary-fixed",
+  secondary: "bg-secondary-fixed text-on-secondary-fixed",
+  error: "bg-error-container text-on-error-container",
+  neutral: "bg-surface-container-high text-on-surface-variant",
+};
+
+export default function Badge({ variant = "neutral", className = "", children, ...rest }: BadgeProps) {
+  return (
+    <span
+      className={`inline-flex items-center rounded-full px-3 py-1 font-label-caps text-label-caps ${VARIANT_CLASSES[variant]} ${className}`.trim()}
+      {...rest}
+    >
+      {children}
+    </span>
+  );
+}
