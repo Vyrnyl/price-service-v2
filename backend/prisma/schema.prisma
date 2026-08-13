@@ -37,6 +37,8 @@ model SRP {
   effectiveDate DateTime
   createdAt    DateTime  @default(now())
   commodity    Commodity @relation(fields: [commodityId], references: [id])
+
+  @@index([commodityId, effectiveDate])
 }
 
 model Store {
@@ -48,6 +50,8 @@ model Store {
   createdAt   DateTime     @default(now())
   prices      PriceRecord[]
   user        User         @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model PriceRecord {
@@ -62,6 +66,12 @@ model PriceRecord {
   commodity   Commodity @relation(fields: [commodityId], references: [id])
   store       Store?    @relation(fields: [storeId], references: [id], onDelete: SetNull)
   user        User      @relation(fields: [userId], references: [id])
+
+  @@index([commodityId])
+  @@index([storeId])
+  @@index([userId])
+  @@index([dateAndTime])
+  @@index([commodityId, dateAndTime])
 }
 
 model Report {
@@ -72,6 +82,8 @@ model Report {
   fileUrl     String
   createdAt   DateTime   @default(now())
   user        User       @relation(fields: [generatedBy], references: [id])
+
+  @@index([generatedBy])
 }
 
 model Forecast {
@@ -82,6 +94,8 @@ model Forecast {
   forecastDate   DateTime
   createdAt      DateTime  @default(now())
   commodity      Commodity @relation(fields: [commodityId], references: [id])
+
+  @@index([commodityId])
 }
 
 enum UserRole {
