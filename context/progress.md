@@ -4,7 +4,7 @@
 > Update this file at the end of every work session and every time a Feature Loop step is completed.
 > The plan of *what to build* lives in [build-plan.md](build-plan.md); this file records *what is done*.
 
-**Last updated:** 2026-08-13 · **Current phase:** R1 (not started) · **Current feature:** R1.1
+**Last updated:** 2026-08-13 · **Current phase:** R2 (not started) · **Current feature:** R2.1
 
 > **Context.** PresyoSerbisyo was built before these standards existed. The nine product modules below are recorded **retroactively** — they work, but none has been verified against the Definition of Done ([build-plan.md](build-plan.md) §3), which is why most sit at ◕ rather than ●. The refactor phases R0–R3 close that gap.
 >
@@ -36,14 +36,14 @@ Recount after every status change.
 | Phase 0 — Foundation | 5 | 0 | 0 | 0 | 4 | 1 | 0 |
 | Phase P — Existing product (retro) | 9 | 0 | 0 | 0 | 9 | 0 | 0 |
 | Phase R0 — Critical security | 3 | 0 | 0 | 0 | 0 | 3 | 0 |
-| Phase R1 — Dead code & layout | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
+| Phase R1 — Dead code & layout | 5 | 0 | 0 | 0 | 0 | 5 | 0 |
 | Phase R2 — Backend spine | 6 | 6 | 0 | 0 | 0 | 0 | 0 |
 | Phase R3 — Domain restructure | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
 | Phase 1 — Shared UI primitives | 3 | 3 | 0 | 0 | 0 | 0 | 0 |
 | Phase 2 — Product gaps | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
-| **Total** | **39** | **22** | **0** | **0** | **13** | **4** | **0** |
+| **Total** | **39** | **17** | **0** | **0** | **13** | **9** | **0** |
 
-**Overall completion: 4 / 39 features meet the Definition of Done (10%)**
+**Overall completion: 9 / 39 features meet the Definition of Done (23%)**
 
 > The low percentage reflects the **Definition of Done**, not brokenness. The app runs and all three roles work end to end. What's missing across the board: RBAC middleware, visible write feedback (no toast component exists), and service-layer unit tests.
 
@@ -204,24 +204,34 @@ Built before the standards existed. Recorded here so [progress.md](progress.md) 
 
 # Phase R1 — Dead Code & Shared Layout
 
-### R1.1 Delete Dead Code — ☐
-- **Scope:** 8 orphaned files; `MobileBottomNav` + `RoleSwitcher` parked under D-3.
-- **Blockers:** resolves B-24
+### R1.1 Delete Dead Code — ●
+- **Scope:** 9 orphaned files (8 listed + the `(test)` route dir) deleted after a grep importer-sweep confirmed zero external references for each: `admin/components/UsersManagementPage.tsx`, `officer/ReportGenerationPage.tsx` (duplicates of live copies), `public/PublicUserDashboardPage.tsx`, `dashboard/{FeaturedSection,TopCommoditiesGrid}.tsx`, `commodity/components/CommodityDetailsDialog.tsx`, `app/(test)/test-page/page.tsx`, `components/{MobileBottomNav,RoleSwitcher}.tsx` (D-3).
+- **Verification:** `tsc` clean; dev server spot-check — `/`, `/login`, `/commodity-list`, `/price-analysis` render 200, `/admin` and `/officer` still redirect unauthenticated.
+- **Notes:** `features/admin/components/` was **not** fully emptied as the plan assumed — it still holds the live `AdminDashboardPage.tsx` (imported by `app/(protected)/admin/page.tsx`). Directory left in place; normalizing it is R3.2's job.
+- **Blockers:** resolves B-24 ✅
 
-### R1.2 Stop Tracking Build Output — ☐
-- **Scope:** root `.gitignore`; untrack 65 `dist/` files + 9 generated reports.
-- **Blockers:** resolves B-25
+### R1.2 Stop Tracking Build Output — ●
+- **Scope:** root `.gitignore` (new) + `backend/.gitignore`; untracked 60 `dist/` files + 8 generated report artifacts.
+- **Notes:** `backend/reports/forecast_feature_report.md` looked like a 9th generated artifact but is actually **hand-written documentation** — kept tracked (`.gitignore` carves out `*.md`). Verified a fresh `tsc` build of `dist/` doesn't reappear in `git status`.
+- **Blockers:** resolves B-25 ✅
 
-### R1.3 Backend → `src/shared/` — ☐
-- **Scope:** 8 file moves, 27 import sites.
-- **Blockers:** resolves B-5
+### R1.3 Backend → `src/shared/` — ●
+- **Scope:** 8 file moves (`asyncHandler`, `error.middleware`→`errorHandler`, `auth.middleware`→`authenticate`, `AppError`, `helper`, `passwordUtils`→`password.utils`, `pdfkit.d.ts`, root `types/express.d.ts`) into `src/shared/{handlers,middleware,utils,types}/`; 27 import sites updated (all surfaced by `tsc`).
+- **Verification:** `tsc` clean, 9/9 tests pass, manually exercised against the running app + live DB (login, RBAC on `/api/users`, unauthenticated 401, public routes all unchanged).
+- **Blockers:** resolves B-5 ✅
 
-### R1.4 Frontend → `src/shared/` — ☐
-- **Scope:** `lib/` + `components/` → `shared/`; `FieldError` promoted to shared.
-- **Blockers:** resolves B-20
+### R1.4 Frontend → `src/shared/` — ●
+- **Scope:** `lib/` (`api`, `auth`, `jwt`) + 5 live `components/*` + `FieldError` (promoted out of `features/officer/components/`, now used across features) → `src/shared/{services,utils,components}/`; 19 external import sites + 2 internal cross-references updated.
+- **Verification:** `tsc` clean; dev server spot-check same as R1.1.
+- **Blockers:** resolves B-20 ✅
 
-### R1.5 kebab-case Filenames — ☐
-- **Scope:** 3 renames.
+### R1.5 kebab-case Filenames — ●
+- **Scope:** the 3 planned renames (`storeApi.ts`→`stores.api.ts`, `storeHooks.ts`→`use-stores.ts`, `storeStatus.ts`→`store-status.ts`) plus one found during a broader sweep: `features/auth/hooks/useLogin.ts`→`use-login.ts` (same violation, not in the original list). Exported identifiers unchanged, only filenames + import paths.
+- **Notes:** `backend/src/shared/{handlers/asyncHandler.ts,handlers/errorHandler.ts,utils/AppError.ts}` intentionally left camelCase/PascalCase — those are R1.3's own explicit target paths from build-plan.md, not an oversight.
+- **Verification:** `tsc` clean both workspaces; dev server spot-check.
+- **Blockers:** none listed
+
+**Phase R1 exit criteria met:** `tsc` green both workspaces, `npm test` (via `tsx --test`) green, app boots and every spot-checked route renders.
 
 ---
 
@@ -328,7 +338,7 @@ Verified continuously, re-checked at each phase exit ([build-plan.md](build-plan
 | **B-2** | ✅ | **Null-deref crash — RESOLVED.** `schema.prisma` now matches the DB (`storeId String?`, `store Store?`); `MonitoringOfficerDashboardPage.tsx` guards `record.store?.name ?? "Unknown store"`. Verified: deleting a store leaves `GET /api/price-records` at 200 with `store: null`. | Schema / frontend | R0.2 |
 | **B-3** | 🟠 | 5 utilities (`.text-primary` et al.) redefined in `globals.css` as hardcoded hexes with `!important`, shadowing the tokens they name — token changes silently fail. | Styling | 1.2 |
 | **B-4** | 🟠 | No typed env validation; `process.env.JWT_SECRET!` defers a config error to first request. | Backend | R2.2 |
-| **B-5** | 🟡 | Shared code at `src/utils/` + `src/middleware/`; two competing type dirs (`src/types/`, root `types/`). | Backend layout | R1.3 |
+| **B-5** | ✅ | **RESOLVED.** All backend shared code consolidated into `src/shared/{handlers,middleware,utils,types}/`; no competing type dirs remain. | Backend layout | R1.3 |
 | **B-6** | 🟡 | No `audit_logs` table — the cross-cutting audit requirement has no storage. | Database | 2.2 |
 | **B-7** | 🟡 | No `updated_at` on any model; no `last_login_at`. | Database | — |
 | **B-8** | 🟡 | `Commodity.status` / `.category` are unconstrained free-text. | Database | — |
@@ -343,12 +353,12 @@ Verified continuously, re-checked at each phase exit ([build-plan.md](build-plan
 | **B-17** | 🟠 | Card recipe inconsistent — `rounded-2xl` vs `rounded-3xl` (never the documented `rounded-xl`), `bg-white` vs token, three different shadows incl. one arbitrary inline value. | Styling | 1.2 |
 | **B-18** | 🟡 | `min-h-screen lg:ml-72` page wrapper duplicated verbatim in 10 page components. | Frontend | 1.1 |
 | **B-19** | 🟡 | `text-body-md` used in `StoreRegistryGrid` but **never defined** in `globals.css` — a silent no-op. | Styling | 1.2 |
-| **B-20** | 🟡 | `FieldError` lives in `features/officer/` but is used across features. | Frontend layout | R1.4 |
+| **B-20** | ✅ | **RESOLVED.** `FieldError` promoted to `src/shared/components/FieldError.tsx`. | Frontend layout | R1.4 |
 | **B-21** | 🟠 | No shared `Button`, `Input`, `Modal`, `Toast`, `Alert` — markup duplicated across every page; modal overlay copied 5×. | Frontend | 1.1 |
 | **B-22** | 🟡 | Modal overlays use non-token `bg-slate-950/40`; `ForecastDetailModal` diverges with `bg-black/50`. | Styling | 1.1 |
 | **B-23** | 🟠 | No toast/alert component — **no mutation gives visible feedback**, failing the Definition of Done for every write feature. | Frontend | 1.3 |
-| **B-24** | 🟡 | 8 orphaned components incl. 2 same-name duplicates; `(test)/test-page` has hardcoded `localhost` fetches. | Frontend | R1.1 |
-| **B-25** | 🟡 | `backend/dist/` (65 files) and 9 generated report artifacts are tracked in git. | Repo hygiene | R1.2 |
+| **B-24** | ✅ | **RESOLVED.** All 9 orphaned files deleted (confirmed zero importers first). | Frontend | R1.1 |
+| **B-25** | ✅ | **RESOLVED.** `dist/` and generated report artifacts untracked; `.gitignore` added. | Repo hygiene | R1.2 |
 | **B-26** | 🟡 | `GET /api/test` debug route logs env values to console. | Backend | R2.2 |
 | **B-27** | 🟠 | Generated reports are written to the backend's local disk and served from `/reports/files` — they do not survive an ephemeral redeploy, and horizontal scaling serves 404s from whichever instance didn't generate the file. **Blocks production deployment.** | Backend / infra | 2.4 |
 
