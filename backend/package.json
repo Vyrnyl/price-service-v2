@@ -11,7 +11,9 @@
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
     "prisma:studio": "prisma studio",
-    "create:admin": "npx tsx scripts/create-admin-user.ts"
+    "create:admin": "npx tsx scripts/create-admin-user.ts",
+    "test": "tsx --test src/**/*.test.ts",
+    "test:watch": "tsx --test --watch src/**/*.test.ts"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
