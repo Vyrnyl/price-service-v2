@@ -5,7 +5,7 @@ const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:5
 export const dynamic = "force-dynamic";
 
 async function proxyRequest(request: NextRequest) {
-  const targetPath = request.nextUrl.pathname;
+  const targetPath = request.nextUrl.pathname.replace(/^\/api\//, "/api/v1/");
   const targetUrl = new URL(`${API_BASE_URL}${targetPath}`);
 
   const searchParams = request.nextUrl.searchParams.toString();

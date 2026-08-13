@@ -36,9 +36,9 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 
-app.use("/api/auth", authRoutes);
-app.use("/api/public", publicRoutes);
-app.use("/api", authenticate, apiRoutes);
+app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/public", publicRoutes);
+app.use("/api/v1", authenticate, apiRoutes);
 app.use("/reports/files", express.static(reportsDir));
 
 app.get("/", (_req: Request, res: Response) => {
