@@ -4,11 +4,11 @@
 > Update this file at the end of every work session and every time a Feature Loop step is completed.
 > The plan of *what to build* lives in [build-plan.md](build-plan.md); this file records *what is done*.
 
-**Last updated:** 2026-08-13 · **Current phase:** R0 (not started) · **Current feature:** —
+**Last updated:** 2026-08-13 · **Current phase:** R1 (not started) · **Current feature:** R1.1
 
 > **Context.** PresyoSerbisyo was built before these standards existed. The nine product modules below are recorded **retroactively** — they work, but none has been verified against the Definition of Done ([build-plan.md](build-plan.md) §3), which is why most sit at ◕ rather than ●. The refactor phases R0–R3 close that gap.
 >
-> **Two blockers are live defects, not tidiness items.** See B-1 and B-2.
+> **Phase R0 is complete.** Both critical defects (B-1 privilege escalation, B-2 null-deref crash) are resolved and verified against the live database. The `PUBLIC` role has also been removed (R0.3). Phase R1 (dead code & shared layout) is next.
 
 ---
 
@@ -34,16 +34,16 @@ Recount after every status change.
 | Phase | Features | ☐ | ◔ | ◑ | ◕ | ● | ⚠ |
 |---|---|---|---|---|---|---|---|
 | Phase 0 — Foundation | 5 | 0 | 0 | 0 | 4 | 1 | 0 |
-| Phase P — Existing product (retro) | 9 | 0 | 0 | 0 | 7 | 0 | 2 |
-| Phase R0 — Critical security | 3 | 3 | 0 | 0 | 0 | 0 | 0 |
+| Phase P — Existing product (retro) | 9 | 0 | 0 | 0 | 9 | 0 | 0 |
+| Phase R0 — Critical security | 3 | 0 | 0 | 0 | 0 | 3 | 0 |
 | Phase R1 — Dead code & layout | 5 | 5 | 0 | 0 | 0 | 0 | 0 |
 | Phase R2 — Backend spine | 6 | 6 | 0 | 0 | 0 | 0 | 0 |
 | Phase R3 — Domain restructure | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
 | Phase 1 — Shared UI primitives | 3 | 3 | 0 | 0 | 0 | 0 | 0 |
 | Phase 2 — Product gaps | 4 | 4 | 0 | 0 | 0 | 0 | 0 |
-| **Total** | **39** | **25** | **0** | **0** | **11** | **1** | **2** |
+| **Total** | **39** | **22** | **0** | **0** | **13** | **4** | **0** |
 
-**Overall completion: 1 / 39 features meet the Definition of Done (3%)**
+**Overall completion: 4 / 39 features meet the Definition of Done (10%)**
 
 > The low percentage reflects the **Definition of Done**, not brokenness. The app runs and all three roles work end to end. What's missing across the board: RBAC middleware, visible write feedback (no toast component exists), and service-layer unit tests.
 
@@ -113,13 +113,14 @@ Built before the standards existed. Recorded here so [progress.md](progress.md) 
 - **Access:** public
 - **Remaining:** No refresh-token rotation. No service unit tests. No audit log on login.
 
-### P.2 User Management — ⚠ **BLOCKED**
+### P.2 User Management — ◕
 - **Screens:** Users management table, add-user dialog, search/filters, stats
 - **Components:** `UsersManagementPage`, `UsersTable`, `AddUserDialog`, `UsersSearchFilters`, `UsersStatsSection`
 - **Endpoints:** `POST|GET /api/users` · `GET|PUT|DELETE /api/users/:id`
 - **Files:** `backend/src/modules/user/*`, `frontend/src/features/admin/users/*`
-- **Access:** intended Admin — **actually enforced on nobody**
-- **Blockers:** 🔴 **B-1** — privilege escalation. Do not deploy.
+- **Access:** Admin only — **now enforced** via `authorize('ADMIN')` (R0.1)
+- **Remaining:** No service unit tests; no audit log on user CRUD (→ 2.2).
+- **Blockers:** none — B-1 resolved
 
 ### P.3 Commodity Catalog — ◕
 - **Screens:** Commodity management table, add dialog, summary cards, public list
@@ -142,14 +143,14 @@ Built before the standards existed. Recorded here so [progress.md](progress.md) 
 - **Access:** Admin + Officer — **no route-level enforcement**
 - **Remaining:** RBAC (→ R0.1). Shared by admin and officer routes despite living in `features/officer/` (→ R3.1).
 
-### P.6 Price Records — ⚠ **BLOCKED**
+### P.6 Price Records — ◕
 - **Screens:** Price records table, entry form, filters
 - **Components:** `PriceRecordsPage`, `PriceRecordsTable`, `PriceRecordForm`, `PriceRecordFilters`, `FieldError`
 - **Endpoints:** full CRUD `/api/price-records`
 - **Files:** `backend/src/modules/price-record/*` (incl. `price-record.scope.ts` — **unit tested ✅**)
-- **Access:** Admin + Officer, officer-scoped in the service layer
-- **Blockers:** 🔴 **B-2** — `record.store.name` crashes when a store has been deleted.
-- **Notes:** Officer scoping is the best-tested logic in the codebase — 4 passing tests.
+- **Access:** Admin + Officer, officer-scoped in the service layer — RBAC now enforced at the route (R0.1)
+- **Notes:** Officer scoping is the best-tested logic in the codebase — 4 passing tests. `record.store.name` null-deref crash fixed (R0.2).
+- **Blockers:** none — B-2 resolved
 
 ### P.7 Reports — ◕
 - **Screens:** Report generation page, type cards, export format buttons, recent reports
@@ -177,24 +178,27 @@ Built before the standards existed. Recorded here so [progress.md](progress.md) 
 
 # Phase R0 — Critical Security Remediation
 
-### R0.1 RBAC Middleware — ☐
+### R0.1 RBAC Middleware — ●
 - **Scope:** `authorize(...roles)` middleware; attach to all 7 protected route files; delete the 2 duplicated `requireAdmin` helpers.
-- **Files:** see [build-plan.md](build-plan.md) R0.1
-- **Done gate:** an OFFICER token cannot touch `/api/users` or set `role` anywhere.
-- **Blockers:** resolves B-1
+- **Files:** `backend/src/shared/middleware/authorize.ts` (new), `backend/src/shared/middleware/authorize.test.ts` (new, 3 tests), `backend/src/modules/{user,commodity,srp,store,price-record,report,forecast}/*.routes.ts` (edited), `backend/src/modules/{commodity,srp}/*.controller.ts` (`requireAdmin` removed)
+- **Done gate:** an OFFICER token cannot touch `/api/users` or set `role` anywhere. **Met.**
+- **Verification:** `tsc --noEmit` clean both workspaces; `npx tsx --test` 9/9 passing (6 pre-existing + 3 new). Manually exercised against a live server + seeded Neon DB: OFFICER token → 403 on `GET/POST /api/users` and `POST /api/commodities`; OFFICER → 200 on reads (`/api/commodities`, `/api/stores`); ADMIN token unaffected (200 on all); unauthenticated → 401 (not 403 — `authenticate` runs first); `/api/public/*` still 200 with no token.
+- **Notes:** The Neon DB in `backend/.env` was completely empty (no tables) — ran `prisma migrate deploy` to apply the 5 existing migrations as part of this session. Still no seed script (R2.6) — verification used two throwaway users created via `create:admin` script and deleted after.
+- **Blockers:** resolves B-1 ✅
 
-### R0.2 Fix `storeId` Nullability Drift — ☐
+### R0.2 Fix `storeId` Nullability Drift — ●
 - **Scope:** `schema.prisma` → `String?` / `Store?`; regenerate; fix every unguarded deref.
-- **Files:** `backend/prisma/schema.prisma`, `frontend/src/features/officer/MonitoringOfficerDashboardPage.tsx`
-- **Done gate:** deleting a store leaves the officer dashboard rendering.
-- **Blockers:** resolves B-2
+- **Files:** `backend/prisma/schema.prisma` (`storeId String?`, `store Store?` with explicit `onDelete: SetNull`), `frontend/src/features/officer/MonitoringOfficerDashboardPage.tsx` (both `store` type declarations made nullable; `record.store.name` → `record.store?.name ?? "Unknown store"`)
+- **Done gate:** deleting a store leaves the officer dashboard rendering. **Met.**
+- **Verification:** `tsc --noEmit` clean both workspaces (no new migration needed — DB and schema now agree). Manually exercised against the live Neon DB: created a commodity/store/price-record trio, confirmed `GET /api/price-records` returns the populated `store` object, deleted the store (204), re-fetched — response stayed 200 with `storeId: null` and `store: null`, no crash. Backend's `report.generator.ts` already guarded this same field (`record.store?.name ?? 'Unknown store'`), confirming the schema fix aligns it with existing defensive code rather than introducing a new pattern.
+- **Blockers:** resolves B-2 ✅
 
-### R0.3 Remove the `PUBLIC` Role — ☐
+### R0.3 Remove the `PUBLIC` Role — ●
 - **Scope:** Drop `PUBLIC` from `UserRole`; restrict user schemas to `ADMIN`/`OFFICER`; strip `PUBLIC` branches from auth and frontend middleware. *(D-7)*
-- **Files:** `backend/src/modules/user/user.schema.ts`, `backend/prisma/schema.prisma` + migration, `backend/src/modules/auth/auth.service.ts`, `frontend/src/lib/auth.ts`, `frontend/src/middleware.ts`
-- **⚠ Order:** Postgres cannot drop an enum value while rows use it — **query for existing `PUBLIC` users first** and reassign them before migrating.
-- **Done gate:** `UserRole` has two values; unauthenticated public pages still load.
-- **Notes:** Deliberate behavior change, not a pure refactor — grouped into R0 so R0.1 doesn't write guards for a role that then disappears.
+- **Files:** `backend/src/modules/user/user.schema.ts` (role now **required** on create, not just restricted), `backend/prisma/schema.prisma` + new migration `20260813073659_remove_public_role` (enum recreated without `PUBLIC`, default dropped), `backend/src/modules/auth/auth.service.ts` (rejects login for any non-ADMIN/OFFICER role), `backend/types/express.d.ts`, `backend/src/modules/auth/auth.controller.ts`, `backend/scripts/create-admin-user.ts`, `backend/src/shared/middleware/authorize.test.ts`, `frontend/src/lib/auth.ts` (`UserRole` now `"officer" | "admin"`; unauthenticated resolves to `null`, not `"public"`), `frontend/src/app/api/auth/role/route.ts`, `frontend/src/middleware.ts`, `frontend/src/components/TopAppBar.tsx`, `frontend/src/components/NavigationDrawer.tsx` (public nav links extracted to their own `publicLinks` array; local `"guest"` sentinel replaces the `"public"` role for the resolved-but-unauthenticated UI state), `frontend/src/components/RoleSwitcher.tsx` (dead code, kept compiling pending R1.1 deletion), `frontend/src/features/admin/users/{users.schema.ts,types/users.types.ts,components/UsersSearchFilters.tsx}` (PUBLIC filter option removed)
+- **Done gate:** `UserRole` has two values; unauthenticated public pages still load. **Met.**
+- **Verification:** Queried the live Neon DB first — **zero existing users**, so the enum migration was risk-free (no reassignment needed). `tsc --noEmit` clean both workspaces; 9/9 tests pass. Manually exercised: `groupBy` confirms only `ADMIN`/`OFFICER` rows possible; `POST /api/users` without `role` → 400 (now required); with `role: "PUBLIC"` → 400 (invalid enum); with `role: "OFFICER"` → 201; `GET /api/public/commodities` unauthenticated → 200 (public access unaffected).
+- **Notes:** Deliberate behavior change, not a pure refactor — grouped into R0 so R0.1 doesn't write guards for a role that then disappears. The frontend's `"public"` string was doing double duty as both the DB role literal *and* the UI sentinel for "unauthenticated visitor" (nav rendering in `NavigationDrawer`/`TopAppBar`) — these are now cleanly separated: DB role removed entirely, UI sentinel renamed to `"guest"` so it can never be confused with an account role again.
 
 ---
 
@@ -286,7 +290,7 @@ Verified continuously, re-checked at each phase exit ([build-plan.md](build-plan
 
 | Concern | Status | Notes |
 |---|---|---|
-| RBAC enforced per route | ⚠ | **No middleware exists.** 2 of 9 modules self-check; `/api/users` is wide open (B-1) |
+| RBAC enforced per route | ● | `authorize(...roles)` middleware attached to all 7 protected route files (R0.1). `/api/public/*` intentionally open; `/api/auth/*` needs no role check. |
 | Validation (frontend + backend) | ● | Zod both sides, params and bodies |
 | Centralized error handling | ● | `errorHandler` maps `AppError`, `ZodError`, Prisma P2002/P2025 |
 | Password hashing + secure storage | ● | bcrypt; httpOnly cookie; BFF keeps the token out of client JS |
@@ -320,8 +324,8 @@ Verified continuously, re-checked at each phase exit ([build-plan.md](build-plan
 
 | # | Sev | Blocker | Area | Resolved by |
 |---|---|---|---|---|
-| **B-1** | 🔴 | **Privilege escalation.** No `authorize` middleware. `/api/users` has zero role checks and `createUserSchema`/`updateUserSchema` accept `role` — any authenticated user can create or promote themselves to `ADMIN`. Only `commodity` and `srp` guard anything, via a duplicated local helper. | Backend security | R0.1 |
-| **B-2** | 🔴 | **Null-deref crash.** DB allows `PriceRecord.storeId` NULL (`ON DELETE SET NULL`); `schema.prisma` declares it non-null, so Prisma's types hide it. `MonitoringOfficerDashboardPage.tsx:187` reads `record.store.name` unguarded and throws once any store is deleted. | Schema / frontend | R0.2 |
+| **B-1** | ✅ | **Privilege escalation — RESOLVED.** `authorize(...roles)` middleware now attached to all 7 protected route files; `/api/users` restricted to `ADMIN`. Verified: OFFICER token gets 403 on `/api/users` and on writes to `/api/commodities`; ADMIN unaffected. | Backend security | R0.1 |
+| **B-2** | ✅ | **Null-deref crash — RESOLVED.** `schema.prisma` now matches the DB (`storeId String?`, `store Store?`); `MonitoringOfficerDashboardPage.tsx` guards `record.store?.name ?? "Unknown store"`. Verified: deleting a store leaves `GET /api/price-records` at 200 with `store: null`. | Schema / frontend | R0.2 |
 | **B-3** | 🟠 | 5 utilities (`.text-primary` et al.) redefined in `globals.css` as hardcoded hexes with `!important`, shadowing the tokens they name — token changes silently fail. | Styling | 1.2 |
 | **B-4** | 🟠 | No typed env validation; `process.env.JWT_SECRET!` defers a config error to first request. | Backend | R2.2 |
 | **B-5** | 🟡 | Shared code at `src/utils/` + `src/middleware/`; two competing type dirs (`src/types/`, root `types/`). | Backend layout | R1.3 |
