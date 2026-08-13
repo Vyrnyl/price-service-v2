@@ -4,7 +4,7 @@ import { Prisma } from '@prisma/client';
 import AppError from "../utils/AppError";
 
 export const errorHandler = (
-  err: any,
+  err: unknown,
   req: Request,
   res: Response,
   next: NextFunction
