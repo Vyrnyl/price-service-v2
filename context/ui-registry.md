@@ -167,10 +167,11 @@ Forms use `react-hook-form` + Zod resolvers. Shared `Input` / `Select` / `FormGr
 
 | Component | Status | File | Exact classes |
 |---|---|---|---|
-| Admin settings page | built (route only) | `src/app/(protected)/admin/settings/page.tsx` | — |
-| Officer settings page | built (route only) | `src/app/(protected)/officer/settings/page.tsx` | — |
+| SettingsPage | built | `src/features/settings/pages/SettingsPage.tsx` | `PageShell` + `mx-auto max-w-3xl space-y-6`; loading skeleton: two `Card` instances, `h-56`/`h-72 animate-pulse` |
+| ProfileForm | built | `src/features/settings/components/ProfileForm.tsx` | `Card` (`p-6 md:p-8`) wrapping a `grid gap-4 sm:grid-cols-2` form of `FormGroup`+`Input` pairs — first form built entirely on the Phase 1.1 primitives from the start, not migrated |
+| PasswordForm | built | `src/features/settings/components/PasswordForm.tsx` | Same `Card`/`FormGroup`/`Input` recipe as `ProfileForm`; 3 password fields (current/new/confirm) |
 
-Both settings routes exist but have no dedicated feature components registered here. Verify their contents before building anything new into them.
+Both `/admin/settings` and `/officer/settings` route files (`src/app/(protected)/{admin,officer}/settings/page.tsx`) now render the same `SettingsPage` — self-service profile + password change, backed by `GET/PUT /api/v1/users/me` and `PUT /api/v1/users/me/password` (Phase 2.3, 2026-08-14). Closes the "route only" gap noted here previously.
 
 ---
 
@@ -191,6 +192,7 @@ Route-level feature pages. Listed for completeness — these compose the compone
 | StoreRegistryPage | built | `src/features/stores/pages/StoreRegistryPage.tsx` |
 | ReportGenerationPage | built | `src/features/report/pages/ReportGenerationPage.tsx` |
 | PriceAnalysisPage | built | `src/features/public/pages/PriceAnalysisPage.tsx` |
+| SettingsPage | built | `src/features/settings/pages/SettingsPage.tsx` |
 
 ---
 
@@ -205,3 +207,4 @@ Route-level feature pages. Listed for completeness — these compose the compone
 | 2026-08-14 | All cards, `Toast`, `NavigationDrawer` | Phase 1.2 — success/warning/info tokens added to `globals.css`; card recipe converged to `rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow` across ~37 files; modal/drawer overlays converged to `bg-inverse-surface/40`\|`/30`; undefined `text-body-md` fixed. Visually signed off by the user. |
 | 2026-08-14 | Toast | Phase 1.3 — added a `success` variant (B-13's token made this possible); wired `showToast` into all 8 create/update/delete handlers across the app. Self-verified via Playwright screenshots; pending human sign-off. |
 | 2026-08-14 | PriceTrendLineChart, CommodityComparisonChart, SrpVsActualChart | Phase 2.1 — 3 new dashboard charts added under §4, all in `shared/components/charts/` (consumed by both `AdminDashboardPage` and `MonitoringOfficerDashboardPage`). Visually verified by the user at 1024/768/480 (mock data), then re-verified rendering real seeded aggregates after backend wiring. Extracted `readToken`/`hexToRgba` into `shared/utils/chart-tokens.ts` so a 3rd/4th copy of `PriceTrendPanel`'s inline helpers wasn't needed. |
+| 2026-08-14 | SettingsPage, ProfileForm, PasswordForm | Phase 2.3 — new `features/settings/` domain, added under §5/§8/§9. First feature built entirely on the Phase 1.1 shared primitives (`PageShell`/`Card`/`FormGroup`/`Input`/`Button`/`Alert`) from the start rather than migrating existing markup. Replaces the two empty-shell `/admin/settings` and `/officer/settings` routes. Visually verified by the user at 1024/768/480. |

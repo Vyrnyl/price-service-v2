@@ -7,6 +7,7 @@ import {
   MdOutlineHistory,
   MdOutlineInventory2,
   MdOutlineLogout,
+  MdOutlineSettings,
   MdOutlineStorefront,
   MdOutlineTrendingUp,
 } from "react-icons/md";
@@ -60,6 +61,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       icon: MdOutlineHistory,
       label: "Audit Log",
     },
+    {
+      href: "/admin/settings",
+      icon: MdOutlineSettings,
+      label: "Settings",
+    },
   ],
   officer: [
     { href: "/officer", icon: MdOutlineDashboard, label: "Officer Dashboard" },
@@ -82,6 +88,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       href: "/officer/reports",
       icon: HiOutlineDocumentReport,
       label: "Reports",
+    },
+    {
+      href: "/officer/settings",
+      icon: MdOutlineSettings,
+      label: "Settings",
     },
   ],
 };

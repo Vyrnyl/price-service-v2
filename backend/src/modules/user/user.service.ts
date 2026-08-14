@@ -1,7 +1,8 @@
 import AppError from '../../shared/utils/AppError';
 import { passwordUtils } from '../../shared/utils/password.utils';
 import { userRepository } from './user.repository';
-import type { CreateUserInput, UpdateUserInput } from './user.schema';
+import { toUserProfileDto } from './user.types';
+import type { ChangePasswordInput, CreateUserInput, UpdateProfileInput, UpdateUserInput } from './user.schema';
 
 export const userService = {
   createUser: async (data: CreateUserInput) => {
@@ -48,4 +49,42 @@ export const userService = {
   },
 
   deleteUser: (id: string) => userRepository.delete(id),
+
+  getCurrentUser: async (id: string) => {
+    const user = await userRepository.findById(id);
+
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    return toUserProfileDto(user);
+  },
+
+  updateProfile: async (id: string, data: UpdateProfileInput) => {
+    const existingUser = await userRepository.findByEmail(data.email);
+
+    if (existingUser && existingUser.id !== id) {
+      throw new AppError('Email already exists', 409);
+    }
+
+    const updated = await userRepository.update(id, { name: data.name, email: data.email });
+    return toUserProfileDto(updated);
+  },
+
+  changePassword: async (id: string, data: ChangePasswordInput) => {
+    const user = await userRepository.findById(id);
+
+    if (!user) {
+      throw new AppError('User not found', 404);
+    }
+
+    const currentPasswordMatches = await passwordUtils.comparePassword(data.currentPassword, user.password);
+
+    if (!currentPasswordMatches) {
+      throw new AppError('Current password is incorrect', 401);
+    }
+
+    const hashedPassword = await passwordUtils.hashPassword(data.newPassword);
+    await userRepository.update(id, { password: hashedPassword });
+  },
 };

@@ -1,11 +1,31 @@
 import { Request, Response } from 'express';
 import AppError from '../../shared/utils/AppError';
 import { userService } from './user.service';
-import { createUserSchema, updateUserSchema, userIdParamSchema } from './user.schema';
+import { changePasswordSchema, createUserSchema, updateProfileSchema, updateUserSchema, userIdParamSchema } from './user.schema';
 import { auditLogService } from '../audit-log';
 import type { AuthUser } from '../../shared/types/express';
 
 export const userController = {
+  getCurrentUser: async (req: Request, res: Response) => {
+    const authUser = req.user as AuthUser;
+    const user = await userService.getCurrentUser(authUser.userId);
+    res.json(user);
+  },
+
+  updateCurrentUser: async (req: Request, res: Response) => {
+    const authUser = req.user as AuthUser;
+    const validatedBody = updateProfileSchema.parse(req.body);
+    const user = await userService.updateProfile(authUser.userId, validatedBody);
+    res.json(user);
+  },
+
+  changeCurrentUserPassword: async (req: Request, res: Response) => {
+    const authUser = req.user as AuthUser;
+    const validatedBody = changePasswordSchema.parse(req.body);
+    await userService.changePassword(authUser.userId, validatedBody);
+    res.status(204).send();
+  },
+
   createUser: async (req: Request, res: Response) => {
     const authUser = req.user as AuthUser | undefined;
     const validatedBody = createUserSchema.parse(req.body);
