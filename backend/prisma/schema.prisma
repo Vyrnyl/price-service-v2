@@ -18,6 +18,7 @@ model User {
   prices    PriceRecord[]
   reports   Report[]
   stores    Store[]
+  auditLogs AuditLog[]
 }
 
 model Commodity {
@@ -105,9 +106,33 @@ model Forecast {
   @@index([commodityId])
 }
 
+model AuditLog {
+  id        String      @id @default(uuid()) @db.Uuid
+  actorId   String      @db.Uuid
+  action    AuditAction
+  targetId  String?     @db.Uuid
+  metadata  Json?
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
+}
+
 enum UserRole {
   ADMIN
   OFFICER
+}
+
+enum AuditAction {
+  LOGIN
+  USER_CREATE
+  USER_UPDATE
+  USER_DELETE
+  SRP_CREATE
+  SRP_UPDATE
+  PRICE_RECORD_DELETE
 }
 
 enum PriceStatus {

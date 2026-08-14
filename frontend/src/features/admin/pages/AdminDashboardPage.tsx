@@ -7,6 +7,11 @@ import { FiUsers } from "react-icons/fi";
 import { IoFilterOutline } from "react-icons/io5";
 import { IoMdAdd, IoMdMore } from "react-icons/io";
 import { LuDownload } from "react-icons/lu";
+import { PriceTrendLineChart } from "@/shared/components/charts/PriceTrendLineChart";
+import { CommodityComparisonChart } from "@/shared/components/charts/CommodityComparisonChart";
+import { SrpVsActualChart } from "@/shared/components/charts/SrpVsActualChart";
+import { fetchDashboardAnalytics } from "@/shared/services/dashboard.service";
+import type { DashboardAnalytics } from "@/shared/types/dashboard.types";
 
 type DashboardStat = {
   label: string;
@@ -104,6 +109,27 @@ export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStat[]>(initialStats);
   const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
   const [recentStores, setRecentStores] = useState<RecentStoreRow[]>([]);
+  const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadAnalytics() {
+      try {
+        setAnalyticsLoading(true);
+        setAnalyticsError(null);
+        const data = await fetchDashboardAnalytics();
+        setAnalytics(data);
+      } catch (error) {
+        console.error("Failed to load dashboard analytics", error);
+        setAnalyticsError("Unable to load market insights right now.");
+      } finally {
+        setAnalyticsLoading(false);
+      }
+    }
+
+    void loadAnalytics();
+  }, []);
 
   useEffect(() => {
     async function loadDashboardStats() {
@@ -278,6 +304,27 @@ export default function AdminDashboardPage() {
                 </h3>
               </div>
             ))}
+          </section>
+
+          <section className="space-y-6">
+            <h3 className="font-h2-desktop text-h2-desktop text-on-surface">Market Insights</h3>
+            <PriceTrendLineChart
+              points={analytics?.priceTrend ?? []}
+              isLoading={analyticsLoading}
+              error={analyticsError}
+            />
+            <div className="grid gap-6 xl:grid-cols-2">
+              <CommodityComparisonChart
+                points={analytics?.commodityComparison ?? []}
+                isLoading={analyticsLoading}
+                error={analyticsError}
+              />
+              <SrpVsActualChart
+                points={analytics?.srpVsActual ?? []}
+                isLoading={analyticsLoading}
+                error={analyticsError}
+              />
+            </div>
           </section>
 
           <section className="grid gap-6 xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)]">

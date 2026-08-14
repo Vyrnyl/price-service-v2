@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   MdOutlineDashboard,
+  MdOutlineHistory,
   MdOutlineInventory2,
   MdOutlineLogout,
   MdOutlineStorefront,
@@ -53,6 +54,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       href: "/admin/price-records",
       icon: MdOutlineTrendingUp,
       label: "Price Records",
+    },
+    {
+      href: "/admin/audit-log",
+      icon: MdOutlineHistory,
+      label: "Audit Log",
     },
   ],
   officer: [

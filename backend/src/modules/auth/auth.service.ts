@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import AppError from '../../shared/utils/AppError';
 import { userRepository } from '../user';
+import { auditLogService } from '../audit-log';
 import type { LoginInput } from './auth.schema';
 import { env } from '../../config/env';
 
@@ -35,6 +36,8 @@ export const authService = {
       env.JWT_SECRET,
       { expiresIn: '1h' },
     );
+
+    await auditLogService.record({ actorId: user.id, action: 'LOGIN' });
 
     return {
       user: {

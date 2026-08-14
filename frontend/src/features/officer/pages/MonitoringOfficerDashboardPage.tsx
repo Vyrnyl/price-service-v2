@@ -3,6 +3,11 @@
 import { useEffect, useState } from "react";
 import { MdInventory2, MdNotificationsActive, MdSearch, MdStore, MdTrendingUp } from "react-icons/md";
 import { apiFetch } from "@/shared/services/api";
+import { PriceTrendLineChart } from "@/shared/components/charts/PriceTrendLineChart";
+import { CommodityComparisonChart } from "@/shared/components/charts/CommodityComparisonChart";
+import { SrpVsActualChart } from "@/shared/components/charts/SrpVsActualChart";
+import { fetchDashboardAnalytics } from "@/shared/services/dashboard.service";
+import type { DashboardAnalytics } from "@/shared/types/dashboard.types";
 
 const stats = [
   {
@@ -35,6 +40,27 @@ export default function MonitoringOfficerDashboardPage() {
   const [latestStores, setLatestStores] = useState<Array<{ id: string; name: string; location: string; createdAt: string }>>([]);
   const [latestPriceRecords, setLatestPriceRecords] = useState<Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>>([]);
   const [latestReports, setLatestReports] = useState<Array<{ id: string; type: string; period: string; createdAt: string }>>([]);
+  const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadAnalytics() {
+      try {
+        setAnalyticsLoading(true);
+        setAnalyticsError(null);
+        const data = await fetchDashboardAnalytics();
+        setAnalytics(data);
+      } catch (error) {
+        console.error("Failed to load dashboard analytics", error);
+        setAnalyticsError("Unable to load market insights right now.");
+      } finally {
+        setAnalyticsLoading(false);
+      }
+    }
+
+    void loadAnalytics();
+  }, []);
 
   useEffect(() => {
     async function loadDashboardCounts() {
@@ -113,6 +139,27 @@ export default function MonitoringOfficerDashboardPage() {
                 </div>
               );
             })}
+          </section>
+
+          <section className="space-y-6">
+            <h3 className="font-h2-desktop text-h2-desktop text-on-surface">Market Insights</h3>
+            <PriceTrendLineChart
+              points={analytics?.priceTrend ?? []}
+              isLoading={analyticsLoading}
+              error={analyticsError}
+            />
+            <div className="grid gap-6 xl:grid-cols-2">
+              <CommodityComparisonChart
+                points={analytics?.commodityComparison ?? []}
+                isLoading={analyticsLoading}
+                error={analyticsError}
+              />
+              <SrpVsActualChart
+                points={analytics?.srpVsActual ?? []}
+                isLoading={analyticsLoading}
+                error={analyticsError}
+              />
+            </div>
           </section>
 
           <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">

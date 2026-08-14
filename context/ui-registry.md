@@ -40,7 +40,7 @@ All paths are relative to `frontend/`.
 | Design tokens (colors, radius, spacing) | `src/app/globals.css` → `@theme inline` | [ui-rules.md](ui-rules.md) §2 |
 | Type scale (`.text-h1-desktop` … `.text-label-caps`) | `src/app/globals.css` | [ui-rules.md](ui-rules.md) §4 |
 | `.data-card-shadow` · `.animate-stats` · `.scrollbar-none` | `src/app/globals.css` | [ui-rules.md](ui-rules.md) §4 |
-| Badge pills | built — `src/shared/components/Badge.tsx` | 4 variants (`primary`/`secondary`/`error`/`neutral`); `success`/`warning`/`info` variants pending status tokens (B-13, Phase 1.2) |
+| Badge pills | built — `src/shared/components/Badge.tsx` | 7 variants (`primary`/`secondary`/`error`/`success`/`warning`/`info`/`neutral`) — `success`/`warning`/`info` added in 2.2 (Audit Logging), first consumer to need more than 4 badge colors |
 
 ---
 
@@ -53,7 +53,7 @@ All paths are relative to `frontend/`.
 | TopAppBar | built | `src/shared/components/TopAppBar.tsx` | `sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-outline-variant bg-surface px-container-margin-mobile py-stack-md shadow-sm md:px-container-margin-desktop` |
 | NavigationDrawer | built | `src/shared/components/NavigationDrawer.tsx` | nav item: `mx-2 mt-2 flex items-center gap-4 rounded-full px-6 py-3 text-on-surface-variant transition-all hover:bg-surface-variant` |
 | FooterSection | built | `src/shared/components/FooterSection.tsx` | `flex w-full lg:ml-72 lg:max-w-[calc(100%-18rem)] flex-col items-center justify-between gap-stack-md border-t border-outline-variant bg-surface-container-highest px-container-margin-mobile py-stack-lg md:flex-row md:px-container-margin-desktop` |
-| PageShell | built | `src/shared/components/PageShell.tsx` | `min-h-screen lg:ml-72` + any extra `className` — extracts the wrapper that was repeated verbatim in 10 page components (B-18). **Not yet adopted by existing pages** — they keep their inline `<main className="min-h-screen lg:ml-72">` until migrated; only new work (starting with the component gallery) uses it. |
+| PageShell | built | `src/shared/components/PageShell.tsx` | `min-h-screen lg:ml-72` + any extra `className` — extracts the wrapper that was repeated verbatim in 10 page components (B-18). **Not yet adopted by the 10 pre-existing pages** — they keep their inline `<main className="min-h-screen lg:ml-72">` until migrated. First real adoption: `AuditLogPage` (2.2), built against it directly from the start. |
 
 `AppShell` renders TopAppBar → NavigationDrawer → main → FooterSection.
 
@@ -69,8 +69,8 @@ Base component set built against the **documented** [ui-rules.md](ui-rules.md) �
 |---|---|---|---|
 | Button | built | `src/shared/components/Button.tsx` | `primary`/`secondary`/`danger` × `sm`/`md`; `loading` (spinner), `disabled`. `rounded-full` per the documented spec — diverges from existing inline buttons, which are `rounded-xl` (the drift this component is meant to converge, not match) |
 | Card | built | `src/shared/components/Card.tsx` | `rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow` — the one canonical recipe, per §6 |
-| Badge | built | `src/shared/components/Badge.tsx` | `primary`/`secondary`/`error`/`neutral`. `success`/`warning`/`info` tokens now exist (B-13 resolved in 1.2) but Badge hasn't adopted them yet — unscheduled follow-up |
-| Modal | built | `src/shared/components/Modal.tsx` | Overlay `bg-inverse-surface/40` (token-based, replaces the non-token `bg-slate-950/40` in 5 duplicated modals — B-22) + `rounded-xl bg-surface-container-lowest` container. Escape-to-close, click-outside-to-close, `role="dialog"`/`aria-modal`. **No focus trap** — that gap (noted in the Cross-Cutting Checklist) is not closed by this component |
+| Badge | built | `src/shared/components/Badge.tsx` | `primary`/`secondary`/`error`/`success`/`warning`/`info`/`neutral` — `success`/`warning`/`info` added in 2.2 |
+| Modal | built | `src/shared/components/Modal.tsx` | Overlay `bg-inverse-surface/40` (token-based, replaces the non-token `bg-slate-950/40` in 5 duplicated modals — B-22) + `rounded-xl bg-surface-container-lowest` container. Escape-to-close, click-outside-to-close, `role="dialog"`/`aria-modal`. **No focus trap** — that gap (noted in the Cross-Cutting Checklist) is not closed by this component. First real adoption: `AuditLogDetailModal` (2.2) — the 5 pre-existing hand-rolled dialogs are still not migrated. |
 | Toast | built | `src/shared/components/Toast.tsx` | `ToastProvider` (mounted in root `layout.tsx`) + `useToast()` hook, `primary`/`success`/`error`/`neutral` variants (`success` added in 1.3 once B-13's token existed), auto-dismiss 4s, manual dismiss. **Wired into all 8 create/update/delete mutations across the app as of Phase 1.3** (2026-08-14) — closes B-23, self-verified via Playwright, pending human sign-off |
 | Alert | built | `src/shared/components/Alert.tsx` | `error`/`neutral`; inline banner, `role="alert"` |
 | Input | built | `src/shared/components/Input.tsx` | `forwardRef` (works with `react-hook-form`'s `register()`); `hasError` prop for the error border/ring treatment |
@@ -90,6 +90,9 @@ Base component set built against the **documented** [ui-rules.md](ui-rules.md) �
 | CommodityTable | built | `src/features/commodity/components/CommodityTable.tsx` | `flex min-h-105 flex-1 flex-col rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8` |
 | CommoditySummaryCards | built | `src/features/commodity/components/CommoditySummaryCards.tsx` | `flex flex-wrap gap-6` |
 | PriceRecordsTable | built | `src/features/price-record/components/PriceRecordsTable.tsx` | row actions: `flex flex-wrap items-center gap-2` |
+| AuditLogTable | built | `src/features/admin/audit-log/components/AuditLogTable.tsx` | `overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow` — built against the current (post-1.2) card recipe, not the drifted `rounded-2xl`/`shadow-sm` some older tables above still use |
+| AuditLogFilters | built | `src/features/admin/audit-log/components/AuditLogFilters.tsx` | `flex flex-col gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow` — search input + action-filter pills, same recipe as `UsersSearchFilters` |
+| AuditLogDetailModal | built | `src/features/admin/audit-log/components/AuditLogDetailModal.tsx` | wraps the shared `Modal` — see §1a |
 | StoreCard | built | `src/features/stores/components/StoreCard.tsx` | title: `mb-1 truncate font-h3-desktop text-h3-desktop text-on-surface` (compact variant: `text-sm font-semibold`) |
 | StoreRegistryGrid | built | `src/features/stores/components/StoreRegistryGrid.tsx` | empty state: `rounded-2xl border border-dashed border-outline-variant bg-white p-8 text-center text-body-md text-on-surface-variant` — ⚠️ `text-body-md` **is not defined** in `globals.css` (B-19) |
 | StoreRegistryHeader | built | `src/features/stores/components/StoreRegistryHeader.tsx` | `mb-2 flex items-center gap-2 text-primary` |
@@ -110,10 +113,11 @@ Base component set built against the **documented** [ui-rules.md](ui-rules.md) �
 | Component | Status | File | Exact classes |
 |---|---|---|---|
 | PriceTrendPanel | built | `src/features/public/components/price-analysis/PriceTrendPanel.tsx` | header: `mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between` |
+| PriceTrendLineChart | built | `src/shared/components/charts/PriceTrendLineChart.tsx` | card: `rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8`; states: `h-60 animate-pulse rounded-xl bg-surface-container` (loading), `flex h-60 items-center justify-center text-body-sm text-error\|text-on-surface-variant` (error/empty) |
+| CommodityComparisonChart | built | `src/shared/components/charts/CommodityComparisonChart.tsx` | same card recipe as above; horizontal bar (`indexAxis: "y"`), single dataset in `--color-secondary` |
+| SrpVsActualChart | built | `src/shared/components/charts/SrpVsActualChart.tsx` | same card recipe as above; grouped bar, SRP in `--color-outline`, actual average colored per-bar `--color-success`/`--color-error` depending on whether it exceeds SRP |
 
-**This is the only Chart.js component in the codebase.** `chart.js` + `react-chartjs-2` are imported nowhere else.
-
-The dashboard "price trend graphs" and "commodity comparison" visualizations described in [project-overview.md](project-overview.md) are **not built** — see [build-plan.md](build-plan.md) Phase 2. Any new chart must reuse this component's Chart.js registration pattern and read its colors from tokens ([ui-rules.md](ui-rules.md) §7).
+**Phase 2.1 (Dashboard Visualization) built the 3 new charts above** — the "price trend graphs" and "commodity comparison" visualizations [project-overview.md](project-overview.md) describes. They're presentational-only (`points`/`isLoading`/`error` props, no data fetching inside), live in `shared/components/` because both `AdminDashboardPage` and `MonitoringOfficerDashboardPage` consume them, and are demoed with real seeded data on both dashboards under a "Market Insights" section. All 4 Chart.js components now share the same token-reading pattern (`shared/utils/chart-tokens.ts`'s `readToken`/`hexToRgba`, extracted in this phase — `PriceTrendPanel` still inlines its own copy, not touched). Any new chart should use the shared util rather than re-inlining it a third time.
 
 ---
 
@@ -200,3 +204,4 @@ Route-level feature pages. Listed for completeness — these compose the compone
 | 2026-08-13 | Button, Card, Badge, Modal, Toast, Alert, Input, Select, FormGroup, PageShell | Phase 1.1 — the base component set Phase 0.2 never produced. All 10 added under §1a, built against the documented ui-rules.md §6 recipe rather than the drifted inline markup already in the app. Demoed at `/component-gallery`, visually verified at 1024/768/480 by the user. None of the 10 have been adopted by existing pages yet — that's incremental follow-up, not part of this feature. |
 | 2026-08-14 | All cards, `Toast`, `NavigationDrawer` | Phase 1.2 — success/warning/info tokens added to `globals.css`; card recipe converged to `rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow` across ~37 files; modal/drawer overlays converged to `bg-inverse-surface/40`\|`/30`; undefined `text-body-md` fixed. Visually signed off by the user. |
 | 2026-08-14 | Toast | Phase 1.3 — added a `success` variant (B-13's token made this possible); wired `showToast` into all 8 create/update/delete handlers across the app. Self-verified via Playwright screenshots; pending human sign-off. |
+| 2026-08-14 | PriceTrendLineChart, CommodityComparisonChart, SrpVsActualChart | Phase 2.1 — 3 new dashboard charts added under §4, all in `shared/components/charts/` (consumed by both `AdminDashboardPage` and `MonitoringOfficerDashboardPage`). Visually verified by the user at 1024/768/480 (mock data), then re-verified rendering real seeded aggregates after backend wiring. Extracted `readToken`/`hexToRgba` into `shared/utils/chart-tokens.ts` so a 3rd/4th copy of `PriceTrendPanel`'s inline helpers wasn't needed. |

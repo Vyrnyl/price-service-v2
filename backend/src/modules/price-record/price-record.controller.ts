@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import AppError from '../../shared/utils/AppError';
 import { priceRecordService } from './price-record.service';
 import { createPriceRecordSchema, updatePriceRecordSchema, priceRecordIdParamSchema } from './price-record.schema';
+import { auditLogService } from '../audit-log';
 import type { AuthUser } from '../../shared/types/express';
 import type { CreatePriceRecordWithUserInput } from './price-record.types';
 
@@ -54,9 +55,29 @@ export const priceRecordController = {
   },
 
   deletePriceRecord: async (req: Request, res: Response) => {
+    const authUser = req.user as AuthUser | undefined;
     const { id } = priceRecordIdParamSchema.parse(req.params);
 
+    const existingRecord = await priceRecordService.getPriceRecordById(id);
+
+    if (!existingRecord) {
+      throw new AppError('Price record not found', 404);
+    }
+
     await priceRecordService.deletePriceRecord(id);
+
+    if (authUser) {
+      await auditLogService.record({
+        actorId: authUser.userId,
+        action: 'PRICE_RECORD_DELETE',
+        targetId: id,
+        metadata: {
+          commodity: existingRecord.commodity.name,
+          store: existingRecord.store?.name ?? 'Unknown store',
+          price: existingRecord.price.toString(),
+        },
+      });
+    }
 
     res.status(204).send();
   },
