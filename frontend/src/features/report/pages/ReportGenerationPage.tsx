@@ -73,7 +73,7 @@ function mapBackendReportToRecent(report: BackendReport): RecentReport {
     buttonLabel: "Download",
     buttonIcon: MdDownload,
     buttonClass: "border border-primary text-primary hover:bg-primary-container hover:text-on-primary-container",
-    fileUrl: report.fileUrl,
+    downloadUrl: `/api/reports/${report.id}/download`,
   };
 }
 

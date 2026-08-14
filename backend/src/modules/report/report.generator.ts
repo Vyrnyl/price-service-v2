@@ -1,21 +1,10 @@
-﻿import fs from 'fs';
-import path from 'path';
 import PDFDocument from 'pdfkit';
 import ExcelJS from 'exceljs';
 import { prisma } from '../../prisma';
 import type { Prisma } from '@prisma/client';
 import type { CreateReportInput, ReportFormat, ReportTypeEnum } from './report.schema';
-import { env } from '../../config/env';
 
 export type ReportGeneratorPayload = CreateReportInput;
-
-const REPORTS_DIR = path.resolve(process.cwd(), 'reports');
-
-function ensureReportsDir() {
-  if (!fs.existsSync(REPORTS_DIR)) {
-    fs.mkdirSync(REPORTS_DIR, { recursive: true });
-  }
-}
 
 function parsePeriod(period: string) {
   const [start, end] = period.split(' to ').map((value) => value.trim());
@@ -83,6 +72,12 @@ function buildReportFilename(type: ReportTypeEnum, format: ReportFormat) {
   return `${normalizedType}_${timestamp}.${ext}`;
 }
 
+function contentTypeForFormat(format: ReportFormat) {
+  return format === 'PDF'
+    ? 'application/pdf'
+    : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+}
+
 function formatPrice(value: number) {
   return `₱${Number(value).toFixed(2)}`;
 }
@@ -102,15 +97,14 @@ function buildRecordRows(records: Array<any>) {
   }));
 }
 
-async function generatePdf(reportPath: string, payload: ReportGeneratorPayload, records: Array<any>) {
-  return new Promise<string>((resolve, reject) => {
+async function generatePdf(payload: ReportGeneratorPayload, records: Array<any>): Promise<Buffer> {
+  return new Promise<Buffer>((resolve, reject) => {
     const doc = new PDFDocument({ margin: 40, size: 'A4' });
-    const stream = fs.createWriteStream(reportPath);
+    const chunks: Buffer[] = [];
 
-    stream.on('finish', () => resolve(reportPath));
-    stream.on('error', reject);
-
-    doc.pipe(stream);
+    doc.on('data', (chunk) => chunks.push(chunk));
+    doc.on('end', () => resolve(Buffer.concat(chunks)));
+    doc.on('error', reject);
 
     doc.fontSize(18).font('Helvetica-Bold').text('PresyoSerbisyo Report', {
       align: 'center',
@@ -146,7 +140,7 @@ async function generatePdf(reportPath: string, payload: ReportGeneratorPayload, 
   });
 }
 
-async function generateExcel(reportPath: string, records: Array<any>) {
+async function generateExcel(records: Array<any>): Promise<Buffer> {
   const workbook = new ExcelJS.Workbook();
   const worksheet = workbook.addWorksheet('Report');
 
@@ -164,27 +158,21 @@ async function generateExcel(reportPath: string, records: Array<any>) {
   ];
 
   worksheet.addRows(buildRecordRows(records));
-  await workbook.xlsx.writeFile(reportPath);
-  return reportPath;
+  const buffer = await workbook.xlsx.writeBuffer();
+  return Buffer.from(buffer);
 }
 
 export async function generateReportFile(payload: ReportGeneratorPayload) {
-  ensureReportsDir();
-
   const filename = buildReportFilename(payload.type, payload.format);
-  const reportPath = path.join(REPORTS_DIR, filename);
   const records = await loadReportRecords(payload.period, payload.commodityGroup, payload.storeId);
 
-  if (payload.format === 'PDF') {
-    await generatePdf(reportPath, payload, records);
-  } else {
-    await generateExcel(reportPath, records);
-  }
+  const fileContent = payload.format === 'PDF'
+    ? await generatePdf(payload, records)
+    : await generateExcel(records);
 
-  const baseUrl = env.BACKEND_BASE_URL ?? `http://localhost:${env.PORT}`;
   return {
-    fileUrl: `${baseUrl}/reports/files/${filename}`,
     filename,
-    filePath: reportPath,
+    contentType: contentTypeForFormat(payload.format),
+    fileContent,
   };
 }

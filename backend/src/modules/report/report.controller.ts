@@ -3,6 +3,7 @@ import AppError from '../../shared/utils/AppError';
 import { reportService } from './report.service';
 import { createReportSchema, updateReportSchema, reportIdParamSchema } from './report.schema';
 import { generateReportFile } from './report.generator';
+import type { CreateReportWithFileInput } from './report.types';
 import type { AuthUser } from '../../shared/types/express';
 
 export const reportController = {
@@ -16,9 +17,11 @@ export const reportController = {
     const validatedBody = createReportSchema.parse(req.body);
     const generated = await generateReportFile(validatedBody);
 
-    const reportPayload = {
+    const reportPayload: CreateReportWithFileInput = {
       ...validatedBody,
-      fileUrl: generated.fileUrl,
+      filename: generated.filename,
+      contentType: generated.contentType,
+      fileContent: generated.fileContent,
     };
 
     const report = await reportService.createReport(reportPayload, authUser.userId);
@@ -42,6 +45,19 @@ export const reportController = {
     }
 
     res.json({ status: 'success', data: report });
+  },
+
+  downloadReport: async (req: Request, res: Response) => {
+    const { id } = reportIdParamSchema.parse(req.params);
+    const file = await reportService.getReportFile(id);
+
+    if (!file) {
+      throw new AppError('Report not found', 404);
+    }
+
+    res.setHeader('Content-Type', file.contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${file.filename}"`);
+    res.send(Buffer.from(file.fileContent));
   },
 
   updateReport: async (req: Request, res: Response) => {

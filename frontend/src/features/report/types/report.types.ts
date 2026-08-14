@@ -31,7 +31,7 @@ export type RecentReport = {
   buttonIcon: ComponentType<{ size?: number }>;
   buttonClass: string;
   disabled?: boolean;
-  fileUrl?: string;
+  downloadUrl: string;
 };
 
 export type BackendReportUser = {
@@ -45,7 +45,7 @@ export type BackendReport = {
   id: string;
   type: ReportTypeEnum;
   period: string;
-  fileUrl: string;
+  filename: string;
   createdAt: string;
   user: BackendReportUser;
 };

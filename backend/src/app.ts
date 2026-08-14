@@ -1,5 +1,4 @@
 import express, { Request, Response } from "express";
-import path from "path";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import apiRoutes from "./routes";
@@ -17,8 +16,6 @@ const allowedOrigins = [
   "http://localhost:3000",
   "https://price-service-sandy.vercel.app",
 ].filter(Boolean) as string[];
-
-const reportsDir = path.resolve(process.cwd(), "reports");
 
 app.use(
   cors({
@@ -41,7 +38,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/public", publicRoutes);
 app.use("/api/v1", authenticate, apiRoutes);
-app.use("/reports/files", express.static(reportsDir));
 
 app.get("/", (_req: Request, res: Response) => {
   res.json({ message: "PresyoSerbisyo backend is running" });

@@ -5,9 +5,7 @@ export default function RecentReportCard({ report }: { report: RecentReport }) {
   const ButtonIcon = report.buttonIcon;
 
   const handleClick = () => {
-    if (report.fileUrl) {
-      window.open(report.fileUrl, "_blank");
-    }
+    window.open(report.downloadUrl, "_blank");
   };
 
   return (
@@ -25,7 +23,7 @@ export default function RecentReportCard({ report }: { report: RecentReport }) {
 
       <button
         type="button"
-        disabled={report.disabled ?? !report.fileUrl}
+        disabled={report.disabled ?? false}
         onClick={handleClick}
         className={`mt-4 flex w-full items-center justify-center gap-2 rounded-full border py-3 text-sm font-semibold transition-colors ${report.buttonClass}`}
       >

@@ -18,6 +18,8 @@ declare module 'pdfkit' {
     fontSize(size: number): this;
     moveDown(step?: number): this;
     end(): this;
+    on(event: 'data', listener: (chunk: Buffer) => void): this;
+    on(event: 'end' | 'error', listener: (error?: Error) => void): this;
   }
 
   export default PDFDocument;
