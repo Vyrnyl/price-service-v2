@@ -14,6 +14,7 @@ model User {
   role      UserRole
   isActive  Boolean      @default(true)
   createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   prices    PriceRecord[]
   reports   Report[]
   stores    Store[]
@@ -25,6 +26,7 @@ model Commodity {
   status    String
   category  String
   createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   srps      SRP[]
   prices    PriceRecord[]
   forecasts Forecast[]
@@ -36,6 +38,7 @@ model SRP {
   price        Decimal   @db.Decimal(20, 4)
   effectiveDate DateTime
   createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   commodity    Commodity @relation(fields: [commodityId], references: [id])
 
   @@index([commodityId, effectiveDate])
@@ -48,6 +51,7 @@ model Store {
   userId      String       @db.Uuid
   lastVisited DateTime?
   createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   prices      PriceRecord[]
   user        User         @relation(fields: [userId], references: [id])
 
@@ -63,6 +67,7 @@ model PriceRecord {
   dateAndTime DateTime
   status      PriceStatus
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   commodity   Commodity @relation(fields: [commodityId], references: [id])
   store       Store?    @relation(fields: [storeId], references: [id], onDelete: SetNull)
   user        User      @relation(fields: [userId], references: [id])
@@ -81,6 +86,7 @@ model Report {
   period      String
   fileUrl     String
   createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   user        User       @relation(fields: [generatedBy], references: [id])
 
   @@index([generatedBy])
@@ -93,6 +99,7 @@ model Forecast {
   confidence     Float
   forecastDate   DateTime
   createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   commodity      Commodity @relation(fields: [commodityId], references: [id])
 
   @@index([commodityId])

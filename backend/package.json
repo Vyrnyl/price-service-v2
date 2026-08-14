@@ -14,7 +14,10 @@
     "create:admin": "npx tsx scripts/create-admin-user.ts",
     "seed": "npx tsx prisma/seed.ts",
     "test": "tsx --test src/**/*.test.ts",
-    "test:watch": "tsx --test --watch src/**/*.test.ts"
+    "test:watch": "tsx --test --watch src/**/*.test.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -23,9 +26,12 @@
     "@types/express": "^4.17.19",
     "@types/jsonwebtoken": "^9.0.2",
     "@types/node": "^20.19.42",
+    "eslint": "^9.39.5",
+    "prettier": "^3.9.6",
     "prisma": "^7.8.0",
     "tsx": "^4.22.4",
-    "typescript": "^6.0.3"
+    "typescript": "^6.0.3",
+    "typescript-eslint": "^8.67.0"
   },
   "dependencies": {
     "@prisma/adapter-pg": "^7.8.0",
