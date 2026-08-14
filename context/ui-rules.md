@@ -84,12 +84,15 @@ Defined in `globals.css` under `@theme inline`. These are the only source of col
 |---|---|---|
 | Error | `--color-error-container` `#ffdad6` | `--color-on-error-container` `#93000a` |
 | Error (solid) | `--color-error` `#ba1a1a` | `--color-on-error` `#ffffff` |
-| Success | *not defined* | *not defined* |
-| Info | *not defined* | *not defined* |
-| Warning | *not defined* | *not defined* |
+| Success | `--color-success-container` `#b6f2c4` | `--color-on-success-container` `#072111` |
+| Success (solid) | `--color-success` `#146c2e` | `--color-on-success` `#ffffff` |
+| Info | `--color-info-container` `#cde5ff` | `--color-on-info-container` `#001d33` |
+| Info (solid) | `--color-info` `#00639b` | `--color-on-info` `#ffffff` |
+| Warning | `--color-warning-container` `#ffe083` | `--color-on-warning-container` `#271a00` |
+| Warning (solid) | `--color-warning` `#7a5900` | `--color-on-warning` `#ffffff` |
 | Neutral | `--color-surface-container-high` `#e7e7f3` | `--color-on-surface-variant` `#434655` |
 
-> ⚠️ **B-13** — only error tokens exist. The three `PriceStatus` values are the single most important signal in this app and are currently styled with ad-hoc greens and ambers that drift per component. Success / warning / info tokens are needed.
+> **B-13 resolved (Phase 1.2, 2026-08-14)** — success/warning/info tokens now exist, mirroring the error token shape (base + container + on + on-container). `PriceStatus` mapping per §7: `COMPLIANT` → success · `OVERPRICE` → error · `UNDERPRICE` → warning.
 
 ---
 
@@ -137,11 +140,11 @@ Each step is both a font utility and a size utility, applied together (`font-h2-
 
 ### Badge pill utility
 
-**Not implemented.** There is no `.badge` class. Status pills are currently written inline per component with `rounded-full` plus ad-hoc colors — the direct consequence of the missing status tokens (**B-13**). When status tokens land, a `.badge` + `.badge-green/red/blue/gold/gray` set should be added here and registered in [ui-registry.md](ui-registry.md).
+**Not implemented.** There is no `.badge` class. Status pills are still written inline per component with `rounded-full` plus the status tokens (§2) — the tokens landed in Phase 1.2, but the `.badge` + `.badge-success/error/warning/info/neutral` utility set itself is still a follow-up: add it here and register it in [ui-registry.md](ui-registry.md) when built.
 
 ### ⚠️ Do not use
 
-`globals.css` also declares `.text-primary`, `.text-on-surface`, `.text-on-surface-variant`, `.text-on-primary`, and `.text-outline` as hardcoded hexes with **`!important`**, shadowing the tokens of the same name. Changing a token silently fails for these five. Removing them is **B-3** — the highest-priority styling cleanup.
+~~`globals.css` declares `.text-primary`, `.text-on-surface`, `.text-on-surface-variant`, `.text-on-primary`, and `.text-outline` as hardcoded hexes with `!important`, shadowing the tokens of the same name.~~ **Resolved in Phase 1.2 (2026-08-14) — B-3.** These five rules were removed; Tailwind now generates the equivalent utilities directly from the `@theme` tokens, so changing a token no longer silently fails.
 
 ---
 
