@@ -428,8 +428,8 @@ export default function CommodityListPage() {
       </div>
 
       {selectedCommodity ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-4xl rounded-3xl border border-outline-variant bg-surface-container-lowest p-4 shadow-[0_24px_80px_rgba(15,23,42,0.12)] sm:p-5">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-4xl rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow sm:p-5">
             <div className="mb-3 flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-base font-semibold text-on-surface">Price Records</h2>
@@ -446,7 +446,7 @@ export default function CommodityListPage() {
               </button>
             </div>
 
-            <div className="mb-2 flex flex-col gap-2 rounded-2xl border border-outline-variant bg-white p-2 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mb-2 flex flex-col gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:flex-row sm:items-center sm:justify-between">
               <input
                 className="w-full rounded-xl border border-outline-variant bg-surface py-1.5 px-2.5 text-[11px] outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary sm:max-w-xs sm:text-xs"
                 placeholder="Filter records by store, status, or price"
@@ -534,7 +534,7 @@ export default function CommodityListPage() {
                 </div>
               </>
             ) : (
-              <div className="rounded-2xl border border-dashed border-outline-variant bg-white p-4 text-body-sm text-on-surface-variant">
+              <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest p-4 text-body-sm text-on-surface-variant">
                 {selectedCommodity.records.length > 0 ? "No records match the current filters." : "No price records found for this commodity."}
               </div>
             )}

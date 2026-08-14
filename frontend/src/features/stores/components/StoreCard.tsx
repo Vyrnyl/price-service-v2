@@ -25,7 +25,7 @@ export default function StoreCard({
   const StatusIcon = status.icon;
 
   return (
-    <div className={`flex ${compact ? "h-auto" : "h-full"} flex-col overflow-hidden rounded-2xl border border-outline-variant bg-white shadow-sm transition-shadow hover:shadow-md`}>
+    <div className={`flex ${compact ? "h-auto" : "h-full"} flex-col overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow transition-shadow hover:shadow-md`}>
       <div className={`flex flex-1 flex-col ${compact ? "p-4" : "p-6"}`}>
         <div className={`mb-3 flex items-start justify-between gap-3 ${compact ? "" : "mb-4"}`}>
           <div className={`flex ${compact ? "h-10 w-10" : "h-12 w-12"} items-center justify-center rounded-xl bg-primary-fixed text-primary`}>

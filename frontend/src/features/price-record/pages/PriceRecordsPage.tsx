@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { MdAdd, MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
 import { apiFetch } from "@/shared/services/api";
+import { useToast } from "@/shared/components/Toast";
 import PriceRecordForm from "../components/PriceRecordForm";
 import PriceRecordFilters from "../components/PriceRecordFilters";
 import PriceRecordsTable from "../components/PriceRecordsTable";
@@ -167,6 +168,7 @@ export default function PriceRecordsPage({
   const [submitLoading, setSubmitLoading] = useState(false);
   const [newRecord, setNewRecord] = useState<CreatePriceRecordPayload>(createDefaultRecord);
   const [currentPage, setCurrentPage] = useState(1);
+  const { showToast } = useToast();
 
   useEffect(() => {
     const loadData = async () => {
@@ -305,11 +307,13 @@ export default function PriceRecordsPage({
               : record,
           ),
         );
+        showToast("Price record updated successfully.", "success");
       } else {
         setRecords((current) => [
           mapBackendPriceRecord(response.data, commodities),
           ...current,
         ]);
+        showToast("Price record created successfully.", "success");
       }
 
       handleCloseForm();
@@ -367,7 +371,7 @@ export default function PriceRecordsPage({
           </div>
 
           {formOpen ? (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm">
               <PriceRecordForm
                 stores={stores}
                 commodities={commodities}
@@ -383,7 +387,7 @@ export default function PriceRecordsPage({
             </div>
           ) : null}
 
-          <div className="rounded-3xl border border-outline-variant bg-white p-2 sm:p-3">
+          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:p-3">
             <PriceRecordsTable
               records={pagedRecords}
               onEdit={handleEditRecord}

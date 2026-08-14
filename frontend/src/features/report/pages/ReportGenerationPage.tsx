@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { MdDownload } from "react-icons/md";
 import { apiFetch } from "@/shared/services/api";
+import { useToast } from "@/shared/components/Toast";
 import { reportTypes, exportFormats } from "../mocks/report.mock";
 import ExportFormatButton from "../components/ExportFormatButton";
 import RecentReportCard from "../components/RecentReportCard";
@@ -94,6 +95,7 @@ export default function ReportGenerationPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [recentReports, setRecentReports] = useState<RecentReport[]>([]);
+  const { showToast } = useToast();
 
   const selectedReportType = reportTypes.find((type) => type.id === selectedReportTypeId) ?? reportTypes[0];
   const isStoreMonitoring = selectedReportType.id === "store-monitoring";
@@ -224,6 +226,7 @@ export default function ReportGenerationPage() {
       setLoading(true);
       const response = await createReport(payload);
       setSuccessMessage("Report generated successfully.");
+      showToast("Report generated successfully.", "success");
       setRecentReports((current) => [mapBackendReportToRecent(response.data), ...current]);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Unable to generate report.");
@@ -247,7 +250,7 @@ export default function ReportGenerationPage() {
 
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
             <section className="flex flex-col gap-5 xl:col-span-8">
-              <div className="rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8">
+              <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
                 <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-label-caps font-semibold uppercase tracking-[0.24em] text-primary">
@@ -269,7 +272,7 @@ export default function ReportGenerationPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8">
+              <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
                 <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                   <div>
                     <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-label-caps font-semibold uppercase tracking-[0.24em] text-primary">
@@ -285,16 +288,16 @@ export default function ReportGenerationPage() {
                       <label className="font-label-caps text-label-caps text-on-surface-variant">Date Range</label>
                       <div className="flex flex-col gap-2 md:flex-row md:items-center">
                         <input
-                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-white p-3 font-body-sm text-body-sm"
+                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-body-sm text-body-sm"
                           type="date"
                           value={startDate}
                           onChange={(event) => handleStartDateChange(event.target.value)}
                         />
-                        <span className="flex items-center justify-center rounded-xl border border-outline-variant bg-white px-4 text-body-sm font-semibold text-on-surface-variant">
+                        <span className="flex items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-4 text-body-sm font-semibold text-on-surface-variant">
                           to
                         </span>
                         <input
-                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-white p-3 font-body-sm text-body-sm"
+                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-body-sm text-body-sm"
                           type="date"
                           value={endDate}
                           onChange={(event) => handleEndDateChange(event.target.value)}
@@ -312,7 +315,7 @@ export default function ReportGenerationPage() {
                     <div className="flex flex-col gap-2 min-w-0">
                       <label className="font-label-caps text-label-caps text-on-surface-variant">Store</label>
                       <select
-                        className="w-full rounded-xl border border-outline-variant bg-white p-3 font-body-sm text-body-sm"
+                        className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-body-sm text-body-sm"
                         value={selectedStoreId}
                         onChange={(event) => setSelectedStoreId(event.target.value)}
                         disabled={storesLoading}
@@ -329,7 +332,7 @@ export default function ReportGenerationPage() {
                     <div className="flex flex-col gap-2 min-w-0">
                       <label className="font-label-caps text-label-caps text-on-surface-variant">Category list</label>
                       <select
-                        className="w-full rounded-xl border border-outline-variant bg-white p-3 font-body-sm text-body-sm"
+                        className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-body-sm text-body-sm"
                         value={commodityGroup}
                         onChange={(event) => setCommodityGroup(event.target.value)}
                       >
@@ -359,7 +362,7 @@ export default function ReportGenerationPage() {
                 type="button"
                 onClick={handleGenerateReport}
                 disabled={loading || isGenerateDisabled}
-                className="flex w-full items-center justify-center gap-2 rounded-3xl bg-primary px-5 py-4 text-sm font-semibold text-on-primary transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-4 text-sm font-semibold text-on-primary transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <MdDownload size={18} />
                 {loading ? "Generating report…" : "GENERATE OFFICIAL REPORT"}
@@ -370,7 +373,7 @@ export default function ReportGenerationPage() {
             </section>
 
             <section className="flex flex-col gap-5 xl:col-span-4">
-              <div className="rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8">
+              <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
                     <p className="font-label-caps text-label-caps text-on-surface-variant">Recent Reports</p>
@@ -378,7 +381,7 @@ export default function ReportGenerationPage() {
                   </div>
                   <button
                     type="button"
-                    className="rounded-full border border-outline-variant bg-white px-4 py-2 text-body-sm font-semibold text-primary transition hover:border-primary hover:bg-surface-container-lowest"
+                    className="rounded-full border border-outline-variant bg-surface-container-lowest px-4 py-2 text-body-sm font-semibold text-primary transition hover:border-primary hover:bg-surface-container-high"
                     onClick={async () => {
                       try {
                         await deleteAllReports();
@@ -390,6 +393,7 @@ export default function ReportGenerationPage() {
                         setCommodityGroup(DEFAULT_CATEGORIES[0].value);
                         setError(null);
                         setSuccessMessage("All recent reports have been cleared.");
+                        showToast("All recent reports have been cleared.", "success");
                       } catch (err: unknown) {
                         setError(err instanceof Error ? err.message : "Unable to clear recent reports.");
                       }

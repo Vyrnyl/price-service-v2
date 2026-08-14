@@ -21,7 +21,7 @@ export default function UsersSearchFilters({
   onActiveFilterChange,
 }: UsersSearchFiltersProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between">
+    <div className="flex flex-col gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow lg:flex-row lg:items-center lg:justify-between">
       <div className="relative w-full lg:w-96">
         <MdOutlineSearch
           className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"

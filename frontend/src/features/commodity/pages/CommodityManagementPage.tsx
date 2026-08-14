@@ -27,6 +27,7 @@ import {
 import { createSrp } from "../services/srp.api";
 import type { CommodityStatus } from "../commodity.schema";
 import type { UserRole } from "@/shared/services/auth";
+import { useToast } from "@/shared/components/Toast";
 
 function mapCommodityToRow(item: CommodityItem, index: number) {
   const latestSrp = item.srps?.[0];
@@ -65,9 +66,8 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "Active" | "Inactive">("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+  const { showToast } = useToast();
 
-  console.log(process.env.NEXT_PUBLIC_API_URL);
-  
   const refreshCommodityRows = async () => {
     try {
       const commodities = await getCommodities();
@@ -106,10 +106,12 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
           ),
         );
         setFormSuccess("Commodity updated successfully.");
+        showToast("Commodity updated successfully.", "success");
       } else {
         const createdCommodity = await createCommodity(data);
         setCommodityRows((prev) => [mapCommodityToRow(createdCommodity, prev.length), ...prev]);
         setFormSuccess("Commodity created successfully.");
+        showToast("Commodity created successfully.", "success");
       }
 
       setFormOpen(false);
@@ -179,6 +181,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
         ),
       );
       setFormSuccess("SRP updated successfully.");
+      showToast("SRP updated successfully.", "success");
       await refreshCommodityRows();
       setUpdateSrpOpen(false);
     } catch (error: unknown) {

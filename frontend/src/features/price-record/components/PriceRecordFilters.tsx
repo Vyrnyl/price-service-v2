@@ -22,7 +22,7 @@ export default function PriceRecordFilters({
   commodities,
 }: PriceRecordFiltersProps) {
   return (
-    <div className="grid gap-4 rounded-3xl border border-outline-variant bg-white p-5 data-card-shadow md:p-6">
+    <div className="grid gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-5 data-card-shadow md:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
           <h2 className="font-h3-desktop text-h3-desktop text-on-surface">Search & Filters</h2>
@@ -39,7 +39,7 @@ export default function PriceRecordFilters({
           <input
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            className="h-12 w-full rounded-2xl border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="h-12 w-full rounded-lg border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
             placeholder="Search by store, commodity, or ID"
           />
         </div>
@@ -49,7 +49,7 @@ export default function PriceRecordFilters({
           <select
             value={storeFilter}
             onChange={(event) => onStoreChange(event.target.value)}
-            className="h-12 w-full rounded-2xl border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="h-12 w-full rounded-lg border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
           >
             <option value="">All stores</option>
             {stores.map((store) => (
@@ -65,7 +65,7 @@ export default function PriceRecordFilters({
           <select
             value={commodityFilter}
             onChange={(event) => onCommodityChange(event.target.value)}
-            className="h-12 w-full rounded-2xl border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
+            className="h-12 w-full rounded-lg border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
           >
             <option value="">All commodities</option>
             {commodities.map((commodity) => (

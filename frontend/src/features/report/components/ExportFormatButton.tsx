@@ -10,9 +10,9 @@ export default function ExportFormatButton({
   onSelect: () => void;
 }) {
   const Icon = format.icon;
-  const baseClasses = "flex items-center gap-3 rounded-2xl border px-6 py-3 transition-all duration-200 text-left w-full";
+  const baseClasses = "flex items-center gap-3 rounded-xl border px-6 py-3 transition-all duration-200 text-left w-full";
   const activeClasses = "border-primary bg-primary-container text-on-primary-container";
-  const inactiveClasses = "border-outline-variant bg-white hover:border-primary";
+  const inactiveClasses = "border-outline-variant bg-surface-container-lowest hover:border-primary";
 
   return (
     <button

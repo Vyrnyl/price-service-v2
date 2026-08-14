@@ -10,7 +10,7 @@ type DailyChangesPanelProps = {
 
 export function DailyChangesPanel({ changes }: DailyChangesPanelProps) {
   return (
-    <section className="rounded-3xl border border-outline-variant/80 bg-gradient-to-br from-surface-container-lowest to-surface-container p-4 shadow-[0_12px_36px_rgba(0,0,0,0.06)] sm:p-6">
+    <section className="rounded-xl border border-outline-variant/80 bg-linear-to-br from-surface-container-lowest to-surface-container p-4 data-card-shadow sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">Daily price changes</p>
@@ -20,7 +20,7 @@ export function DailyChangesPanel({ changes }: DailyChangesPanelProps) {
 
       <div className="mt-5 space-y-4">
         {changes.map((change) => (
-          <div key={change.label} className="rounded-2xl border border-outline-variant/70 bg-surface-container-high p-4 shadow-sm">
+          <div key={change.label} className="rounded-xl border border-outline-variant/70 bg-surface-container-high p-4 data-card-shadow">
             <div className="flex items-center justify-between gap-3 text-sm">
               <span className="font-medium text-on-surface">{change.label}</span>
               <span className="font-semibold text-primary">{change.value}</span>

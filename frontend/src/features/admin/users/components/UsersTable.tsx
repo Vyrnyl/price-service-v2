@@ -29,7 +29,7 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
   const endIndex = Math.min(startIndex + paginatedUsers.length - 1, users.length);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow">
       <div className="hidden md:block">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
@@ -97,7 +97,7 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
 
       <div className="space-y-3 p-3 md:hidden">
         {paginatedUsers.map((user) => (
-          <div key={user.id} className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+          <div key={user.id} className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-high font-bold text-primary">

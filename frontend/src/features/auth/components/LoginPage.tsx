@@ -35,7 +35,7 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-background px-container-margin-mobile py-12 md:px-container-margin-desktop">
-      <div className="w-full max-w-120 rounded-3xl border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
+      <div className="w-full max-w-120 rounded-xl border border-outline-variant bg-surface-container-lowest p-8 data-card-shadow">
         <div className="text-center mb-8">
           <h1 className="font-h1-desktop text-h1-mobile font-bold text-on-surface md:text-h1-desktop">
             Welcome Back
@@ -104,7 +104,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-2xl bg-primary px-6 py-3 text-body-sm font-semibold text-on-primary transition hover:bg-primary-focus disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-full bg-primary px-6 py-3 text-body-sm font-semibold text-on-primary transition hover:bg-primary-focus disabled:cursor-not-allowed disabled:opacity-60"
             >
               {isLoading ? "Signing In..." : "Sign In"}
             </button>

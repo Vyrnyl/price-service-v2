@@ -22,7 +22,7 @@ export function getStoreStatus(store: Store): { label: "Monitored" | "Pending"; 
       }
     : {
         label: "Monitored",
-        tone: "border border-green-200 bg-green-50 text-green-700",
+        tone: "border border-success-container bg-success-container/40 text-on-success-container",
         icon: MdCheckCircle,
       };
 }

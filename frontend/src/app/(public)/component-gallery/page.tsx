@@ -87,8 +87,11 @@ export default function ComponentGalleryPage() {
 
       <Section title="Toasts">
         <div className="flex flex-wrap items-center gap-3">
-          <Button variant="primary" onClick={() => showToast("Saved successfully.", "primary")}>
+          <Button variant="primary" onClick={() => showToast("Saved successfully.", "success")}>
             Show success toast
+          </Button>
+          <Button variant="secondary" onClick={() => showToast("Heads up — here's an update.", "primary")}>
+            Show primary toast
           </Button>
           <Button variant="danger" onClick={() => showToast("Something went wrong.", "error")}>
             Show error toast

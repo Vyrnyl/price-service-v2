@@ -2,7 +2,7 @@
 
 import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 
-type ToastVariant = "primary" | "error" | "neutral";
+type ToastVariant = "primary" | "success" | "error" | "neutral";
 
 interface ToastItem {
   id: string;
@@ -18,6 +18,7 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 
 const VARIANT_CLASSES: Record<ToastVariant, string> = {
   primary: "border-primary-fixed bg-primary-fixed text-on-primary-fixed",
+  success: "border-success/30 bg-success-container text-on-success-container",
   error: "border-error/30 bg-error-container text-on-error-container",
   neutral: "border-outline-variant bg-surface-container-high text-on-surface-variant",
 };
@@ -45,7 +46,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <div className="pointer-events-none fixed bottom-4 right-4 z-[60] flex w-full max-w-sm flex-col gap-2">
+      <div className="pointer-events-none fixed bottom-4 right-4 z-60 flex w-full max-w-sm flex-col gap-2">
         {toasts.map((toast) => (
           <div
             key={toast.id}

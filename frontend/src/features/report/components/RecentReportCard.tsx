@@ -11,7 +11,7 @@ export default function RecentReportCard({ report }: { report: RecentReport }) {
   };
 
   return (
-    <div className="rounded-3xl border border-outline-variant bg-white p-5">
+    <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 data-card-shadow">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
           <p className="truncate text-lg font-semibold text-on-surface">{report.name}</p>
@@ -27,7 +27,7 @@ export default function RecentReportCard({ report }: { report: RecentReport }) {
         type="button"
         disabled={report.disabled ?? !report.fileUrl}
         onClick={handleClick}
-        className={`mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border py-3 text-sm font-semibold transition-colors ${report.buttonClass}`}
+        className={`mt-4 flex w-full items-center justify-center gap-2 rounded-full border py-3 text-sm font-semibold transition-colors ${report.buttonClass}`}
       >
         <ButtonIcon size={18} />
         {report.buttonLabel}

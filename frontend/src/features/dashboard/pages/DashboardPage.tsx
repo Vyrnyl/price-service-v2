@@ -190,7 +190,7 @@ export default function DashboardPage() {
 
       <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.35fr_0.65fr]">
-          <div className="rounded-3xl border border-outline-variant bg-white p-6 shadow-sm data-card-shadow">
+          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
             <div className="mb-6 flex items-center justify-between">
               <div>
                 <h3 className="font-h3-desktop text-h3-desktop text-on-surface">
@@ -204,14 +204,14 @@ export default function DashboardPage() {
 
             <div className="space-y-3">
               {isLoading ? (
-                <div className="rounded-2xl border border-dashed border-outline-variant bg-surface-container-low p-4 text-sm text-on-surface-variant">
+                <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-low p-4 text-sm text-on-surface-variant">
                   Loading recent updates...
                 </div>
               ) : recentSrpUpdates.length > 0 ? (
                 recentSrpUpdates.map((item) => (
                   <div
                     key={item.name}
-                    className="flex items-center justify-between gap-4 rounded-2xl border border-outline-variant bg-surface-container-low p-4"
+                    className="flex items-center justify-between gap-4 rounded-xl border border-outline-variant bg-surface-container-low p-4"
                   >
                     <div className="min-w-0 flex-1">
                       <p className="font-body-sm font-semibold text-on-surface">{item.name}</p>
@@ -226,7 +226,7 @@ export default function DashboardPage() {
                   </div>
                 ))
               ) : (
-                <div className="rounded-2xl border border-dashed border-outline-variant bg-surface-container-low p-4 text-sm text-on-surface-variant">
+                <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-low p-4 text-sm text-on-surface-variant">
                   No recent SRP updates available right now.
                 </div>
               )}
@@ -234,7 +234,7 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="rounded-3xl border border-outline-variant bg-surface-container-low p-6 shadow-sm">
+            <div className="rounded-xl border border-outline-variant bg-surface-container-low p-6 data-card-shadow">
               <div className="mb-4 flex items-center gap-2">
                 <MdTrendingUp className="text-primary" size={22} />
                 <h3 className="font-h3-desktop text-h3-desktop text-on-surface">
@@ -243,12 +243,12 @@ export default function DashboardPage() {
               </div>
               <div className="space-y-3">
                 {isLoading ? (
-                  <div className="rounded-2xl border border-dashed border-outline-variant bg-white p-4 text-sm text-on-surface-variant">
+                  <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest p-4 text-sm text-on-surface-variant">
                     Loading market highlights...
                   </div>
                 ) : marketHighlights.length > 0 ? (
                   marketHighlights.map((item) => (
-                    <div key={item.title} className="rounded-2xl bg-white p-4">
+                    <div key={item.title} className="rounded-xl bg-surface-container-lowest p-4">
                       <p className="font-label-caps text-label-caps text-on-surface-variant">
                         {item.title}
                       </p>
@@ -259,14 +259,14 @@ export default function DashboardPage() {
                     </div>
                   ))
                 ) : (
-                  <div className="rounded-2xl border border-dashed border-outline-variant bg-white p-4 text-sm text-on-surface-variant">
+                  <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest p-4 text-sm text-on-surface-variant">
                     No market highlights available right now.
                   </div>
                 )}
               </div>
             </div>
 
-            <div className="rounded-3xl border border-outline-variant bg-primary-container/20 p-6 shadow-sm">
+            <div className="rounded-xl border border-outline-variant bg-primary-container/20 p-6 data-card-shadow">
               <div className="mb-3 flex items-center gap-2">
                 <MdStorefront className="text-primary" size={22} />
                 <h3 className="font-h3-desktop text-h3-desktop text-on-surface">

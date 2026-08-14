@@ -17,6 +17,7 @@ import {
   logoutFromServer,
   type UserRole,
 } from "../services/auth";
+import { useToast } from "./Toast";
 
 type NavLink = { href: string; icon: React.ElementType; label: string };
 
@@ -90,6 +91,7 @@ export default function NavigationDrawer({
 }) {
   const [role, setRole] = useState<UserRole | "guest" | null>(null);
   const router = useRouter();
+  const { showToast } = useToast();
 
   useEffect(() => {
     let mounted = true;
@@ -108,6 +110,7 @@ export default function NavigationDrawer({
       await logoutFromServer();
     } catch (error) {
       console.error("Logout failed", error);
+      showToast("Logout failed on the server, but you've been signed out on this device.", "error");
     }
 
     setRole("guest");
@@ -118,7 +121,7 @@ export default function NavigationDrawer({
   return (
     <>
       <div
-        className={`fixed inset-0 z-30 bg-black/30 transition-opacity duration-200 lg:hidden ${
+        className={`fixed inset-0 z-30 bg-inverse-surface/30 transition-opacity duration-200 lg:hidden ${
           isOpen ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={onClose}

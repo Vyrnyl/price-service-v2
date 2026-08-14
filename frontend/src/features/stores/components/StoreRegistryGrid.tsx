@@ -21,7 +21,7 @@ export function StoreRegistryGrid({
 }: StoreRegistryGridProps) {
   if (stores.length === 0) {
     return (
-      <div className="rounded-2xl border border-dashed border-outline-variant bg-white p-8 text-center text-body-md text-on-surface-variant">
+      <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest p-8 text-center text-body-sm text-on-surface-variant">
         {emptyState ?? "No matching outlets found for the current filters."}
       </div>
     );

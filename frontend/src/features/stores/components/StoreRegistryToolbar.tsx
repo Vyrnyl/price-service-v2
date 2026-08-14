@@ -25,7 +25,7 @@ export function StoreRegistryToolbar({
   storeCount,
 }: StoreRegistryToolbarProps) {
   return (
-    <div className="rounded-2xl border border-outline-variant bg-white p-6 shadow-sm">
+    <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
       <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-12">
         <div className="relative md:col-span-6">
           <MdSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />

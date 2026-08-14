@@ -23,38 +23,8 @@ const stats = [
     label: "Added Price Records",
     valueKey: "priceRecords",
     icon: MdTrendingUp,
-    tone: "text-[#00897B]",
-    bg: "bg-[#E8F5E9]",
-  },
-];
-
-const rows = [
-  {
-    commodity: "Rice (Well-milled)",
-    store: "ABC Supermarket",
-    region: "Virac",
-    price: "₱58.00",
-    srp: "₱55.00",
-    status: "Above SRP",
-    statusClass: "bg-error text-on-error",
-  },
-  {
-    commodity: "Cooking Oil",
-    store: "Virac Public Market",
-    region: "Virac",
-    price: "₱85.00",
-    srp: "₱85.00",
-    status: "Compliant",
-    statusClass: "bg-[#00897B] text-on-primary",
-  },
-  {
-    commodity: "Canned Sardines",
-    store: "SaveMore Virac",
-    region: "Bato",
-    price: "₱19.50",
-    srp: "₱21.00",
-    status: "Below SRP",
-    statusClass: "bg-tertiary-container text-on-tertiary",
+    tone: "text-success",
+    bg: "bg-success-container",
   },
 ];
 
@@ -124,7 +94,7 @@ export default function MonitoringOfficerDashboardPage() {
               return (
                 <div
                   key={stat.label}
-                  className="flex min-w-48 flex-1 flex-col rounded-2xl border border-outline-variant bg-white p-4 data-card-shadow"
+                  className="flex min-w-48 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow"
                 >
                   <div className="mb-3 flex items-start justify-between gap-3">
                     <span className={`rounded-xl p-2 ${stat.bg}`}>
@@ -145,7 +115,7 @@ export default function MonitoringOfficerDashboardPage() {
             })}
           </section>
 
-          <section className="rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8">
+          <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
             <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
                 <h3 className="font-h3-desktop text-h3-desktop text-on-surface">
@@ -156,14 +126,14 @@ export default function MonitoringOfficerDashboardPage() {
             </div>
 
             <div className="grid gap-4 lg:grid-cols-3">
-              <div className="rounded-3xl border border-outline-variant bg-surface-container-low p-4">
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
                 <p className="mb-3 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
                   Added Stores
                 </p>
                 <div className="space-y-3">
                   {latestStores.length > 0 ? (
                     latestStores.map((store) => (
-                      <div key={store.id} className="rounded-2xl bg-white p-3 shadow-sm">
+                      <div key={store.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
                         <p className="font-semibold text-on-surface">{store.name}</p>
                         <p className="text-body-sm text-on-surface-variant">{store.location}</p>
                         <p className="mt-2 text-[11px] text-on-surface-variant">{new Date(store.createdAt).toLocaleDateString()}</p>
@@ -175,14 +145,14 @@ export default function MonitoringOfficerDashboardPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-outline-variant bg-surface-container-low p-4">
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
                 <p className="mb-3 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
                   Added Price Records
                 </p>
                 <div className="space-y-3">
                   {latestPriceRecords.length > 0 ? (
                     latestPriceRecords.map((record) => (
-                      <div key={record.id} className="rounded-2xl bg-white p-3 shadow-sm">
+                      <div key={record.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
                         <p className="font-semibold text-on-surface">{record.commodity.name}</p>
                         <p className="text-body-sm text-on-surface-variant">{record.store?.name ?? "Unknown store"}</p>
                         <p className="mt-2 text-[11px] text-on-surface-variant">{new Date(record.createdAt).toLocaleDateString()} • {record.price}</p>
@@ -194,14 +164,14 @@ export default function MonitoringOfficerDashboardPage() {
                 </div>
               </div>
 
-              <div className="rounded-3xl border border-outline-variant bg-surface-container-low p-4">
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
                 <p className="mb-3 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
                   Reports Activity
                 </p>
                 <div className="space-y-3">
                   {latestReports.length > 0 ? (
                     latestReports.map((report) => (
-                      <div key={report.id} className="rounded-2xl bg-white p-3 shadow-sm">
+                      <div key={report.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
                         <p className="font-semibold text-on-surface">{report.type.replace(/_/g, " ")}</p>
                         <p className="text-body-sm text-on-surface-variant">{report.period}</p>
                         <p className="mt-2 text-[11px] text-on-surface-variant">{new Date(report.createdAt).toLocaleDateString()}</p>

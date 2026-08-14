@@ -3,6 +3,7 @@ import { mapBackendPriceRecord, fetchCommodities, fetchStores, fetchStorePriceRe
 import type { Store, StoreFormData } from "../types/stores.types";
 import type { PriceRecord } from "@/features/price-record/types/price-record.types";
 import { getStoreStatus } from "../utils/store-status";
+import { useToast } from "@/shared/components/Toast";
 
 const RECENTLY_UPDATED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -24,6 +25,7 @@ export function useStoreRegistryState() {
   const [municipalityFilter, setMunicipalityFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [quickFilter, setQuickFilter] = useState("");
+  const { showToast } = useToast();
 
   useEffect(() => {
     async function loadStores() {
@@ -140,9 +142,11 @@ export function useStoreRegistryState() {
       if (editingStore) {
         setStores((current) => current.map((store) => (store.id === editingStore.id ? response.data : store)));
         setFormSuccess("Store updated successfully.");
+        showToast("Store updated successfully.", "success");
       } else {
         setStores((current) => [response.data, ...current]);
         setFormSuccess("Store created successfully.");
+        showToast("Store created successfully.", "success");
       }
 
       setFormData({ name: "", location: "", lastVisited: "" });

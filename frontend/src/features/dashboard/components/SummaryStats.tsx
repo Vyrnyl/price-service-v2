@@ -125,7 +125,7 @@ export default function SummaryStats() {
             return (
               <div
                 key={stat.label}
-                className="animate-stats rounded-2xl border border-outline-variant bg-white p-6 data-card-shadow"
+                className="animate-stats rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div className="mb-4 flex items-center justify-between">
@@ -135,7 +135,7 @@ export default function SummaryStats() {
                   <span
                     className={`text-xs font-label-caps ${
                       stat.meta === "HIGH COMPLIANCE"
-                        ? "text-[#00897B]"
+                        ? "text-success"
                         : "text-outline"
                     }`}
                   >

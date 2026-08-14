@@ -63,8 +63,8 @@ export function StorePriceRecordsModal({ storeId, storeName, records, loading, o
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-4xl rounded-3xl border border-outline-variant bg-surface-container-lowest p-4 shadow-[0_24px_80px_rgba(15,23,42,0.12)] sm:p-5">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-4xl rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow sm:p-5">
         <div className="mb-3 flex items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-semibold text-on-surface">Store Price Records</h2>
@@ -82,11 +82,11 @@ export function StorePriceRecordsModal({ storeId, storeName, records, loading, o
         </div>
 
         {loading ? (
-          <div className="rounded-2xl border border-outline-variant bg-white p-4 text-[11px] text-on-surface-variant sm:text-xs">
+          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 text-[11px] text-on-surface-variant sm:text-xs">
             Loading price records...
           </div>
         ) : normalizedRecords.length > 0 ? (
-          <div className="rounded-2xl border border-outline-variant bg-white p-2 sm:p-3">
+          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:p-3">
             <PriceRecordsTable records={pagedRecords} hideActions hideOfficerColumn hideCommodityColumn compact />
             {normalizedRecords.length > pageSize ? (
               <div className="mt-3 flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
@@ -131,7 +131,7 @@ export function StorePriceRecordsModal({ storeId, storeName, records, loading, o
             ) : null}
           </div>
         ) : (
-          <div className="rounded-2xl border border-dashed border-outline-variant bg-white p-4 text-[11px] text-on-surface-variant sm:text-xs">
+          <div className="rounded-xl border border-dashed border-outline-variant bg-surface-container-lowest p-4 text-[11px] text-on-surface-variant sm:text-xs">
             No price records found for this store.
           </div>
         )}

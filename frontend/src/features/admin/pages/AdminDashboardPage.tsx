@@ -250,7 +250,7 @@ export default function AdminDashboardPage() {
             {stats.map((stat) => (
               <div
                 key={stat.label}
-                className="flex min-w-52.5 flex-1 flex-col rounded-2xl border border-outline-variant bg-white p-6 data-card-shadow"
+                className="flex min-w-52.5 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow"
               >
                 <div className="mb-4 flex items-start justify-between gap-3">
                   <div className={`rounded-xl p-2 ${stat.iconBg}`}>
@@ -281,7 +281,7 @@ export default function AdminDashboardPage() {
           </section>
 
           <section className="grid gap-6 xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)]">
-            <div className="flex min-h-105 w-full flex-col rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8">
+            <div className="flex min-h-105 w-full flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
               <div className="mb-6 flex items-center justify-between">
                 <h4 className="font-h3-desktop text-h3-desktop text-on-surface">
                   Recent Activity
@@ -314,7 +314,7 @@ export default function AdminDashboardPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8">
+            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
               <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <h4 className="font-h3-desktop text-h3-desktop text-on-surface">
                   Recently Added Stores

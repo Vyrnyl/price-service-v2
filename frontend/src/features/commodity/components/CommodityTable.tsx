@@ -65,7 +65,7 @@ export default function CommodityTable({
   const endIndex = Math.min(startIndex + paginatedCommodityRows.length - 1, filteredCommodityRows.length);
 
   return (
-    <div className="flex min-h-105 flex-1 flex-col rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8">
+    <div className="flex min-h-105 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
       <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
           <h4 className="font-h3-desktop text-h3-desktop text-on-surface">Commodity with SRP</h4>
@@ -75,7 +75,7 @@ export default function CommodityTable({
         </div>
       </div>
 
-      <div className="mb-4 rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+      <div className="mb-4 rounded-xl border border-outline-variant bg-surface-container-low p-4">
         <div className="relative w-full">
           <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />
           <input

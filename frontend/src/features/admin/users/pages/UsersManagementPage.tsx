@@ -10,6 +10,7 @@ import {
 } from "react-icons/md";
 import { createUser, getUsers, updateUser, updateUserStatus } from "../services/users.api";
 import { ApiError } from "../../../../shared/services/api";
+import { useToast } from "@/shared/components/Toast";
 import type { CreateUserFormSchema, UpdateUserFormSchema } from "../schemas/users.schema";
 import type { User, UserRole } from "../types/users.types";
 import AddUserDialog from "../components/AddUserDialog";
@@ -27,6 +28,7 @@ export default function UsersManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState<"ALL" | UserRole>("ALL");
   const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const { showToast } = useToast();
 
   const totalUsers = users.length;
   const adminCount = users.filter((user) => user.role === "ADMIN").length;
@@ -109,6 +111,7 @@ export default function UsersManagementPage() {
         const updatedUser = await updateUser(editingUser.id, data as UpdateUserFormSchema);
         setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
         setFormSuccess("User updated successfully.");
+        showToast("User updated successfully.", "success");
       } else {
         const createPayload = data as CreateUserFormSchema;
 
@@ -119,6 +122,7 @@ export default function UsersManagementPage() {
         });
         setUsers((prev) => [createdUser, ...prev]);
         setFormSuccess("User created successfully.");
+        showToast("User created successfully.", "success");
       }
       setFormOpen(false);
       setEditingUser(null);
@@ -147,8 +151,13 @@ export default function UsersManagementPage() {
     try {
       const updatedUser = await updateUserStatus(user.id, !user.isActive);
       setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
+      showToast(
+        updatedUser.isActive ? `${updatedUser.name} activated.` : `${updatedUser.name} deactivated.`,
+        "success",
+      );
     } catch (error) {
       console.error("Failed to update user status", error);
+      showToast("Unable to update user status. Please try again.", "error");
     }
   };
 

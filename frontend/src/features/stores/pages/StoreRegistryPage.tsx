@@ -112,11 +112,11 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
           />
 
           {isLoading ? (
-            <div className="rounded-2xl border border-outline-variant bg-white p-8 text-center text-body-md text-on-surface-variant">
+            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-body-sm text-on-surface-variant">
               Loading stores...
             </div>
           ) : error ? (
-            <div className="rounded-2xl border border-error bg-error-container p-8 text-center text-body-md text-on-error">
+            <div className="rounded-xl border border-error bg-error-container p-8 text-center text-body-sm text-on-error">
               {error}
             </div>
           ) : (

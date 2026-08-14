@@ -15,8 +15,8 @@ export default function ReportTypeCard({
     <button
       type="button"
       onClick={onSelect}
-      className={`relative flex min-w-0 cursor-pointer flex-col rounded-3xl border border-outline-variant bg-white p-6 text-left transition-all duration-200 hover:border-primary ${
-        isSelected ? "border-primary shadow-sm" : ""
+      className={`relative flex min-w-0 cursor-pointer flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 text-left transition-all duration-200 hover:border-primary ${
+        isSelected ? "border-primary data-card-shadow" : ""
       }`}
     >
       <div className="absolute right-4 top-4">
