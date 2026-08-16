@@ -2,21 +2,22 @@
 
 A web-based commodity price monitoring and decision-support system for the **Department of Trade and Industry (DTI) Catanduanes**. Field officers record store prices on site, the system automatically classifies them against the official Suggested Retail Price (SRP), and the public gets price transparency. Core domains: commodity & SRP reference data, store registry, field price records, reporting, and ARIMA price forecasting.
 
-Roles: `ADMIN` · `OFFICER` · `PUBLIC`
+Roles: `ADMIN` · `OFFICER` (accounts) · unauthenticated public access
 
 ## Current state — read this first
 
-**The application is already built and running.** Nine product modules work end to end across all three roles. It was built *before* these standards existed, so the docs describe the **target** structure and the gap is tracked explicitly.
+**The application is built, running, and structurally current.** Nine product modules work end to end for both account roles plus unauthenticated public access. It was built *before* these standards existed, but refactor phases R0–R3 closed the structural gap, and Phases 0, P, 1, and 2 are all complete.
 
 Check [context/progress.md](context/progress.md) at the start of every session — it is the single source of truth for what is actually built. Never assume a feature exists; verify there first.
 
-> 🔴 **Two critical defects are open. Read [context/progress.md](context/progress.md) → Blockers before touching backend code.**
-> - **B-1** — privilege escalation: no `authorize` middleware exists, `/api/users` has no role check, and the user schemas accept `role`. Any authenticated user can make themselves `ADMIN`.
-> - **B-2** — null-deref crash: `PriceRecord.storeId` is nullable in the database but not in `schema.prisma`, and one dashboard reads `record.store.name` unguarded.
->
-> Both are fixed in **Phase R0**, which runs before anything else.
+> 🔴 **One open authorization bypass — B-43.** `report.repository.ts`'s `findById` and `findFileById` take no `authUser` and apply no scope, while `findAll` and `deleteAll` in the same file both route through `resolveReportScope`. `authorize('ADMIN','OFFICER')` checks role, not ownership, so **any officer can read or download any other officer's report** given its UUID. Closed by **Phase 4.1**, which runs before the rest of Phase 4.
 
-Verified baseline: backend `tsc` clean · frontend `tsc` clean · 6/6 tests pass (but no script invokes them — see R2.1).
+**Two phases are scoped and unstarted:**
+
+- **Phase 3 — Public Transparency** (3.1–3.3, findings B-31–B-38). **3.1 is the highest value-per-line item in the plan** — the public commodity table computes compliance status and price for every row and then renders neither; backend, transport, and row-mapping are already done. **D-9 is open and gates 3.3 only**; 3.1 and 3.2 are unblocked.
+- **Phase 4 — Hardening & Scale** (4.1–4.6, findings B-43–B-52). Security, pagination, sessions, accessibility. Start at 4.1.
+
+Verified baseline (2026-08-16): backend `tsc` clean · frontend `tsc` clean · `npm test` 42/42 passing.
 
 ## The one rule that governs everything
 
@@ -44,7 +45,7 @@ These encode the workflow — prefer them over ad-hoc work:
 | File | Purpose |
 |---|---|
 | [context/build-plan.md](context/build-plan.md) | **What to build** — Feature Loop, Definition of Done, phases, settled decisions |
-| [context/progress.md](context/progress.md) | **What is done** — per-feature status, 26 blockers, session log. Update every session |
+| [context/progress.md](context/progress.md) | **What is done** — per-feature status, 52 blockers, session log. Update every session |
 | [context/ui-rules.md](context/ui-rules.md) | Design tokens, theme, component styling contract |
 | [context/ui-registry.md](context/ui-registry.md) | Every UI component + its exact classes. **Check before building any component** |
 | [context/architecture.md](context/architecture.md) | Module structure, data flow, API design, RBAC model |
@@ -54,7 +55,7 @@ These encode the workflow — prefer them over ad-hoc work:
 
 ## Stack
 
-**Frontend**: Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 (Material 3 tokens) · `react-icons` + Material Symbols · Chart.js via `react-chartjs-2`
+**Frontend**: Next.js 16 (App Router) · React 19 · TypeScript strict · Tailwind CSS v4 (Material 3 tokens) · `react-icons` (sole icon library — Material Symbols was removed in B-14; don't reintroduce it) · Chart.js via `react-chartjs-2`
 **Backend**: Node.js · Express 4 · TypeScript strict · Prisma 7 · PostgreSQL
 **Auth**: JWT signed with `JWT_SECRET`, delivered as an httpOnly `accessToken` cookie; the Next.js BFF layer converts it to a Bearer header so the token never reaches client JavaScript
 
@@ -66,10 +67,11 @@ These encode the workflow — prefer them over ad-hoc work:
 - **Docs describe the target structure**, with every gap tracked in [context/progress.md](context/progress.md) → Blockers. *(D-5)*
 - **Feature folders are domains, not roles.** `price-record/`, `stores/`, `commodity/` — never a folder named after who uses it.
 - **There is no `PUBLIC` role.** Only `ADMIN` and `OFFICER` hold accounts; public access is unauthenticated via `/api/public/*`. *(D-7, removed in R0.3)*
-- **Report storage is backend-independent.** Reports go through the `ReportStorage` interface, never `fs` directly. *(D-6, built in Phase 2.4)*
-- **`MobileBottomNav` and `RoleSwitcher` are deleted**, not revived — both were non-functional scaffolding. A real bottom nav gets built in Phase 1.1 if wanted. *(D-3)*
+- **Report storage never touches the local filesystem.** Report bytes are stored as `Bytes` columns on the `Report` row in Postgres and served through `GET /api/v1/reports/:id/download`. The originally-planned pluggable `ReportStorage`/S3 interface was **not** built — there was no S3 credential or SDK to verify a second driver against. *(D-6, revised and built in Phase 2.4)*
+- **`MobileBottomNav` and `RoleSwitcher` are deleted**, not revived — both were non-functional scaffolding. No replacement bottom nav was built in Phase 1.1; if one is ever wanted it is net-new work. *(D-3)*
+- **Public compliance status comes from the price range, not the mean.** A commodity is non-compliant if *any* monitored store prices it above SRP — averaging across stores lets an overpricing store hide behind a cheaper one. *(D-8, Phase 3.2)*
 
-All decisions are settled — none open. The register lives in [context/build-plan.md](context/build-plan.md) §7.
+**One decision is open: D-9** — consumer violation reports, refer out to DTI Consumer Care vs. build an in-app form + `consumer_reports` table + admin queue. It gates Phase 3.3 only; 3.1 and 3.2 are unblocked. The register lives in [context/build-plan.md](context/build-plan.md) §7.
 
 ## Conventions
 
@@ -85,9 +87,10 @@ All decisions are settled — none open. The register lives in [context/build-pl
 
 ## Gotchas
 
-- **Check [context/ui-registry.md](context/ui-registry.md) before building any component** — but read its warning first: the existing card recipes are *inconsistent* (`rounded-2xl` vs `rounded-3xl`, `bg-white` vs token, three shadows). Match [context/ui-rules.md](context/ui-rules.md) §6 for new work, not the drift.
-- **There is no shared Button, Input, Modal, Toast, or Alert.** Markup is duplicated across every page and the modal overlay is copied five times. Phase 1.1 builds them; don't add a sixth copy.
-- **No mutation shows visible feedback** — no toast component exists, so every write feature currently fails the Definition of Done (B-23).
+- **Check [context/ui-registry.md](context/ui-registry.md) before building any component.** The shared primitives live in `frontend/src/shared/components/` — `Button`, `Card`, `Badge`, `Modal`, `Toast`, `Alert`, `Input`, `Select`, `FormGroup`, `PageShell`, `Chip`, `Pagination`, `FieldError` — most demoed at `/component-gallery`. Use them; never hand-roll a sixth copy of markup one of them already owns.
+- **The card recipe is settled**: `rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow` (buttons `rounded-full`, form inputs `rounded-lg`). Converged across the app in Phase 1.2 — match it, and match [context/ui-rules.md](context/ui-rules.md) §6 for anything new.
+- **Every mutation must show a toast.** `Toast` is wired into all 8 write handlers (1.3); a new write without visible feedback fails the Definition of Done.
+- **The public pages are the exception to the adoption sweeps.** B-18/B-21/B-22 were closed for the admin/officer surface, but `CommodityListPage` and `HeroSection` still hand-roll their wrapper, toolbar, and CTA (B-35). Phase 3.1 fixes this — don't cite them as precedent.
 - **`/api/*` in frontend code is the BFF namespace, not the backend contract.** Backend version changes are absorbed in `app/api/[...path]/route.ts`; don't rewrite the 30 client call sites.
 - **The real responsive break is 1024px (`lg`)**, not the 768px the generic standard assumes. Check 1024, 768, *and* 480.
 - **Every screen needs loading, empty, and error states drawn** — a blank state fails the visual-verify gate.

@@ -441,6 +441,120 @@ Generated reports are written to `backend/reports/` and served from `/reports/fi
 
 ---
 
+## Phase 3 — Public Transparency
+
+The consumer-facing surface is the system's public mandate: [project-overview.md](project-overview.md) promises price transparency to the public, and the three public routes (`/`, `/commodity-list`, `/price-analysis`) are what actually delivers it. An audit on 2026-08-16 found the mandate under-served in three distinct ways, which map to the three features below.
+
+The ordering is deliberate and follows §5 rule 2. **3.1 ships value from data that already exists** (no backend change, one file). **3.2 changes what that data means** — the UI slots 3.1 creates are filled with honest aggregates rather than rebuilt. **3.3 adds the consumer action path**, which depends on neither.
+
+> **3.1 is the highest value-per-line change in the plan.** The backend already computes compliance status and price for every commodity, ships it over the wire, and the frontend already maps it into its row model — the table just never renders it. Do not defer 3.1 behind 3.2's backend work.
+
+### 3.1 Surface Compliance on the Public List
+
+[CommodityListPage.tsx](../frontend/src/features/commodity/pages/CommodityListPage.tsx) computes `current`, `status`, `statusTone`, `lastUpdated`, and `municipality` per row, then renders a three-column table: Commodity, Category, SRP. Every transparency field is dropped. Compliance status is reachable only by opening a row's modal — and is *searchable* (a visitor can type "Above SRP" and filter) while being invisible on screen.
+
+- **Screens**: `/commodity-list` (public)
+- **Mock/UI first**: extend the table to Commodity · Category · SRP · **Avg. recent price** · **Compliance** · **Last updated**; add a visible status filter and a **municipality filter** (`storeLocation` is already in the payload and currently feeds only free-text search). Mobile (<768px) falls back to a card list rather than a 6-column horizontal scroll.
+- **Components**: reuse `Badge` (already carries `success`/`warning`/`error` variants since 2.2), `Chip`, `Select`, `Input`'s icon slot, `Pagination`, `PageShell` — no new component should be needed. Register any that is.
+- **Honest labelling**: today's `currentPrice` is a blended average (see 3.2), so this feature labels the column **"Avg. recent price"**, not "Current price". 3.2 upgrades the number behind the label; 3.1 must not overstate it.
+- **Also closes here**: the public pages were missed by B-18/B-21's adoption sweeps — migrate this page's inlined `<main className="… lg:ml-72">` onto `PageShell`, and its hand-rolled search input, category pill, and in-modal filters onto the shared primitives.
+- **Access**: unauthenticated
+- **Done gate**: a visitor can tell, **without clicking anything**, which commodities are above SRP and by how much, and can filter to their own municipality. No filterable field remains invisible.
+
+### 3.2 Honest Public Aggregates
+
+[public.controller.ts](../backend/src/modules/public/public.controller.ts) caps price history at `take: 8` per commodity and [public.service.ts](../backend/src/modules/public/public.service.ts) averages those 8 records into a single `currentPrice`. Because the 8 records span multiple stores and dates, the average can hide the exact thing the system exists to expose: one store at ₱90 and one at ₱50 blend into a "Compliant" ₱70. The same cap makes the price-analysis range toggle cosmetic (6 vs. 8 points off the same 8 rows, labelled "Last 7 Days" / "Last 30 Days") and makes the landing page's coverage stats structurally wrong.
+
+- **Contract**: the public commodity payload gains **per-store latest price** and a **price range** (`minPrice`/`maxPrice` across stores, with the store behind each), and history is selected by **date window** rather than a fixed row count. `complianceStatus` is derived from the range, not the mean — any store above SRP makes the commodity non-compliant.
+- **Files (new)**: `backend/src/modules/public/public.repository.ts` — the controller currently imports `prisma` and queries directly, bypassing both service and repository layers. This is the only module in the codebase that does. Fixing it is in scope here because 3.2 rewrites that query anyway.
+- **Files (edit)**: `public.controller.ts` (thin again — fetch via repository, delegate to service), `public.service.ts` + `public.service.test.ts` (range/compliance logic, new branches tested), `frontend/src/features/public/pages/PriceAnalysisPage.tsx` (real date windows behind Week/Month; real date labels — `buildTrendInsight` currently passes `null` and emits placeholder `P1…Pn`), `frontend/src/features/dashboard/components/SummaryStats.tsx` (coverage counts from real totals, not from the latest-record-per-commodity window).
+- **Watch the payload size**: removing a fixed `take` without a date bound would ship the full 910-row history per commodity. The window is the limit.
+- **Access**: unauthenticated
+- **Done gate**: a commodity with one compliant and one overpricing store reads as **non-compliant** with both prices visible; "Last 7 Days" contains seven days of data; the landing page's store count matches the real number of monitored stores.
+
+### 3.3 Consumer Trust & Action Layer
+
+The system's purpose is SRP compliance, but a consumer who spots a violation has nowhere to go — no report path, no DTI Consumer Care route, no contact information anywhere on the site. The public pages also assume the visitor knows what an SRP is and never disclose where the numbers come from.
+
+- **Screens**: a consumer report/contact route, plus additions to `/` and `/commodity-list`
+- **Scope depends on D-9** (below) — settle it before starting. The rest of this feature is unaffected either way:
+  - **Plain-language SRP explainer** — what an SRP is, that exceeding it is reportable, what "Above SRP" on the table means.
+  - **Data provenance strip** — "Prices collected by DTI field officers · last updated {date} · {N} stores across {M} municipalities." Transparency systems live on this disclosure.
+  - **Footer** ([FooterSection.tsx](../frontend/src/shared/components/FooterSection.tsx)) — real DTI Catanduanes contact details and hotline; the copyright year is hardcoded to 2024 and the Facebook/language icons are `<span>`s that link nowhere. Wire them or remove them.
+  - **Hero image** ([HeroSection.tsx](../frontend/src/features/dashboard/components/HeroSection.tsx)) hotlinks a Google-hosted `aida-public` placeholder. Third-party content that can vanish has no place on an official government landing page — replace with a local asset. Its CTA is also a hand-rolled `rounded-xl` link rather than the `Button` primitive.
+- **Access**: unauthenticated (any admin-side queue this creates is `ADMIN`)
+- **Done gate**: a visitor who believes a store is overcharging has a clear, working next step, and can tell where the prices came from and when.
+
+**Phase 3 exit**: the public surface renders every transparency field it computes, the aggregates behind those fields are honest at the store level, and a consumer can act on what they see.
+
+---
+
+## Phase 4 — Hardening & Scale
+
+Scoped 2026-08-16 from findings during the report-generator rework. Unlike Phases 1–3 these are mostly **backend-only** items with no new screen, so they use the **Refactor Gate** (§5a) rather than the full Feature Loop — except **4.5** and **4.6**, which do change what a user sees and take the Loop in full.
+
+> **4.1 runs first and is not optional.** It closes an authorization bypass. Everything else in this phase can be reordered freely.
+
+### 4.1 Report Access Control *(B-43, B-44)*
+
+`report.repository.ts` scopes `findAll` and `deleteAll` through `resolveReportScope`, but `findById` and `findFileById` take no `authUser` and apply no scope at all. Any authenticated officer can read or download **any other officer's report** given its UUID — the route's `authorize('ADMIN','OFFICER')` gate checks role, not ownership. Separately, `loadReportRecords` in the generator queries every price record in the period, so an officer's generated report contains other officers' data even though `/officer/price-records` correctly hides it.
+
+- **Files (edit)**: `report.repository.ts` (`findById`/`findFileById` accept `authUser` and apply `resolveReportScope`), `report.service.ts`, `report.controller.ts` (pass the auth user through), `report.generator.ts` (`loadReportRecords` takes an optional officer scope, mirroring `resolvePriceRecordScope`)
+- **Tests**: extend `report.scope.test.ts` — an officer requesting another officer's report id gets nothing back; an admin gets it; an officer's generated report contains only their own records
+- **Done gate**: an OFFICER holding another officer's report UUID receives **404**, and a report generated by an officer contains only records that officer submitted. Verified against two real officer accounts, not by inspection.
+
+### 4.2 Auth Hardening *(B-45, B-46, B-47)*
+
+Login has no rate limiting, so password guessing is unmetered. The app registers no security headers. The password policy is a bare `min(8)` with no complexity rule.
+
+- **Files (new)**: `backend/src/shared/middleware/rate-limit.ts`
+- **Files (edit)**: `auth.routes.ts` (limiter on `POST /login`), `app.ts` (`helmet()` before the routers), `user.schema.ts` (shared password rule — length **and** complexity, applied to create, update, and change-password alike), the matching frontend Zod schema so both sides still agree
+- **Watch**: the limiter must key on IP **and** submitted email, or one attacker locks out every user from a shared address. Return 429 through the existing `errorHandler`, not a bespoke response.
+- **Done gate**: repeated bad logins get 429; `helmet` headers present on every response; a weak password is rejected identically by both frontend and backend.
+
+### 4.3 Server-Side Pagination *(B-50)*
+
+No list endpoint paginates. Every table ships its full result set and slices client-side — 910 price records today, growing linearly with every field visit. `Pagination` (B-30) fixed the *rendering* of this; the transport is still unbounded.
+
+- **Contract**: `page`/`pageSize` query params on the list endpoints, response gains `{ data, total, page, pageSize }`. Validated in each module's `.schema.ts` with a hard `pageSize` ceiling so the parameter can't be used to request everything.
+- **Files (edit)**: repositories (`skip`/`take`), services, controllers, schemas for `price-record`, `user`, `commodity`, `store`, `report`, `audit-log`; the frontend tables move from slicing a local array to refetching per page
+- **Order**: do `price-record` first — it is the only table with real volume — then apply the same shape to the rest.
+- **Done gate**: `/admin/price-records` transfers one page of rows, not 910; page changes refetch; totals stay correct under filters.
+
+### 4.4 Session Continuity *(B-49)*
+
+The access token expires in **1 hour** with no refresh path, so an officer mid-field-visit is logged out with unsaved work and no warning. This is the practical cost of the long-deferred `refresh_tokens` work.
+
+- **Contract**: `refresh_tokens` table ([database-design.md](database-design.md)), `POST /api/v1/auth/refresh`, rotation on use, revoke on logout
+- **Files**: new `refresh-token` handling in the `auth` module; the BFF layer refreshes transparently so no client call site changes
+- **Watch**: rotation without reuse-detection is worse than no rotation — a stolen token must invalidate the chain.
+- **Done gate**: a session survives past one hour without re-login; logout revokes; a replayed old refresh token is rejected.
+
+### 4.5 Report Type Differentiation *(B-48)*
+
+`MONTHLY`, `SRP_COMPLIANCE`, and `TREND` are stored, displayed, and selectable — and produce **identical documents**. The type currently changes only the title.
+
+- **Proposed shape** (no open decision; adjust if the DTI stakeholder wants otherwise):
+  - **MONTHLY** — the current full record listing, grouped by commodity, with per-commodity subtotals
+  - **SRP_COMPLIANCE** — violations first: per-store compliance rate, every above-SRP record with its variance, compliant records summarised rather than listed
+  - **TREND** — time series per commodity (weekly average, movement vs. period start), not a record dump
+- **Files (edit)**: `report.generator.ts` (branch the body per type; header, summary panel, and Excel summary sheet stay shared), `report.summary.ts` (per-type aggregates, unit tested)
+- **Loop**: this one **is** user-visible — take the Feature Loop, and get sign-off on a generated sample of each of the three types.
+- **Done gate**: the three types produce visibly different, individually useful documents.
+
+### 4.6 Accessibility Pass *(B-52)*
+
+Never audited — the standing ☐ on the cross-cutting checklist. `Modal` handles Escape but has no focus trap, so keyboard and screen-reader users fall through an open dialog into the page behind it. For a government service this is a compliance concern, not a nicety.
+
+- **Files (edit)**: `Modal.tsx` (focus trap, restore focus on close, `role="dialog"`/`aria-modal`), then a sweep for label association, focus-visible rings, and colour contrast on the status tokens
+- **Watch**: the status colours (`overprice` red on tinted fill) need a real contrast check — Phase 1.2 chose them for looks, never measured them.
+- **Loop**: user-visible; Feature Loop applies, with keyboard-only navigation as part of the visual-verify gate.
+- **Done gate**: every modal is keyboard-navigable and focus-trapped; status colours meet WCAG AA.
+
+**Phase 4 exit**: no authenticated user can reach another user's data, auth resists guessing, lists scale past the seed set, and sessions outlive an hour.
+
+---
+
 ## 6. Recommended MVP Slice (if time-boxed)
 
 **R0 → R2.1 → R2.6 → R1.1 → R1.2**
@@ -462,10 +576,13 @@ Closes the privilege-escalation hole and the crash, makes the tests runnable, an
 | D-3 | `MobileBottomNav` / `RoleSwitcher` — wire up or delete? | **Delete both.** Neither is functional: `MobileBottomNav` renders hardcoded `Home/Search/Alerts/Profile` `<div>`s with no links, no routing, and a static `active` flag — destinations that don't exist in this app. `RoleSwitcher` holds local `useState` that calls nothing, using lowercase role strings that don't match the `UserRole` enum. Both are template scaffolding. A real bottom nav is built in **Phase 1.1** against the actual route set if wanted. → **R1.1** |
 | D-6 | Report file storage | **Make storage backend-independent.** Reports must not depend on the backend's local filesystem. → **Phase 2.4** |
 | D-7 | Is a `PUBLIC`-role account needed? | **No — remove the role.** Public access is unauthenticated via `/api/public/*`; there is no registration endpoint and no way to obtain a `PUBLIC` account. → **R0.3** |
+| D-8 | Public compliance status — derived from the mean or from the range? | **From the range.** A commodity is non-compliant if *any* monitored store prices it above SRP. Averaging across stores lets one overpricing store hide behind a cheaper one — which defeats the purpose of a compliance system. The mean stays on screen as "Avg. recent price"; it just no longer decides the badge. → **Phase 3.2** |
 
 ### Open
 
-*None.*
+| # | Decision | Options | Blocks |
+|---|---|---|---|
+| D-9 | Consumer violation reports — handled in-app, or referred to DTI's existing channels? | **(a) Refer out** *(recommended)*: a contact/how-to-report panel pointing at DTI Consumer Care. No schema change, no moderation burden, no new admin surface, and it does not duplicate a government process that already exists. **(b) In-app**: a report form, a `consumer_reports` table, and an admin triage queue — real product scope, and it commits DTI staff to answering reports through this system. | **Phase 3.3** |
 
 ---
 
