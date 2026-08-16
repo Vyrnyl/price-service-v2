@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useToast } from "@/shared/components/Toast";
 import { ApiError } from "@/shared/services/api";
+import { isPasswordComplex, PASSWORD_POLICY_MESSAGE } from "@/shared/utils/password-policy";
 import { changeCurrentUserPassword, fetchCurrentUser, updateCurrentUser } from "../services/settings.service";
 import type { PasswordFormValues, ProfileFormValues } from "../types/settings.types";
 
@@ -38,6 +39,8 @@ function validatePassword(values: PasswordFormValues) {
 
   if (values.newPassword.length < 8) {
     errors.newPassword = "Password must be at least 8 characters.";
+  } else if (!isPasswordComplex(values.newPassword)) {
+    errors.newPassword = PASSWORD_POLICY_MESSAGE;
   }
 
   if (values.confirmNewPassword.length < 8) {

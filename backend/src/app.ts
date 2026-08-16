@@ -1,6 +1,7 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
 import apiRoutes from "./routes";
 import { asyncHandler } from "./shared/handlers/asyncHandler";
 import { errorHandler } from "./shared/handlers/errorHandler";
@@ -11,6 +12,10 @@ import { env } from "./config/env";
 import { prisma } from "./prisma";
 
 const app = express();
+
+app.set("trust proxy", 1);
+app.use(helmet());
+
 const allowedOrigins = [
   env.CORS_ORIGIN,
   "http://localhost:3000",

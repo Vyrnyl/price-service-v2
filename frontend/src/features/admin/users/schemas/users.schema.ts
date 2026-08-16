@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { isPasswordComplex, PASSWORD_POLICY_MESSAGE } from "@/shared/utils/password-policy";
 
 const baseUserSchema = z.object({
   name: z.string().trim().min(1, "Full name is required"),
@@ -9,7 +10,11 @@ const baseUserSchema = z.object({
 
 export const createUserSchema = baseUserSchema
   .extend({
-    password: z.string().trim().min(8, "Password must be at least 8 characters"),
+    password: z
+      .string()
+      .trim()
+      .min(8, "Password must be at least 8 characters")
+      .refine(isPasswordComplex, PASSWORD_POLICY_MESSAGE),
     confirmPassword: z.string().trim().min(8, "Confirm password must be at least 8 characters"),
   })
   .superRefine((data, ctx) => {
@@ -29,7 +34,12 @@ export const passwordSchema = z.preprocess(
     }
     return value;
   },
-  z.string().trim().min(8, "Password must be at least 8 characters").optional(),
+  z
+    .string()
+    .trim()
+    .min(8, "Password must be at least 8 characters")
+    .refine(isPasswordComplex, PASSWORD_POLICY_MESSAGE)
+    .optional(),
 );
 
 const confirmPasswordSchema = z.preprocess(

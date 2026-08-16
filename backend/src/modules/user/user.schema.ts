@@ -1,9 +1,15 @@
 import { z } from 'zod';
+import { isPasswordComplex, PASSWORD_POLICY_MESSAGE } from '../../shared/utils/password-policy';
+
+const passwordField = z
+  .string()
+  .min(8, "Password must be at least 8 characters")
+  .refine(isPasswordComplex, PASSWORD_POLICY_MESSAGE);
 
 const userSchema = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(8, "Password must be at least 8 characters"),
+  password: passwordField,
   confirmPassword: z.string().min(8, "Confirm password must be at least 8 characters"),
   role: z.enum(["ADMIN", "OFFICER"]),
   isActive: z.boolean().optional(),
@@ -20,7 +26,7 @@ export const createUserSchema = userSchema.refine(
 const updateUserBaseSchema = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email().optional(),
-  password: z.string().min(8).optional(),
+  password: passwordField.optional(),
   confirmPassword: z.string().min(8).optional(),
   role: z.enum(["ADMIN", "OFFICER"]).optional(),
   isActive: z.boolean().optional(),
@@ -46,7 +52,7 @@ export const updateProfileSchema = z.object({
 export const changePasswordSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
-    newPassword: z.string().min(8, "Password must be at least 8 characters"),
+    newPassword: passwordField,
     confirmNewPassword: z.string().min(8, "Confirm password must be at least 8 characters"),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
