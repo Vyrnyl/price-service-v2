@@ -6,9 +6,10 @@ import type { AuthUser } from '../../shared/types/express';
 export const reportService = {
   createReport: (data: CreateReportWithFileInput, userId: string) => reportRepository.create(data, userId),
   getReports: (authUser?: AuthUser) => reportRepository.findAll(authUser),
-  getReportById: (id: string) => reportRepository.findById(id),
-  getReportFile: (id: string) => reportRepository.findFileById(id),
-  updateReport: (id: string, data: UpdateReportInput) => reportRepository.update(id, data),
-  deleteReport: (id: string) => reportRepository.delete(id),
+  getReportById: (id: string, authUser?: AuthUser) => reportRepository.findById(id, authUser),
+  getReportFile: (id: string, authUser?: AuthUser) => reportRepository.findFileById(id, authUser),
+  updateReport: (id: string, data: UpdateReportInput, authUser?: AuthUser) =>
+    reportRepository.update(id, data, authUser),
+  deleteReport: (id: string, authUser?: AuthUser) => reportRepository.delete(id, authUser),
   deleteAllReports: (authUser?: AuthUser) => reportRepository.deleteAll(authUser),
 };

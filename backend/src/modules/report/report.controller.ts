@@ -6,16 +6,27 @@ import { generateReportFile } from './report.generator';
 import type { CreateReportWithFileInput } from './report.types';
 import type { AuthUser } from '../../shared/types/express';
 
+/**
+ * Every handler below resolves the caller this way and refuses without one.
+ * The scope helpers treat "no user" as "no restriction", so reading `req.user`
+ * loosely would fail *open* — the exact shape of the bypass this module had.
+ */
+function requireAuthUser(req: Request): AuthUser {
+  const authUser = req.user as AuthUser | undefined;
+
+  if (!authUser) {
+    throw new AppError('Unauthorized', 401);
+  }
+
+  return authUser;
+}
+
 export const reportController = {
   createReport: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-
-    if (!authUser) {
-      throw new AppError('Unauthorized', 401);
-    }
+    const authUser = requireAuthUser(req);
 
     const validatedBody = createReportSchema.parse(req.body);
-    const generated = await generateReportFile(validatedBody, authUser.email);
+    const generated = await generateReportFile(validatedBody, authUser.email, authUser);
 
     const reportPayload: CreateReportWithFileInput = {
       ...validatedBody,
@@ -30,15 +41,16 @@ export const reportController = {
   },
 
   getReports: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
+    const authUser = requireAuthUser(req);
     const reports = await reportService.getReports(authUser);
 
     res.json({ status: 'success', data: reports });
   },
 
   getReportById: async (req: Request, res: Response) => {
+    const authUser = requireAuthUser(req);
     const { id } = reportIdParamSchema.parse(req.params);
-    const report = await reportService.getReportById(id);
+    const report = await reportService.getReportById(id, authUser);
 
     if (!report) {
       throw new AppError('Report not found', 404);
@@ -48,8 +60,9 @@ export const reportController = {
   },
 
   downloadReport: async (req: Request, res: Response) => {
+    const authUser = requireAuthUser(req);
     const { id } = reportIdParamSchema.parse(req.params);
-    const file = await reportService.getReportFile(id);
+    const file = await reportService.getReportFile(id, authUser);
 
     if (!file) {
       throw new AppError('Report not found', 404);
@@ -61,9 +74,10 @@ export const reportController = {
   },
 
   updateReport: async (req: Request, res: Response) => {
+    const authUser = requireAuthUser(req);
     const { id } = reportIdParamSchema.parse(req.params);
     const validatedBody = updateReportSchema.parse(req.body);
-    const report = await reportService.updateReport(id, validatedBody);
+    const report = await reportService.updateReport(id, validatedBody, authUser);
 
     if (!report) {
       throw new AppError('Report not found', 404);
@@ -73,15 +87,16 @@ export const reportController = {
   },
 
   deleteReport: async (req: Request, res: Response) => {
+    const authUser = requireAuthUser(req);
     const { id } = reportIdParamSchema.parse(req.params);
 
-    await reportService.deleteReport(id);
+    await reportService.deleteReport(id, authUser);
 
     res.status(204).send();
   },
 
   deleteAllReports: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
+    const authUser = requireAuthUser(req);
     await reportService.deleteAllReports(authUser);
 
     res.status(204).send();

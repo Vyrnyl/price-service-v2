@@ -41,17 +41,26 @@ export const reportRepository = {
     });
   },
 
-  findById: (id: string) =>
-    prisma.report.findUnique({
-      where: { id },
-      select: reportSummarySelect,
-    }),
+  // `findFirst`, not `findUnique`: the scope is a second predicate alongside the
+  // id, so a report outside the caller's scope reads as "not found" (404) rather
+  // than being returned to whoever holds the UUID.
+  findById: (id: string, authUser?: AuthUser) => {
+    const scope = resolveReportScope(authUser);
 
-  findFileById: (id: string) =>
-    prisma.report.findUnique({
-      where: { id },
+    return prisma.report.findFirst({
+      where: { id, ...scope },
+      select: reportSummarySelect,
+    });
+  },
+
+  findFileById: (id: string, authUser?: AuthUser) => {
+    const scope = resolveReportScope(authUser);
+
+    return prisma.report.findFirst({
+      where: { id, ...scope },
       select: { filename: true, contentType: true, fileContent: true },
-    }),
+    });
+  },
 
   deleteAll: (authUser?: AuthUser) => {
     const scope = resolveReportScope(authUser);
@@ -59,19 +68,26 @@ export const reportRepository = {
     return prisma.report.deleteMany({ where: scope });
   },
 
-  update: (id: string, data: UpdateReportInput) => {
+  // Writes carry the same scope as reads — otherwise an officer holding another
+  // officer's UUID could still rename or delete it. No match raises Prisma
+  // P2025, which `errorHandler` already maps to 404.
+  update: (id: string, data: UpdateReportInput, authUser?: AuthUser) => {
     const { format, commodityGroup, storeId, ...rest } = data;
+    const scope = resolveReportScope(authUser);
     const updateData: Prisma.ReportUpdateInput = {
       ...rest,
     };
 
     return prisma.report.update({
-      where: { id },
+      where: { id, ...scope },
       data: updateData,
       select: reportSummarySelect,
     });
   },
 
-  delete: (id: string) =>
-    prisma.report.delete({ where: { id } }),
+  delete: (id: string, authUser?: AuthUser) => {
+    const scope = resolveReportScope(authUser);
+
+    return prisma.report.delete({ where: { id, ...scope } });
+  },
 };

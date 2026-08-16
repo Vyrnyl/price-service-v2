@@ -9,6 +9,8 @@ import {
   type ReportSummary,
   type SrpLookupEntry,
 } from './report.summary';
+import { resolveReportRecordScope } from './report.scope';
+import type { AuthUser } from '../../shared/types/express';
 
 export type ReportGeneratorPayload = CreateReportInput;
 
@@ -98,7 +100,12 @@ function mapStoreFilter(storeId?: string): Prisma.PriceRecordWhereInput | undefi
   return { storeId } as Prisma.PriceRecordWhereInput;
 }
 
-async function loadReportRecords(period: string, commodityGroup?: string, storeId?: string) {
+async function loadReportRecords(
+  period: string,
+  commodityGroup?: string,
+  storeId?: string,
+  authUser?: AuthUser,
+) {
   const { startDate, endDate } = parsePeriod(period);
 
   return prisma.priceRecord.findMany({
@@ -109,6 +116,7 @@ async function loadReportRecords(period: string, commodityGroup?: string, storeI
       },
       ...mapCommodityGroupFilter(commodityGroup),
       ...mapStoreFilter(storeId),
+      ...resolveReportRecordScope(authUser),
     },
     include: {
       commodity: true,
@@ -753,9 +761,15 @@ async function generateExcel(
 export async function generateReportFile(
   payload: ReportGeneratorPayload,
   generatedBy = 'PresyoSerbisyo',
+  authUser?: AuthUser,
 ) {
   const filename = buildReportFilename(payload.type, payload.format);
-  const records = await loadReportRecords(payload.period, payload.commodityGroup, payload.storeId);
+  const records = await loadReportRecords(
+    payload.period,
+    payload.commodityGroup,
+    payload.storeId,
+    authUser,
+  );
 
   const commodityIds = Array.from(new Set(records.map((record) => record.commodityId)));
   const srps = await loadSrpLookup(commodityIds);

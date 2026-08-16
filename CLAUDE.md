@@ -10,14 +10,16 @@ Roles: `ADMIN` · `OFFICER` (accounts) · unauthenticated public access
 
 Check [context/progress.md](context/progress.md) at the start of every session — it is the single source of truth for what is actually built. Never assume a feature exists; verify there first.
 
-> 🔴 **One open authorization bypass — B-43.** `report.repository.ts`'s `findById` and `findFileById` take no `authUser` and apply no scope, while `findAll` and `deleteAll` in the same file both route through `resolveReportScope`. `authorize('ADMIN','OFFICER')` checks role, not ownership, so **any officer can read or download any other officer's report** given its UUID. Closed by **Phase 4.1**, which runs before the rest of Phase 4.
+> ✅ **No open security findings, any severity.** The report IDOR (B-43) was closed by **Phase 4.1** on 2026-08-16 and live-verified with two real officer accounts.
 
-**Two phases are scoped and unstarted:**
+**Two phases are in play:**
 
-- **Phase 3 — Public Transparency** (3.1–3.3, findings B-31–B-38). **3.1 is the highest value-per-line item in the plan** — the public commodity table computes compliance status and price for every row and then renders neither; backend, transport, and row-mapping are already done. **D-9 is open and gates 3.3 only**; 3.1 and 3.2 are unblocked.
-- **Phase 4 — Hardening & Scale** (4.1–4.6, findings B-43–B-52). Security, pagination, sessions, accessibility. Start at 4.1.
+- **Phase 3 — Public Transparency** (3.1–3.3, findings B-31–B-38) — **unstarted.** **3.1 is the highest value-per-line item in the plan** — the public commodity table computes compliance status and price for every row and then renders neither; backend, transport, and row-mapping are already done. **D-9 is open and gates 3.3 only**; 3.1 and 3.2 are unblocked.
+- **Phase 4 — Hardening & Scale** (4.1–4.6, findings B-43–B-52) — **1/6 done.** 4.1 ● (B-43, B-44). The remaining five can be done in any order; **4.2 Auth Hardening** is the next-highest value for the effort.
 
-Verified baseline (2026-08-16): backend `tsc` clean · frontend `tsc` clean · `npm test` 42/42 passing.
+**Ownership is not a role check.** `authorize(...roles)` gates *who may use a route*, never *whose row this is*. Any id-addressed route on an own-data domain also needs its module's scope helper applied in the repository — on writes as much as reads. That gap is what made B-43 reachable; see [context/architecture.md](context/architecture.md) §8.
+
+Verified baseline (2026-08-16): backend `tsc` clean · frontend `tsc` clean · `npm test` 55/55 passing.
 
 ## The one rule that governs everything
 
