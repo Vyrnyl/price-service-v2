@@ -1,21 +1,26 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
-import { MdKeyboardArrowDown, MdLocalDining, MdLocalGroceryStore, MdSearch } from "react-icons/md";
+import Link from "next/link";
+import { MdLocalDining, MdLocalGroceryStore, MdSearch } from "react-icons/md";
 import { PriceRecordsTable, type PriceRecord } from "@/features/price-record";
+import Badge, { type BadgeVariant } from "@/shared/components/Badge";
+import DataProvenanceStrip from "@/shared/components/DataProvenanceStrip";
+import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
+import PageShell from "@/shared/components/PageShell";
 import Pagination from "@/shared/components/Pagination";
-import { getPublicCommodities, type PublicCommodityItem } from "../services/commodity.api";
+import Select from "@/shared/components/Select";
+import { getPublicCommodities, type PublicCommodityItem, type PublicPriceRange } from "../services/commodity.api";
 
 interface CommodityRow {
   id: string;
   name: string;
   category: string;
   commodityStatus: string;
-  current: string;
+  priceRangeLabel: string;
   srp: string;
   status: string;
-  statusTone: string;
   lastUpdated: string;
   storeName: string;
   municipality: string;
@@ -36,6 +41,23 @@ function formatCurrency(value: number | null) {
   }).format(value);
 }
 
+/**
+ * Shows the honest spread across reporting stores rather than a single blended
+ * figure — a range is the only way "one cheap store, one overpriced store" stays
+ * visible instead of averaging out to something that looks fine (D-8).
+ */
+function formatPriceRange(range: PublicPriceRange | null, fallback: number | null) {
+  if (!range) {
+    return formatCurrency(fallback);
+  }
+
+  if (range.min === range.max) {
+    return formatCurrency(range.min);
+  }
+
+  return `${formatCurrency(range.min)} – ${formatCurrency(range.max)}`;
+}
+
 function formatLastUpdated(value: string | null) {
   if (!value) {
     return "Recently updated";
@@ -54,16 +76,16 @@ function formatLastUpdated(value: string | null) {
   }).format(date);
 }
 
-function getStatusTone(status: string) {
+function getStatusBadgeVariant(status: string): BadgeVariant {
   switch (status) {
     case "Above SRP":
-      return "bg-error/10 text-error";
+      return "error";
     case "Below SRP":
-      return "bg-success/10 text-success";
+      return "success";
     case "Compliant":
-      return "bg-primary/10 text-primary";
+      return "primary";
     default:
-      return "bg-surface-container/10 text-on-surface-variant";
+      return "neutral";
   }
 }
 
@@ -109,10 +131,9 @@ function mapCommoditiesToRows(commodities: PublicCommodityItem[]): CommodityRow[
     name: commodity.name,
     category: commodity.category,
     commodityStatus: commodity.status || "Unknown",
-    current: formatCurrency(commodity.currentPrice),
+    priceRangeLabel: formatPriceRange(commodity.priceRange, commodity.currentPrice),
     srp: formatCurrency(commodity.srpPrice),
     status: commodity.complianceStatus || "Unknown",
-    statusTone: getStatusTone(commodity.complianceStatus || "Unknown"),
     lastUpdated: formatLastUpdated(commodity.lastUpdatedAt),
     storeName: commodity.storeName || "N/A",
     municipality: commodity.storeLocation || "N/A",
@@ -144,6 +165,8 @@ export default function CommodityListPage() {
   const [allRows, setAllRows] = useState<CommodityRow[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
+  const [statusFilter, setStatusFilter] = useState("All");
+  const [municipalityFilter, setMunicipalityFilter] = useState("All");
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -164,6 +187,23 @@ export default function CommodityListPage() {
     return ["All", ...Array.from(new Set(values))];
   }, [allRows]);
 
+  const statuses = useMemo(() => {
+    const values = allRows
+      .map((row) => row.status)
+      .filter((value): value is string => Boolean(value))
+      .sort();
+
+    return ["All", ...Array.from(new Set(values))];
+  }, [allRows]);
+
+  const municipalities = useMemo(() => {
+    const values = allRows
+      .map((row) => row.municipality)
+      .filter((value): value is string => Boolean(value) && value !== "N/A")
+      .sort();
+
+    return ["All", ...Array.from(new Set(values))];
+  }, [allRows]);
 
   const tableRows = useMemo(() => {
     const normalizedSearch = searchTerm.trim().toLowerCase();
@@ -176,10 +216,12 @@ export default function CommodityListPage() {
         );
 
       const matchesCategory = categoryFilter === "All" || row.category === categoryFilter;
+      const matchesStatus = statusFilter === "All" || row.status === statusFilter;
+      const matchesMunicipality = municipalityFilter === "All" || row.municipality === municipalityFilter;
 
-      return matchesSearch && matchesCategory;
+      return matchesSearch && matchesCategory && matchesStatus && matchesMunicipality;
     });
-  }, [allRows, categoryFilter, searchTerm]);
+  }, [allRows, categoryFilter, municipalityFilter, searchTerm, statusFilter]);
 
   const totalPages = Math.max(1, Math.ceil(tableRows.length / pageSize));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -190,7 +232,7 @@ export default function CommodityListPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, categoryFilter]);
+  }, [searchTerm, categoryFilter, statusFilter, municipalityFilter]);
 
   useEffect(() => {
     setRecordPage(1);
@@ -265,7 +307,7 @@ export default function CommodityListPage() {
   }, [filteredRecordRows, safeRecordPage]);
 
   return (
-    <main className="flex-1 overflow-y-auto overflow-x-hidden p-container-margin-mobile md:p-container-margin-desktop lg:ml-72">
+    <PageShell className="overflow-x-hidden p-container-margin-mobile md:p-container-margin-desktop">
       <section className="space-y-4 pb-6">
         <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
           <div>
@@ -278,35 +320,60 @@ export default function CommodityListPage() {
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 shadow-sm md:flex-row md:items-center">
-          <div className="relative w-full md:max-w-xs">
-            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
-            <input
-              className="w-full rounded-xl border border-outline-variant bg-surface py-2.5 pl-10 pr-3 text-sm outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary"
-              placeholder="Search Commodity..."
-              type="text"
-              value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="mr-1 text-[11px] font-medium uppercase tracking-wide text-outline">Filters:</span>
-            <label className="relative flex items-center gap-1 overflow-hidden rounded-full bg-surface-container-high px-3 py-1.5 text-xs text-on-surface transition-colors hover:bg-surface-container-highest">
-              <span className="whitespace-nowrap">{categoryFilter === "All" ? "Category: All" : `Category: ${categoryFilter}`}</span>
-              <MdKeyboardArrowDown />
-              <select
-                className="absolute inset-0 z-10 h-full w-full cursor-pointer appearance-none opacity-0"
-                value={categoryFilter}
-                onChange={(event) => setCategoryFilter(event.target.value)}
-                aria-label="Filter by category"
-              >
-                {categories.map((category) => (
-                  <option key={category} value={category}>
-                    {category === "All" ? "All categories" : category}
-                  </option>
-                ))}
-              </select>
-            </label>
+        <DataProvenanceStrip />
+
+        <p className="text-sm text-on-surface-variant">
+          Not sure what <Badge variant="error">Above SRP</Badge> means, or spotted a price that looks wrong?{" "}
+          <Link href="/report-a-concern" className="font-semibold text-primary hover:underline">
+            Learn about SRP & how to report it →
+          </Link>
+        </p>
+
+        <div className="space-y-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
+          <Input
+            icon={<MdSearch size={20} />}
+            placeholder="Search commodity, store, or municipality..."
+            type="text"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+          />
+
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+            <Select
+              value={categoryFilter}
+              onChange={(event) => setCategoryFilter(event.target.value)}
+              aria-label="Filter by category"
+            >
+              {categories.map((category) => (
+                <option key={category} value={category}>
+                  {category === "All" ? "All categories" : category}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              value={statusFilter}
+              onChange={(event) => setStatusFilter(event.target.value)}
+              aria-label="Filter by compliance status"
+            >
+              {statuses.map((status) => (
+                <option key={status} value={status}>
+                  {status === "All" ? "All statuses" : status}
+                </option>
+              ))}
+            </Select>
+
+            <Select
+              value={municipalityFilter}
+              onChange={(event) => setMunicipalityFilter(event.target.value)}
+              aria-label="Filter by municipality"
+            >
+              {municipalities.map((municipality) => (
+                <option key={municipality} value={municipality}>
+                  {municipality === "All" ? "All municipalities" : municipality}
+                </option>
+              ))}
+            </Select>
           </div>
         </div>
       </section>
@@ -318,69 +385,135 @@ export default function CommodityListPage() {
           </div>
         ) : null}
 
-        <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="min-w-full border-collapse text-left">
-              <thead>
-                <tr className="border-b border-outline-variant bg-surface-container-low">
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Commodity</th>
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Category</th>
-                  <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">SRP</th>
-                </tr>
-              </thead>
-              <tbody>
-                {isLoading ? (
-                  <tr>
-                    <td colSpan={3} className="py-12 text-center text-sm text-on-surface-variant">
-                      Loading commodities...
-                    </td>
+        <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow">
+          <div className="hidden md:block">
+            <div className="overflow-x-auto">
+              <table className="min-w-full border-collapse text-left">
+                <thead>
+                  <tr className="border-b border-outline-variant bg-surface-container-low">
+                    <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Commodity</th>
+                    <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Category</th>
+                    <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Price Range</th>
+                    <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">SRP</th>
+                    <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Compliance</th>
+                    <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Last Updated</th>
                   </tr>
-                ) : tableRows.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="py-12 text-center text-sm text-on-surface-variant">
-                      No commodities found.
-                    </td>
-                  </tr>
-                ) : (
-                  pagedRows.map((row) => {
-                    const Icon = row.icon;
-                    return (
-                      <tr
-                        key={row.id}
-                        className="cursor-pointer border-b border-outline-variant transition-colors last:border-b-0 hover:bg-surface-container"
-                        onClick={() => handleOpenCommodityRecords(row)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault();
-                            handleOpenCommodityRecords(row);
-                          }
-                        }}
-                        tabIndex={0}
-                        role="button"
-                      >
-                        <td className="px-3 py-3">
-                          <div className="flex items-center gap-3">
-                            <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${row.iconBg}`}>
-                              <Icon className="text-base" />
-                            </div>
-                            <div>
-                              <div className="text-sm font-semibold text-on-surface">{row.name}</div>
-                              <div className="text-[11px] text-outline">
-                                {row.storeName !== "N/A" ? `${row.storeName}` : "No recent store data"}
+                </thead>
+                <tbody>
+                  {isLoading ? (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-sm text-on-surface-variant">
+                        Loading commodities...
+                      </td>
+                    </tr>
+                  ) : tableRows.length === 0 ? (
+                    <tr>
+                      <td colSpan={6} className="py-12 text-center text-sm text-on-surface-variant">
+                        No commodities found.
+                      </td>
+                    </tr>
+                  ) : (
+                    pagedRows.map((row) => {
+                      const Icon = row.icon;
+                      return (
+                        <tr
+                          key={row.id}
+                          className="cursor-pointer border-b border-outline-variant transition-colors last:border-b-0 hover:bg-surface-container"
+                          onClick={() => handleOpenCommodityRecords(row)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              handleOpenCommodityRecords(row);
+                            }
+                          }}
+                          tabIndex={0}
+                          role="button"
+                        >
+                          <td className="px-3 py-3">
+                            <div className="flex items-center gap-3">
+                              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${row.iconBg}`}>
+                                <Icon className="text-base" />
+                              </div>
+                              <div>
+                                <div className="text-sm font-semibold text-on-surface">{row.name}</div>
+                                <div className="text-[11px] text-outline">
+                                  {row.storeName !== "N/A" ? `${row.storeName} · ${row.municipality}` : "No recent store data"}
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="px-3 py-3">
-                          <span className="rounded-md bg-surface-variant px-2.5 py-1 text-xs text-on-surface-variant">{row.category}</span>
-                        </td>
-                        <td className="px-3 py-3 text-sm text-outline">{row.srp}</td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
+                          </td>
+                          <td className="px-3 py-3">
+                            <span className="rounded-md bg-surface-variant px-2.5 py-1 text-xs text-on-surface-variant">{row.category}</span>
+                          </td>
+                          <td className="px-3 py-3 text-sm font-medium text-on-surface">{row.priceRangeLabel}</td>
+                          <td className="px-3 py-3 text-sm text-outline">{row.srp}</td>
+                          <td className="px-3 py-3">
+                            <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge>
+                          </td>
+                          <td className="px-3 py-3 text-xs text-on-surface-variant">{row.lastUpdated}</td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div className="space-y-3 p-3 md:hidden">
+            {isLoading ? (
+              <p className="py-8 text-center text-sm text-on-surface-variant">Loading commodities...</p>
+            ) : tableRows.length === 0 ? (
+              <p className="py-8 text-center text-sm text-on-surface-variant">No commodities found.</p>
+            ) : (
+              pagedRows.map((row) => {
+                const Icon = row.icon;
+                return (
+                  <div
+                    key={row.id}
+                    className="cursor-pointer rounded-xl border border-outline-variant bg-surface-container-low p-4 transition-colors hover:bg-surface-container"
+                    onClick={() => handleOpenCommodityRecords(row)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleOpenCommodityRecords(row);
+                      }
+                    }}
+                    tabIndex={0}
+                    role="button"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${row.iconBg}`}>
+                          <Icon className="text-base" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-on-surface">{row.name}</p>
+                          <p className="mt-0.5 text-[11px] text-outline">{row.category}</p>
+                        </div>
+                      </div>
+                      <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge>
+                    </div>
+
+                    <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                      <div>
+                        <p className="text-on-surface-variant">Price range</p>
+                        <p className="font-semibold text-on-surface">{row.priceRangeLabel}</p>
+                      </div>
+                      <div>
+                        <p className="text-on-surface-variant">SRP</p>
+                        <p className="font-semibold text-on-surface">{row.srp}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between border-t border-outline-variant pt-2 text-[11px] text-on-surface-variant">
+                      <span>{row.storeName !== "N/A" ? `${row.storeName} · ${row.municipality}` : "No recent store data"}</span>
+                      <span>{row.lastUpdated}</span>
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
 
@@ -468,6 +601,6 @@ export default function CommodityListPage() {
             )}
         </Modal>
       ) : null}
-    </main>
+    </PageShell>
   );
 }

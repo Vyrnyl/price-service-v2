@@ -6,7 +6,9 @@ import {
   MdTrendingUp,
 } from "react-icons/md";
 import { getPublicCommodities, type PublicCommodityItem } from "@/features/commodity";
+import DataProvenanceStrip from "@/shared/components/DataProvenanceStrip";
 import PageShell from "@/shared/components/PageShell";
+import SrpExplainerCard from "@/shared/components/SrpExplainerCard";
 import HeroSection from "../components/HeroSection";
 import SummaryStats from "../components/SummaryStats";
 
@@ -187,9 +189,19 @@ export default function DashboardPage() {
   return (
     <PageShell>
       <HeroSection />
+
+      <div className="px-container-margin-mobile pt-8 md:px-container-margin-desktop">
+        <div className="mx-auto max-w-6xl">
+          <DataProvenanceStrip />
+        </div>
+      </div>
+
       <SummaryStats />
 
       <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
+        <div className="mx-auto max-w-6xl">
+          <SrpExplainerCard className="mb-6" />
+        </div>
         <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1.35fr_0.65fr]">
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
             <div className="mb-6 flex items-center justify-between">

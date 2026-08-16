@@ -20,7 +20,7 @@ export default function HeroSection() {
           <div className="flex flex-wrap gap-4 pt-4">
             <Link
               href="/commodity-list"
-              className="flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-sans text-h3-desktop text-on-primary transition-all hover:shadow-lg active:scale-95"
+              className="inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 font-sans text-body-sm font-semibold text-on-primary transition-colors hover:bg-primary-container"
             >
               View Commodity Prices
               <FaArrowRight />
@@ -30,9 +30,9 @@ export default function HeroSection() {
         <div className="w-full max-w-lg flex-1">
           <div className="relative overflow-hidden rounded-xl bg-surface-container-low p-4 data-card-shadow">
             <img
-              alt="Data Visualization"
+              alt="Rice being measured at a market stall, one of the commodities DTI Catanduanes monitors for SRP compliance"
               className="h-auto w-full rounded-lg object-cover"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuC4l2XNNWDJVMlZ3nduFfQ7vc8UXlsMAfU6KvCLyE3h1LsI1j-NkhybqjK5cSv7_RgnqELg35go9bgGzoRLM98w3MGd4x79ku1eSiG9S0hs0xu_aOgq05_yZ28lvJyjCx72F5VBW0nGUz8I4GgJ-Wy6U2agjumOA_akrx_zs2H6I7GpXOq4tKH1vBtBCiHsHb4VESVPerb1W63JY527ndOmhcIA5yB7XPFJnzy4h4xRQzVZNe2d9epOcB7nJCGBFWjS0zA8SP9s-VI"
+              src="/images.webp"
             />
           </div>
         </div>
