@@ -15,7 +15,7 @@ export const reportController = {
     }
 
     const validatedBody = createReportSchema.parse(req.body);
-    const generated = await generateReportFile(validatedBody);
+    const generated = await generateReportFile(validatedBody, authUser.email);
 
     const reportPayload: CreateReportWithFileInput = {
       ...validatedBody,
