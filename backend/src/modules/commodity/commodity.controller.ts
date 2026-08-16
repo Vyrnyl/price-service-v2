@@ -1,7 +1,12 @@
 import { Request, Response } from 'express';
 import AppError from '../../shared/utils/AppError';
 import { commodityService } from './commodity.service';
-import { createCommoditySchema, updateCommoditySchema, commodityIdParamSchema } from './commodity.schema';
+import {
+  createCommoditySchema,
+  updateCommoditySchema,
+  commodityIdParamSchema,
+  listCommoditiesQuerySchema,
+} from './commodity.schema';
 
 export const commodityController = {
   createCommodity: async (req: Request, res: Response) => {
@@ -11,10 +16,11 @@ export const commodityController = {
     res.status(201).json({ status: 'success', data: commodity });
   },
 
-  getCommodities: async (_req: Request, res: Response) => {
-    const commodities = await commodityService.getCommodities();
+  getCommodities: async (req: Request, res: Response) => {
+    const query = listCommoditiesQuerySchema.parse(req.query);
+    const { data, total, page, pageSize } = await commodityService.getCommodities(query);
 
-    res.json({ status: 'success', data: commodities });
+    res.json({ status: 'success', data, total, page, pageSize });
   },
 
   getCommodityById: async (req: Request, res: Response) => {

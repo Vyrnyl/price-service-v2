@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { MdAdd } from "react-icons/md";
 import { apiFetch } from "@/shared/services/api";
+import type { PaginatedResponse } from "@/shared/types/pagination";
 import { useToast } from "@/shared/components/Toast";
 import PageShell from "@/shared/components/PageShell";
 import Modal from "@/shared/components/Modal";
@@ -17,10 +18,8 @@ import type {
   StoreOption,
 } from "../types/price-record.types";
 
-const FILTERS = [
-  { id: "all", label: "All Price Records" },
-  { id: "compliant", label: "Compliant" },
-];
+const PAGE_SIZE = 5;
+const SEARCH_DEBOUNCE_MS = 300;
 
 function formatInputDateTime(value: string) {
   const date = new Date(value);
@@ -156,12 +155,13 @@ export default function PriceRecordsPage({
   hideActions?: boolean;
 }) {
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilter, setActiveFilter] = useState("all");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("");
   const [commodityFilter, setCommodityFilter] = useState("");
   const [stores, setStores] = useState<StoreOption[]>([]);
   const [commodities, setCommodities] = useState<CommodityOption[]>([]);
-  const [records, setRecords] = useState<PriceRecord[]>([]);
+  const [rawRecords, setRawRecords] = useState<BackendPriceRecord[]>([]);
+  const [total, setTotal] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<PriceRecord | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
@@ -173,56 +173,68 @@ export default function PriceRecordsPage({
   const [currentPage, setCurrentPage] = useState(1);
   const { showToast } = useToast();
 
+  // Reference data for the form/filter dropdowns — commodities and stores are
+  // bounded registry data (well under the pagination ceiling), so one page at
+  // the ceiling size is effectively "all" without a separate unpaginated endpoint.
   useEffect(() => {
-    const loadData = async () => {
+    const loadOptions = async () => {
       try {
-        const [storeResponse, commodityResponse, recordResponse] =
-          await Promise.all([
-            apiFetch<{ status: string; data: StoreOption[] }>("/api/stores"),
-            apiFetch<{ status: string; data: CommodityOption[] }>(
-              "/api/commodities",
-            ),
-            apiFetch<{ status: string; data: BackendPriceRecord[] }>("/api/price-records"),
-          ]);
+        const [storeResponse, commodityResponse] = await Promise.all([
+          apiFetch<{ status: string; data: StoreOption[] }>("/api/stores?pageSize=100"),
+          apiFetch<{ status: string; data: CommodityOption[] }>("/api/commodities?pageSize=100"),
+        ]);
 
         setStores(storeResponse.data);
         setCommodities(commodityResponse.data);
-        setRecords(recordResponse.data.map((record) => mapBackendPriceRecord(record, commodityResponse.data)));
       } catch (error) {
-        console.error("Unable to load price record data", error);
+        console.error("Unable to load store/commodity options", error);
       }
     };
 
-    void loadData();
+    void loadOptions();
   }, []);
 
-  const filteredRecords = useMemo(() => {
-    const query = searchQuery.trim().toLowerCase();
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+      setCurrentPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [searchQuery]);
 
-    return records.filter((record) => {
-      const matchesFilter =
-        activeFilter === "all" ||
-        (activeFilter === "above" && record.status === "Above SRP") ||
-        (activeFilter === "compliant" && record.status === "Compliant");
+  const loadRecords = async (page: number) => {
+    try {
+      const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
+      if (debouncedSearch) params.set("search", debouncedSearch);
+      if (storeFilter) params.set("storeId", storeFilter);
+      if (commodityFilter) params.set("commodityId", commodityFilter);
 
-      const matchesSearch =
-        query === "" ||
-        record.store.toLowerCase().includes(query) ||
-        record.commodity.toLowerCase().includes(query) ||
-        record.officerName.toLowerCase().includes(query);
+      const response = await apiFetch<PaginatedResponse<BackendPriceRecord>>(
+        `/api/price-records?${params.toString()}`,
+      );
 
-      const matchesStore = storeFilter === "" || record.storeId === storeFilter;
-      const matchesCommodity =
-        commodityFilter === "" || record.commodityId === commodityFilter;
+      setRawRecords(response.data);
+      setTotal(response.total);
+    } catch (error) {
+      console.error("Unable to load price record data", error);
+    }
+  };
 
-      return matchesFilter && matchesSearch && matchesStore && matchesCommodity;
-    });
-  }, [activeFilter, commodityFilter, records, searchQuery, storeFilter]);
+  useEffect(() => {
+    async function run() {
+      await loadRecords(currentPage);
+    }
+    void run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, debouncedSearch, storeFilter, commodityFilter]);
 
-  const pageSize = 5;
-  const totalPages = Math.max(1, Math.ceil(filteredRecords.length / pageSize));
+  const records = useMemo(
+    () => rawRecords.map((record) => mapBackendPriceRecord(record, commodities)),
+    [rawRecords, commodities],
+  );
+
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safePage = Math.min(currentPage, totalPages);
-  const pagedRecords = filteredRecords.slice((safePage - 1) * pageSize, safePage * pageSize);
 
   const handleFieldChange = (
     field: keyof CreatePriceRecordPayload,
@@ -294,7 +306,7 @@ export default function PriceRecordsPage({
         ...newRecord,
         dateAndTime: new Date(newRecord.dateAndTime).toISOString(),
       };
-      const response = await apiFetch<{ status: string; data: BackendPriceRecord }>(
+      await apiFetch<{ status: string; data: BackendPriceRecord }>(
         editingRecord ? `/api/price-records/${editingRecord.id}` : "/api/price-records",
         {
           method: editingRecord ? "PUT" : "POST",
@@ -303,22 +315,15 @@ export default function PriceRecordsPage({
       );
 
       if (editingRecord) {
-        setRecords((current) =>
-          current.map((record) =>
-            record.id === editingRecord.id
-              ? mapBackendPriceRecord(response.data, commodities)
-              : record,
-          ),
-        );
         showToast("Price record updated successfully.", "success");
       } else {
-        setRecords((current) => [
-          mapBackendPriceRecord(response.data, commodities),
-          ...current,
-        ]);
         showToast("Price record created successfully.", "success");
       }
 
+      await loadRecords(editingRecord ? safePage : 1);
+      if (!editingRecord) {
+        setCurrentPage(1);
+      }
       handleCloseForm();
     } catch (error: unknown) {
       setFormError(
@@ -343,8 +348,7 @@ export default function PriceRecordsPage({
                   Price Records
                 </h1>
                 <p className="mt-1 text-body-sm text-on-surface-variant">
-                  Showing {records.length} validated entries in the last 30
-                  days.
+                  Showing {total} validated entries.
                 </p>
               </div>
               {canCreateRecord ? (
@@ -366,8 +370,14 @@ export default function PriceRecordsPage({
               storeFilter={storeFilter}
               commodityFilter={commodityFilter}
               onSearchChange={setSearchQuery}
-              onStoreChange={setStoreFilter}
-              onCommodityChange={setCommodityFilter}
+              onStoreChange={(value) => {
+                setStoreFilter(value);
+                setCurrentPage(1);
+              }}
+              onCommodityChange={(value) => {
+                setCommodityFilter(value);
+                setCurrentPage(1);
+              }}
               stores={stores}
               commodities={commodities}
             />
@@ -402,15 +412,15 @@ export default function PriceRecordsPage({
 
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:p-3">
             <PriceRecordsTable
-              records={pagedRecords}
+              records={records}
               onEdit={handleEditRecord}
               hideActions={hideActions}
               hideOfficerColumn
             />
-            {filteredRecords.length > pageSize ? (
+            {total > PAGE_SIZE ? (
               <div className="mt-3 flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                 <p className="text-[11px] text-on-surface-variant sm:text-sm">
-                  Showing {(safePage - 1) * pageSize + 1}-{Math.min(safePage * pageSize, filteredRecords.length)} of {filteredRecords.length} records
+                  Showing {total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, total)} of {total} records
                 </p>
                 <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setCurrentPage} size="sm" />
               </div>

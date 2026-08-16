@@ -6,6 +6,7 @@ import { loginRateLimiter } from '../../shared/middleware/rate-limit';
 const router = Router();
 
 router.post('/login', loginRateLimiter, authController.login);
+router.post('/refresh', authController.refresh);
 router.get('/me', authenticate, authController.me);
 router.post('/logout', authController.logout);
 

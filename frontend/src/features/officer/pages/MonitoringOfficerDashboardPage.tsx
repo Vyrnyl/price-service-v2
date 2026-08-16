@@ -67,15 +67,15 @@ export default function MonitoringOfficerDashboardPage() {
     async function loadDashboardCounts() {
       try {
         const [commoditiesResponse, storesResponse, priceRecordsResponse, reportsResponse] = await Promise.all([
-          apiFetch<{ status: string; data: unknown[] }>("/api/commodities"),
-          apiFetch<{ status: string; data: Array<{ id: string; name: string; location: string; createdAt: string }> }>("/api/stores"),
-          apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }> }>("/api/price-records"),
+          apiFetch<{ status: string; data: unknown[]; total: number }>("/api/commodities?pageSize=1"),
+          apiFetch<{ status: string; data: Array<{ id: string; name: string; location: string; createdAt: string }>; total: number }>("/api/stores?pageSize=100"),
+          apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>; total: number }>("/api/price-records"),
           apiFetch<{ status: string; data: Array<{ id: string; type: string; period: string; createdAt: string }> }>("/api/reports"),
         ]);
 
-        setTotalCommodities(commoditiesResponse.data.length);
-        setTotalStores(storesResponse.data.length);
-        setTotalPriceRecords(priceRecordsResponse.data.length);
+        setTotalCommodities(commoditiesResponse.total);
+        setTotalStores(storesResponse.total);
+        setTotalPriceRecords(priceRecordsResponse.total);
 
         const sortedStores = [...storesResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         setLatestStores(sortedStores.slice(0, 3));

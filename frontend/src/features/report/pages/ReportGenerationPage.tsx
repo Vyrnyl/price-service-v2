@@ -9,8 +9,11 @@ import { reportTypes, exportFormats } from "../mocks/report.mock";
 import ExportFormatButton from "../components/ExportFormatButton";
 import RecentReportCard from "../components/RecentReportCard";
 import ReportTypeCard from "../components/ReportTypeCard";
+import Pagination from "@/shared/components/Pagination";
 import { createReport, deleteAllReports, getReports } from "../services/report.api";
 import type { BackendReport, CreateReportPayload, RecentReport } from "../types/report.types";
+
+const REPORTS_PAGE_SIZE = 10;
 
 type StoreOption = {
   id: string;
@@ -96,6 +99,8 @@ export default function ReportGenerationPage() {
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [recentReports, setRecentReports] = useState<RecentReport[]>([]);
+  const [reportsPage, setReportsPage] = useState(1);
+  const [reportsTotal, setReportsTotal] = useState(0);
   const { showToast } = useToast();
 
   const selectedReportType = reportTypes.find((type) => type.id === selectedReportTypeId) ?? reportTypes[0];
@@ -113,24 +118,29 @@ export default function ReportGenerationPage() {
     return `${startDate} to ${endDate}`;
   }, [startDate, endDate]);
 
-  useEffect(() => {
-    const loadReports = async () => {
-      try {
-        const response = await getReports();
-        setRecentReports(response.data.map(mapBackendReportToRecent));
-      } catch (err) {
-        console.error("Unable to load reports", err);
-      }
-    };
+  const loadReports = async (page: number) => {
+    try {
+      const response = await getReports(page, REPORTS_PAGE_SIZE);
+      setRecentReports(response.data.map(mapBackendReportToRecent));
+      setReportsTotal(response.total);
+    } catch (err) {
+      console.error("Unable to load reports", err);
+    }
+  };
 
-    void loadReports();
-  }, []);
+  useEffect(() => {
+    async function run() {
+      await loadReports(reportsPage);
+    }
+    void run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [reportsPage]);
 
   useEffect(() => {
     const loadStores = async () => {
       try {
         setStoresLoading(true);
-        const response = await apiFetch<{ status: string; data: StoreOption[] }>("/api/stores");
+        const response = await apiFetch<{ status: string; data: StoreOption[] }>("/api/stores?pageSize=100");
         setStores(response.data);
       } catch (err) {
         console.error("Unable to load stores", err);
@@ -146,7 +156,7 @@ export default function ReportGenerationPage() {
     const loadCategories = async () => {
       try {
         const response = await apiFetch<{ status: string; data: Array<{ category: string }> }>(
-          "/api/commodities",
+          "/api/commodities?pageSize=100",
         );
         const unique = Array.from(new Set(response.data.map((item) => item.category))).sort();
         setCategories([
@@ -225,10 +235,11 @@ export default function ReportGenerationPage() {
 
     try {
       setLoading(true);
-      const response = await createReport(payload);
+      await createReport(payload);
       setSuccessMessage("Report generated successfully.");
       showToast("Report generated successfully.", "success");
-      setRecentReports((current) => [mapBackendReportToRecent(response.data), ...current]);
+      setReportsPage(1);
+      await loadReports(1);
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : "Unable to generate report.");
     } finally {
@@ -387,6 +398,8 @@ export default function ReportGenerationPage() {
                       try {
                         await deleteAllReports();
                         setRecentReports([]);
+                        setReportsTotal(0);
+                        setReportsPage(1);
                         setStartDate("");
                         setEndDate("");
                         setSelectedReportTypeId(defaultTypeId);
@@ -412,6 +425,20 @@ export default function ReportGenerationPage() {
                     />
                   ))}
                 </div>
+
+                {reportsTotal > REPORTS_PAGE_SIZE ? (
+                  <div className="mt-4 flex flex-col items-center gap-2 border-t border-outline-variant pt-4">
+                    <p className="text-body-xs text-on-surface-variant">
+                      Showing {(reportsPage - 1) * REPORTS_PAGE_SIZE + 1}-{Math.min(reportsPage * REPORTS_PAGE_SIZE, reportsTotal)} of {reportsTotal}
+                    </p>
+                    <Pagination
+                      currentPage={reportsPage}
+                      totalPages={Math.max(1, Math.ceil(reportsTotal / REPORTS_PAGE_SIZE))}
+                      onPageChange={setReportsPage}
+                      size="sm"
+                    />
+                  </div>
+                ) : null}
               </div>
             </section>
           </div>

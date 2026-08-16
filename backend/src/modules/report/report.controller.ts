@@ -5,6 +5,7 @@ import { createReportSchema, updateReportSchema, reportIdParamSchema } from './r
 import { generateReportFile } from './report.generator';
 import type { CreateReportWithFileInput } from './report.types';
 import type { AuthUser } from '../../shared/types/express';
+import { paginationQuerySchema } from '../../shared/schema/pagination.schema';
 
 /**
  * Every handler below resolves the caller this way and refuses without one.
@@ -42,9 +43,10 @@ export const reportController = {
 
   getReports: async (req: Request, res: Response) => {
     const authUser = requireAuthUser(req);
-    const reports = await reportService.getReports(authUser);
+    const query = paginationQuerySchema.parse(req.query);
+    const { data, total, page, pageSize } = await reportService.getReports(authUser, query);
 
-    res.json({ status: 'success', data: reports });
+    res.json({ status: 'success', data, total, page, pageSize });
   },
 
   getReportById: async (req: Request, res: Response) => {

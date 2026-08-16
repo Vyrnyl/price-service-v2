@@ -73,6 +73,16 @@ export interface CommodityDetailsItem extends CommodityItem {
 export interface CommodityApiResponse {
   status: string;
   data: CommodityItem[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface GetCommoditiesParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  status?: CommodityStatus;
 }
 
 export interface CommodityCreateResponse {
@@ -91,13 +101,18 @@ export interface CommodityUpdateResponse {
   data: CommodityItem;
 }
 
-export async function getCommodities() {
-  const response = await apiFetch<CommodityApiResponse>("/api/commodities", {
+export async function getCommodities(params: GetCommoditiesParams = {}) {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.pageSize) query.set("pageSize", String(params.pageSize));
+  if (params.search) query.set("search", params.search);
+  if (params.status) query.set("status", params.status);
+
+  const queryString = query.toString();
+  return apiFetch<CommodityApiResponse>(queryString ? `/api/commodities?${queryString}` : "/api/commodities", {
     method: "GET",
     credentials: "include",
   });
-
-  return response.data;
 }
 
 export async function getPublicCommodities() {

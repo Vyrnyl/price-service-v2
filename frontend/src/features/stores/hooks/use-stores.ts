@@ -1,14 +1,16 @@
-import { useEffect, useMemo, useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { mapBackendPriceRecord, fetchCommodities, fetchStores, fetchStorePriceRecords, saveStore } from "../services/stores.api";
 import type { Store, StoreFormData } from "../types/stores.types";
 import type { PriceRecord } from "@/features/price-record/types/price-record.types";
-import { getStoreStatus } from "../utils/store-status";
 import { useToast } from "@/shared/components/Toast";
 
-const RECENTLY_UPDATED_WINDOW_MS = 7 * 24 * 60 * 60 * 1000;
+export const STORE_PAGE_SIZE = 6;
+const SEARCH_DEBOUNCE_MS = 300;
 
 export function useStoreRegistryState() {
   const [stores, setStores] = useState<Store[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -21,54 +23,49 @@ export function useStoreRegistryState() {
   const [expandedStoreId, setExpandedStoreId] = useState<string | null>(null);
   const [storeRecords, setStoreRecords] = useState<Record<string, PriceRecord[]>>({});
   const [storeRecordsLoading, setStoreRecordsLoading] = useState<Record<string, boolean>>({});
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTermState] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [municipalityFilter, setMunicipalityFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
   const [quickFilter, setQuickFilter] = useState("");
   const { showToast } = useToast();
 
   useEffect(() => {
-    async function loadStores() {
-      try {
-        const response = await fetchStores();
-        setStores(response.data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "Unable to load stores");
-      } finally {
-        setIsLoading(false);
-      }
+    const handle = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [searchTerm]);
+
+  const loadStores = async (targetPage: number) => {
+    setIsLoading(true);
+    try {
+      const response = await fetchStores({
+        page: targetPage,
+        pageSize: STORE_PAGE_SIZE,
+        search: debouncedSearch || undefined,
+        municipality: municipalityFilter || undefined,
+        status: statusFilter !== "All Statuses" ? statusFilter : undefined,
+        quickFilter: quickFilter && quickFilter !== "All" ? quickFilter : undefined,
+      });
+      setStores(response.data);
+      setTotal(response.total);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Unable to load stores");
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    loadStores();
-  }, []);
-
-  const filteredStores = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-    const now = Date.now();
-
-    return stores.filter((store) => {
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        [store.name, store.location, store.user?.name ?? ""]
-          .join(" ")
-          .toLowerCase()
-          .includes(normalizedSearch);
-
-      const matchesMunicipality =
-        municipalityFilter.length === 0 || store.location.toLowerCase().includes(municipalityFilter.toLowerCase());
-
-      const storeStatus = getStoreStatus(store).label;
-      const matchesStatus = statusFilter === "All Statuses" || storeStatus === statusFilter;
-
-      const matchesQuickFilter =
-        quickFilter.length === 0 ||
-        quickFilter === "All" ||
-        (quickFilter === "Recently Updated" && !!store.lastVisited && new Date(store.lastVisited).getTime() > now - RECENTLY_UPDATED_WINDOW_MS) ||
-        storeStatus === quickFilter;
-
-      return matchesSearch && matchesMunicipality && matchesStatus && matchesQuickFilter;
-    });
-  }, [municipalityFilter, quickFilter, searchTerm, statusFilter, stores]);
+  useEffect(() => {
+    async function run() {
+      await loadStores(page);
+    }
+    void run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, debouncedSearch, municipalityFilter, statusFilter, quickFilter]);
 
   const resetStoreForm = () => {
     setFormData({ name: "", location: "", lastVisited: "" });
@@ -137,16 +134,17 @@ export function useStoreRegistryState() {
     setSubmitLoading(true);
 
     try {
-      const response = await saveStore(formData, editingStore?.id);
+      await saveStore(formData, editingStore?.id);
 
       if (editingStore) {
-        setStores((current) => current.map((store) => (store.id === editingStore.id ? response.data : store)));
         setFormSuccess("Store updated successfully.");
         showToast("Store updated successfully.", "success");
+        await loadStores(page);
       } else {
-        setStores((current) => [response.data, ...current]);
         setFormSuccess("Store created successfully.");
         showToast("Store created successfully.", "success");
+        setPage(1);
+        await loadStores(1);
       }
 
       setFormData({ name: "", location: "", lastVisited: "" });
@@ -175,12 +173,12 @@ export function useStoreRegistryState() {
 
     try {
       const [priceRecordsResponse, commoditiesResponse] = await Promise.all([
-        fetchStorePriceRecords(),
+        fetchStorePriceRecords(store.id),
         fetchCommodities(),
       ]);
-      const recordsForStore = priceRecordsResponse.data
-        .filter((record: { store?: { id?: string } }) => record.store?.id === store.id)
-        .map((record: { store?: { id?: string } }) => mapBackendPriceRecord(record as never, commoditiesResponse.data));
+      const recordsForStore = priceRecordsResponse.data.map((record) =>
+        mapBackendPriceRecord(record as never, commoditiesResponse.data),
+      );
 
       setStoreRecords((current) => ({ ...current, [store.id]: recordsForStore }));
     } catch {
@@ -196,11 +194,28 @@ export function useStoreRegistryState() {
 
   const handleQuickFilterChange = (chip: string) => {
     setQuickFilter((current) => (current === chip ? "" : chip));
+    setPage(1);
+  };
+
+  const setSearchTerm = (value: string) => {
+    setSearchTermState(value);
+  };
+
+  const updateMunicipalityFilter = (value: string) => {
+    setMunicipalityFilter(value);
+    setPage(1);
+  };
+
+  const updateStatusFilter = (value: string) => {
+    setStatusFilter(value);
+    setPage(1);
   };
 
   return {
     stores,
-    filteredStores,
+    total,
+    page,
+    setPage,
     isLoading,
     error,
     formOpen,
@@ -216,9 +231,9 @@ export function useStoreRegistryState() {
     searchTerm,
     setSearchTerm,
     municipalityFilter,
-    setMunicipalityFilter,
+    setMunicipalityFilter: updateMunicipalityFilter,
     statusFilter,
-    setStatusFilter,
+    setStatusFilter: updateStatusFilter,
     quickFilter,
     handleFormChange,
     handleOpenCreateForm,

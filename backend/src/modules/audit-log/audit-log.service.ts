@@ -1,5 +1,6 @@
 import { auditLogRepository } from './audit-log.repository';
 import type { AuditLogEntryDto, AuditLogWithActor, RecordAuditLogInput } from './audit-log.types';
+import type { ListAuditLogsQuery } from './audit-log.schema';
 
 export function toAuditLogEntryDto(entry: AuditLogWithActor): AuditLogEntryDto {
   return {
@@ -16,9 +17,9 @@ export function toAuditLogEntryDto(entry: AuditLogWithActor): AuditLogEntryDto {
 }
 
 export const auditLogService = {
-  getAuditLogs: async (): Promise<AuditLogEntryDto[]> => {
-    const entries = await auditLogRepository.findAll();
-    return entries.map(toAuditLogEntryDto);
+  getAuditLogs: async (query: ListAuditLogsQuery) => {
+    const { data, total, page, pageSize } = await auditLogRepository.findAll(query);
+    return { data: data.map(toAuditLogEntryDto), total, page, pageSize };
   },
   record: (data: RecordAuditLogInput) => auditLogRepository.create(data),
 };

@@ -125,16 +125,38 @@ export function mapBackendPriceRecord(record: BackendPriceRecord, commodities: C
   };
 }
 
-export async function fetchStores() {
-  return apiFetch<{ status: string; data: Store[] }>("/api/stores");
+export interface FetchStoresParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  municipality?: string;
+  status?: string;
+  quickFilter?: string;
 }
 
-export async function fetchStorePriceRecords() {
-  return apiFetch<{ status: string; data: BackendPriceRecord[] }>('/api/price-records');
+export async function fetchStores(params: FetchStoresParams = {}) {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.pageSize) query.set("pageSize", String(params.pageSize));
+  if (params.search) query.set("search", params.search);
+  if (params.municipality) query.set("municipality", params.municipality);
+  if (params.status) query.set("status", params.status);
+  if (params.quickFilter) query.set("quickFilter", params.quickFilter);
+
+  const queryString = query.toString();
+  return apiFetch<{ status: string; data: Store[]; total: number; page: number; pageSize: number }>(
+    queryString ? `/api/stores?${queryString}` : "/api/stores",
+  );
+}
+
+export async function fetchStorePriceRecords(storeId: string) {
+  return apiFetch<{ status: string; data: BackendPriceRecord[] }>(
+    `/api/price-records?storeId=${storeId}&pageSize=100`,
+  );
 }
 
 export async function fetchCommodities() {
-  return apiFetch<{ status: string; data: CommodityOption[] }>('/api/commodities');
+  return apiFetch<{ status: string; data: CommodityOption[] }>('/api/commodities?pageSize=100');
 }
 
 export async function saveStore(formData: StoreFormData, storeId?: string) {

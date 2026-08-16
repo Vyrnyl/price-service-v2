@@ -4,6 +4,7 @@ import type { UpdateReportInput } from './report.schema';
 import type { CreateReportWithFileInput } from './report.types';
 import { resolveReportScope } from './report.scope';
 import type { AuthUser } from '../../shared/types/express';
+import { toSkipTake, type PaginationQuery } from '../../shared/schema/pagination.schema';
 
 const reportSummarySelect = {
   id: true,
@@ -32,13 +33,22 @@ export const reportRepository = {
     });
   },
 
-  findAll: (authUser?: AuthUser) => {
+  findAll: async (authUser: AuthUser | undefined, query: PaginationQuery) => {
     const scope = resolveReportScope(authUser);
+    const { skip, take } = toSkipTake(query);
 
-    return prisma.report.findMany({
-      where: scope,
-      select: reportSummarySelect,
-    });
+    const [data, total] = await prisma.$transaction([
+      prisma.report.findMany({
+        where: scope,
+        select: reportSummarySelect,
+        orderBy: { createdAt: 'desc' },
+        skip,
+        take,
+      }),
+      prisma.report.count({ where: scope }),
+    ]);
+
+    return { data, total, page: query.page, pageSize: query.pageSize };
   },
 
   // `findFirst`, not `findUnique`: the scope is a second predicate alongside the

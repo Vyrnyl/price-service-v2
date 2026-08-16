@@ -1,7 +1,14 @@
 import { Request, Response } from 'express';
 import AppError from '../../shared/utils/AppError';
 import { userService } from './user.service';
-import { changePasswordSchema, createUserSchema, updateProfileSchema, updateUserSchema, userIdParamSchema } from './user.schema';
+import {
+  changePasswordSchema,
+  createUserSchema,
+  listUsersQuerySchema,
+  updateProfileSchema,
+  updateUserSchema,
+  userIdParamSchema,
+} from './user.schema';
 import { auditLogService } from '../audit-log';
 import type { AuthUser } from '../../shared/types/express';
 
@@ -44,8 +51,9 @@ export const userController = {
   },
 
   getUsers: async (req: Request, res: Response) => {
-    const users = await userService.getUsers();
-    res.json(users);
+    const query = listUsersQuerySchema.parse(req.query);
+    const { data, total, page, pageSize } = await userService.getUsers(query);
+    res.json({ status: 'success', data, total, page, pageSize });
   },
 
   getUserById: async (req: Request, res: Response) => {

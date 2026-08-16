@@ -1,20 +1,21 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import PageShell from "@/shared/components/PageShell";
 import Pagination from "@/shared/components/Pagination";
 import { CreateStoreDialog } from "../components/CreateStoreDialog";
 import { StoreRegistryHeader } from "../components/StoreRegistryHeader";
 import { StoreRegistryToolbar } from "../components/StoreRegistryToolbar";
 import { StoreRegistryGrid } from "../components/StoreRegistryGrid";
-import { useStoreRegistryState } from "../hooks/use-stores";
+import { STORE_PAGE_SIZE, useStoreRegistryState } from "../hooks/use-stores";
 import { StorePriceRecordsModal } from "../components/StorePriceRecordsModal";
 import { StoreRegistryPageProps } from "../types/stores.types";
 
 export default function StoreRegistryPage({ showAssignedOfficer = true, canCreateStore = true }: StoreRegistryPageProps) {
   const {
     stores,
-    filteredStores,
+    total,
+    page,
+    setPage,
     isLoading,
     error,
     formOpen,
@@ -44,34 +45,24 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
     handleQuickFilterChange,
   } = useStoreRegistryState();
 
-  const [currentPage, setCurrentPage] = useState(1);
-  const pageSize = 6;
   const selectedStoreName = stores.find((store) => store.id === expandedStoreId)?.name;
-  const totalPages = Math.max(1, Math.ceil(filteredStores.length / pageSize));
-  const safeCurrentPage = Math.min(currentPage, totalPages);
-  const pagedStores = useMemo(
-    () => filteredStores.slice((safeCurrentPage - 1) * pageSize, safeCurrentPage * pageSize),
-    [filteredStores, safeCurrentPage],
-  );
+  const totalPages = Math.max(1, Math.ceil(total / STORE_PAGE_SIZE));
+  const safeCurrentPage = Math.min(page, totalPages);
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-    setCurrentPage(1);
   };
 
   const handleMunicipalityFilterChange = (value: string) => {
     setMunicipalityFilter(value);
-    setCurrentPage(1);
   };
 
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value);
-    setCurrentPage(1);
   };
 
   const handleQuickFilterSelect = (value: string) => {
     handleQuickFilterChange(value);
-    setCurrentPage(1);
   };
 
   return (
@@ -108,7 +99,7 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
             onStatusFilterChange={handleStatusFilterChange}
             quickFilter={quickFilter}
             onQuickFilterChange={handleQuickFilterSelect}
-            storeCount={filteredStores.length}
+            storeCount={total}
           />
 
           {isLoading ? (
@@ -122,7 +113,7 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
           ) : (
             <>
               <StoreRegistryGrid
-                stores={pagedStores}
+                stores={stores}
                 showAssignedOfficer={showAssignedOfficer}
                 onEdit={handleEditStore}
                 expandedStoreId={expandedStoreId}
@@ -142,9 +133,9 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
 
           <div className="flex flex-col items-center justify-between gap-4 border-t border-outline-variant py-6 md:flex-row">
             <span className="font-sans text-on-surface-variant">
-              Showing {filteredStores.length === 0 ? 0 : `${(safeCurrentPage - 1) * pageSize + 1}-${Math.min(safeCurrentPage * pageSize, filteredStores.length)}`} of {filteredStores.length} store{filteredStores.length === 1 ? "" : "s"}
+              Showing {total === 0 ? 0 : `${(safeCurrentPage - 1) * STORE_PAGE_SIZE + 1}-${Math.min(safeCurrentPage * STORE_PAGE_SIZE, total)}`} of {total} store{total === 1 ? "" : "s"}
             </span>
-            <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setPage} />
           </div>
         </div>
       </section>

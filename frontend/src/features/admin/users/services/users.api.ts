@@ -1,9 +1,26 @@
 import { apiFetch } from "../../../../shared/services/api";
-import type { AddUserForm, User } from "../types/users.types";
+import type { PaginatedResponse } from "../../../../shared/types/pagination";
+import type { AddUserForm, User, UserRole } from "../types/users.types";
 import type { UpdateUserFormSchema } from "../schemas/users.schema";
 
-export async function getUsers() {
-  return apiFetch<User[]>("/api/users", {
+export interface GetUsersParams {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  role?: UserRole;
+  isActive?: boolean;
+}
+
+export async function getUsers(params: GetUsersParams = {}) {
+  const query = new URLSearchParams();
+  if (params.page) query.set("page", String(params.page));
+  if (params.pageSize) query.set("pageSize", String(params.pageSize));
+  if (params.search) query.set("search", params.search);
+  if (params.role) query.set("role", params.role);
+  if (params.isActive !== undefined) query.set("isActive", String(params.isActive));
+
+  const queryString = query.toString();
+  return apiFetch<PaginatedResponse<User>>(queryString ? `/api/users?${queryString}` : "/api/users", {
     method: "GET",
     credentials: "include",
   });

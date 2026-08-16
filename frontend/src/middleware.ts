@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { verifyToken } from "./shared/utils/jwt";
+import { setAuthCookies, tryRefreshTokens, type RotatedTokens } from "./shared/utils/token-refresh";
 
 const PROTECTED_PREFIXES = ["/admin", "/officer"];
 
@@ -21,42 +22,66 @@ function getDashboardPath(role: string | null) {
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accessToken = request.cookies.get("accessToken")?.value;
-  if (!accessToken) {
-    if (!isProtectedRoute(pathname)) {
-      return NextResponse.next();
+  let accessToken = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
+  let rotated: RotatedTokens | null = null;
+
+  let payload: Awaited<ReturnType<typeof verifyToken>> | null = null;
+  if (accessToken) {
+    try {
+      payload = await verifyToken(accessToken);
+    } catch {
+      payload = null;
     }
-    return NextResponse.redirect(new URL("/", request.url));
   }
 
-  try {
-    const payload = await verifyToken(accessToken);
-    const role = normalizeJwtRole(
-      typeof payload.role === "string" ? payload.role : null,
-    );
-    const dashboardPath = getDashboardPath(role);
-
-    if (isProtectedRoute(pathname)) {
-      if (pathname.startsWith("/admin") && role !== "admin") {
-        return NextResponse.redirect(new URL("/", request.url));
+  // The access token is missing or expired — try the refresh token before
+  // bouncing the user to login, so a session survives navigation past the
+  // 1-hour access-token window as long as the refresh token is still valid.
+  if (!payload && refreshToken) {
+    rotated = await tryRefreshTokens(refreshToken);
+    if (rotated) {
+      accessToken = rotated.accessToken;
+      try {
+        payload = await verifyToken(accessToken);
+      } catch {
+        payload = null;
       }
-      if (pathname.startsWith("/officer") && role !== "officer") {
-        return NextResponse.redirect(new URL("/", request.url));
-      }
-      return NextResponse.next();
     }
-
-    if (dashboardPath) {
-      return NextResponse.redirect(new URL(dashboardPath, request.url));
-    }
-
-    return NextResponse.next();
-  } catch {
-    if (!isProtectedRoute(pathname)) {
-      return NextResponse.next();
-    }
-    return NextResponse.redirect(new URL("/", request.url));
   }
+
+  const attach = (response: NextResponse) => {
+    if (rotated) {
+      setAuthCookies(response, rotated);
+    }
+    return response;
+  };
+
+  if (!payload) {
+    if (!isProtectedRoute(pathname)) {
+      return attach(NextResponse.next());
+    }
+    return attach(NextResponse.redirect(new URL("/", request.url)));
+  }
+
+  const role = normalizeJwtRole(typeof payload.role === "string" ? payload.role : null);
+  const dashboardPath = getDashboardPath(role);
+
+  if (isProtectedRoute(pathname)) {
+    if (pathname.startsWith("/admin") && role !== "admin") {
+      return attach(NextResponse.redirect(new URL("/", request.url)));
+    }
+    if (pathname.startsWith("/officer") && role !== "officer") {
+      return attach(NextResponse.redirect(new URL("/", request.url)));
+    }
+    return attach(NextResponse.next());
+  }
+
+  if (dashboardPath) {
+    return attach(NextResponse.redirect(new URL(dashboardPath, request.url)));
+  }
+
+  return attach(NextResponse.next());
 }
 
 export const config = {

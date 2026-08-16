@@ -1,6 +1,8 @@
-import { NextResponse } from "next/server";
-import { cookies } from "next/headers";
-import { verifyToken } from "../../../../shared/utils/jwt";
+import { NextResponse, type NextRequest } from "next/server";
+import { verifyToken } from "@/shared/utils/jwt";
+import { clearAuthCookies, setAuthCookies, tryRefreshTokens } from "@/shared/utils/token-refresh";
+
+export const dynamic = "force-dynamic";
 
 function normalizeJwtRole(role: string | null) {
   if (role === "ADMIN") return "admin";
@@ -8,21 +10,39 @@ function normalizeJwtRole(role: string | null) {
   return null;
 }
 
-export async function GET() {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get("accessToken")?.value;
+export async function GET(request: NextRequest) {
+  const token = request.cookies.get("accessToken")?.value;
+  const refreshToken = request.cookies.get("refreshToken")?.value;
 
-    if (!token) {
+  if (!token) {
+    return NextResponse.json({ role: null });
+  }
+
+  try {
+    const payload = await verifyToken(token);
+    const role = normalizeJwtRole(typeof payload.role === "string" ? payload.role : null);
+    return NextResponse.json({ role });
+  } catch {
+    if (!refreshToken) {
       return NextResponse.json({ role: null });
     }
 
-    const payload = await verifyToken(token);
-    const rawRole = typeof payload.role === "string" ? payload.role : null;
-    const role = normalizeJwtRole(rawRole);
+    const rotated = await tryRefreshTokens(refreshToken);
 
-    return NextResponse.json({ role });
-  } catch (err) {
-    return NextResponse.json({ role: null });
+    if (!rotated) {
+      const deadSessionResponse = NextResponse.json({ role: null });
+      clearAuthCookies(deadSessionResponse);
+      return deadSessionResponse;
+    }
+
+    try {
+      const payload = await verifyToken(rotated.accessToken);
+      const role = normalizeJwtRole(typeof payload.role === "string" ? payload.role : null);
+      const response = NextResponse.json({ role });
+      setAuthCookies(response, rotated);
+      return response;
+    } catch {
+      return NextResponse.json({ role: null });
+    }
   }
 }

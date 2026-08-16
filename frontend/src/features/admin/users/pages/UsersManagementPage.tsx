@@ -12,6 +12,7 @@ import { createUser, getUsers, updateUser, updateUserStatus } from "../services/
 import { ApiError } from "../../../../shared/services/api";
 import { useToast } from "@/shared/components/Toast";
 import PageShell from "@/shared/components/PageShell";
+import Pagination from "@/shared/components/Pagination";
 import type { CreateUserFormSchema, UpdateUserFormSchema } from "../schemas/users.schema";
 import type { User, UserRole } from "../types/users.types";
 import AddUserDialog from "../components/AddUserDialog";
@@ -19,22 +20,29 @@ import UsersSearchFilters from "../components/UsersSearchFilters";
 import UsersStatsSection from "../components/UsersStatsSection";
 import UsersTable from "../components/UsersTable";
 
+const PAGE_SIZE = 10;
+const SEARCH_DEBOUNCE_MS = 300;
+
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [userStats, setUserStats] = useState({ total: 0, admins: 0, officers: 0, active: 0 });
   const [formOpen, setFormOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"ALL" | UserRole>("ALL");
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const { showToast } = useToast();
 
-  const totalUsers = users.length;
-  const adminCount = users.filter((user) => user.role === "ADMIN").length;
-  const officerCount = users.filter((user) => user.role === "OFFICER").length;
-  const activeUsersCount = users.filter((user) => user.isActive).length;
+  const totalUsers = userStats.total;
+  const adminCount = userStats.admins;
+  const officerCount = userStats.officers;
+  const activeUsersCount = userStats.active;
 
   const stats = [
     {
@@ -72,16 +80,61 @@ export default function UsersManagementPage() {
   ];
 
   useEffect(() => {
-    const loadUsers = async () => {
-      try {
-        const fetchedUsers = await getUsers();
-        setUsers(fetchedUsers);
-      } catch (error) {
-        console.error("Failed to load users", error);
-      }
-    };
+    const handle = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [searchTerm]);
 
-    loadUsers();
+  const loadUsers = async (targetPage: number) => {
+    try {
+      const response = await getUsers({
+        page: targetPage,
+        pageSize: PAGE_SIZE,
+        search: debouncedSearch || undefined,
+        role: roleFilter !== "ALL" ? roleFilter : undefined,
+        isActive: showActiveOnly ? true : undefined,
+      });
+      setUsers(response.data);
+      setTotal(response.total);
+    } catch (error) {
+      console.error("Failed to load users", error);
+    }
+  };
+
+  useEffect(() => {
+    async function run() {
+      await loadUsers(page);
+    }
+    void run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, debouncedSearch, roleFilter, showActiveOnly]);
+
+  const loadStats = async () => {
+    try {
+      const [totalResponse, adminResponse, officerResponse, activeResponse] = await Promise.all([
+        getUsers({ pageSize: 1 }),
+        getUsers({ pageSize: 1, role: "ADMIN" }),
+        getUsers({ pageSize: 1, role: "OFFICER" }),
+        getUsers({ pageSize: 1, isActive: true }),
+      ]);
+      setUserStats({
+        total: totalResponse.total,
+        admins: adminResponse.total,
+        officers: officerResponse.total,
+        active: activeResponse.total,
+      });
+    } catch (error) {
+      console.error("Failed to load user stats", error);
+    }
+  };
+
+  useEffect(() => {
+    async function run() {
+      await loadStats();
+    }
+    void run();
   }, []);
 
   const getInitials = (name: string) =>
@@ -109,22 +162,24 @@ export default function UsersManagementPage() {
 
     try {
       if (editingUser) {
-        const updatedUser = await updateUser(editingUser.id, data as UpdateUserFormSchema);
-        setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
+        await updateUser(editingUser.id, data as UpdateUserFormSchema);
         setFormSuccess("User updated successfully.");
         showToast("User updated successfully.", "success");
+        await loadUsers(page);
       } else {
         const createPayload = data as CreateUserFormSchema;
 
-        const createdUser = await createUser({
+        await createUser({
           ...createPayload,
           role: createPayload.role ?? "OFFICER",
           isActive: createPayload.isActive ?? true,
         });
-        setUsers((prev) => [createdUser, ...prev]);
         setFormSuccess("User created successfully.");
         showToast("User created successfully.", "success");
+        setPage(1);
+        await loadUsers(1);
       }
+      await loadStats();
       setFormOpen(false);
       setEditingUser(null);
     } catch (error: unknown) {
@@ -151,25 +206,19 @@ export default function UsersManagementPage() {
   const handleToggleActive = async (user: User) => {
     try {
       const updatedUser = await updateUserStatus(user.id, !user.isActive);
-      setUsers((prev) => prev.map((item) => (item.id === updatedUser.id ? updatedUser : item)));
       showToast(
         updatedUser.isActive ? `${updatedUser.name} activated.` : `${updatedUser.name} deactivated.`,
         "success",
       );
+      await Promise.all([loadUsers(page), loadStats()]);
     } catch (error) {
       console.error("Failed to update user status", error);
       showToast("Unable to update user status. Please try again.", "error");
     }
   };
 
-  const filteredUsers = users.filter((user) => {
-    const haystack = `${user.name} ${user.email} ${user.role}`.toLowerCase();
-    const matchesSearch = haystack.includes(searchTerm.toLowerCase());
-    const matchesRole = roleFilter === "ALL" || user.role === roleFilter;
-    const matchesActive = !showActiveOnly || user.isActive;
-
-    return matchesSearch && matchesRole && matchesActive;
-  });
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
 
   return (
     <PageShell>
@@ -231,18 +280,33 @@ export default function UsersManagementPage() {
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             roleFilter={roleFilter}
-            onRoleFilterChange={setRoleFilter}
+            onRoleFilterChange={(value) => {
+              setRoleFilter(value);
+              setPage(1);
+            }}
             showActiveOnly={showActiveOnly}
-            onActiveFilterChange={setShowActiveOnly}
+            onActiveFilterChange={(value) => {
+              setShowActiveOnly(value);
+              setPage(1);
+            }}
           />
 
           <UsersTable
-            users={filteredUsers}
+            users={users}
             onEdit={handleEditUser}
             onToggleActive={handleToggleActive}
             getInitials={getInitials}
             getRoleClass={getRoleClass}
           />
+
+          {total > PAGE_SIZE ? (
+            <div className="flex flex-col gap-3 border-t border-outline-variant pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p className="text-body-xs text-on-surface-variant">
+                Showing {(safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, total)} of {total} users
+              </p>
+              <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setPage} size="sm" />
+            </div>
+          ) : null}
         </div>
       </section>
     </PageShell>

@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import { MdOutlineVisibility } from "react-icons/md";
 import Badge from "@/shared/components/Badge";
 import Pagination from "@/shared/components/Pagination";
@@ -9,6 +8,9 @@ import type { AuditLogEntry } from "../types/audit-log.types";
 
 type AuditLogTableProps = {
   entries: AuditLogEntry[];
+  total: number;
+  currentPage: number;
+  onPageChange: (page: number) => void;
   isLoading?: boolean;
   error?: string | null;
   onViewDetails: (entry: AuditLogEntry) => void;
@@ -37,19 +39,20 @@ function getInitials(name: string) {
     .toUpperCase();
 }
 
-export default function AuditLogTable({ entries, isLoading, error, onViewDetails }: AuditLogTableProps) {
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const totalPages = Math.max(1, Math.ceil(entries.length / PAGE_SIZE));
+export default function AuditLogTable({
+  entries,
+  total,
+  currentPage,
+  onPageChange,
+  isLoading,
+  error,
+  onViewDetails,
+}: AuditLogTableProps) {
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
 
-  const paginatedEntries = useMemo(() => {
-    const startIndex = (safeCurrentPage - 1) * PAGE_SIZE;
-    return entries.slice(startIndex, startIndex + PAGE_SIZE);
-  }, [safeCurrentPage, entries]);
-
-  const startIndex = (safeCurrentPage - 1) * PAGE_SIZE + 1;
-  const endIndex = Math.min(startIndex + paginatedEntries.length - 1, entries.length);
+  const startIndex = total === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
+  const endIndex = Math.min(startIndex + entries.length - 1, total);
 
   return (
     <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow">
@@ -80,7 +83,7 @@ export default function AuditLogTable({ entries, isLoading, error, onViewDetails
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/30">
-                  {paginatedEntries.map((entry) => (
+                  {entries.map((entry) => (
                     <tr key={entry.id} className="group transition-colors">
                       <td className="px-6 py-4 text-body-sm text-on-surface-variant">
                         {formatTimestamp(entry.createdAt)}
@@ -121,7 +124,7 @@ export default function AuditLogTable({ entries, isLoading, error, onViewDetails
           </div>
 
           <div className="space-y-3 p-3 md:hidden">
-            {paginatedEntries.map((entry) => (
+            {entries.map((entry) => (
               <div key={entry.id} className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
                 <div className="flex items-start justify-between gap-3">
                   <div className="flex items-center gap-3">
@@ -153,9 +156,9 @@ export default function AuditLogTable({ entries, isLoading, error, onViewDetails
 
           <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-body-sm text-on-surface-variant">
-              Showing {entries.length === 0 ? 0 : `${startIndex}-${endIndex}`} of {entries.length} entries
+              Showing {entries.length === 0 ? 0 : `${startIndex}-${endIndex}`} of {total} entries
             </p>
-            <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+            <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={onPageChange} />
           </div>
         </>
       )}

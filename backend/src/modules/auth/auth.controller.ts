@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { asyncHandler } from "../../shared/handlers/asyncHandler";
 import { authService } from "./auth.service";
-import { loginSchema } from "./auth.schema";
+import { loginSchema, refreshTokenSchema } from "./auth.schema";
 
 export const authController = {
   login: asyncHandler(async (req: Request, res: Response) => {
@@ -12,9 +12,25 @@ export const authController = {
       success: true,
       data: {
         accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
         user: result.user,
       },
       message: "Login successful",
+    });
+  }),
+
+  refresh: asyncHandler(async (req: Request, res: Response) => {
+    const { refreshToken } = refreshTokenSchema.parse(req.body);
+    const result = await authService.refresh(refreshToken);
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        accessToken: result.accessToken,
+        refreshToken: result.refreshToken,
+        user: result.user,
+      },
+      message: "Token refreshed",
     });
   }),
 
@@ -45,7 +61,12 @@ export const authController = {
     });
   }),
 
-  logout: asyncHandler(async (_req: Request, res: Response) => {
+  logout: asyncHandler(async (req: Request, res: Response) => {
+    const parsed = refreshTokenSchema.safeParse(req.body);
+    if (parsed.success) {
+      await authService.logout(parsed.data.refreshToken);
+    }
+
     return res.status(200).json({
       success: true,
       message: "Logout successful",

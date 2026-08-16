@@ -2,7 +2,7 @@ import AppError from '../../shared/utils/AppError';
 import { passwordUtils } from '../../shared/utils/password.utils';
 import { userRepository } from './user.repository';
 import { toAdminUserDto, toUserProfileDto } from './user.types';
-import type { ChangePasswordInput, CreateUserInput, UpdateProfileInput, UpdateUserInput } from './user.schema';
+import type { ChangePasswordInput, CreateUserInput, ListUsersQuery, UpdateProfileInput, UpdateUserInput } from './user.schema';
 
 export const userService = {
   createUser: async (data: CreateUserInput) => {
@@ -24,9 +24,9 @@ export const userService = {
     return toAdminUserDto(created);
   },
 
-  getUsers: async () => {
-    const users = await userRepository.findAll();
-    return users.map(toAdminUserDto);
+  getUsers: async (query: ListUsersQuery) => {
+    const { data, total, page, pageSize } = await userRepository.findAll(query);
+    return { data: data.map(toAdminUserDto), total, page, pageSize };
   },
 
   getUserById: async (id: string) => {

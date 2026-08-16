@@ -1,7 +1,12 @@
 import { Request, Response } from 'express';
 import AppError from '../../shared/utils/AppError';
 import { priceRecordService } from './price-record.service';
-import { createPriceRecordSchema, updatePriceRecordSchema, priceRecordIdParamSchema } from './price-record.schema';
+import {
+  createPriceRecordSchema,
+  updatePriceRecordSchema,
+  priceRecordIdParamSchema,
+  listPriceRecordsQuerySchema,
+} from './price-record.schema';
 import { auditLogService } from '../audit-log';
 import type { AuthUser } from '../../shared/types/express';
 import type { CreatePriceRecordWithUserInput } from './price-record.types';
@@ -26,9 +31,10 @@ export const priceRecordController = {
 
   getPriceRecords: async (req: Request, res: Response) => {
     const authUser = req.user as AuthUser | undefined;
-    const priceRecords = await priceRecordService.getPriceRecords(authUser);
+    const query = listPriceRecordsQuerySchema.parse(req.query);
+    const { data, total, page, pageSize } = await priceRecordService.getPriceRecords(authUser, query);
 
-    res.json({ status: 'success', data: priceRecords });
+    res.json({ status: 'success', data, total, page, pageSize });
   },
 
   getPriceRecordById: async (req: Request, res: Response) => {

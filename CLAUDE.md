@@ -10,16 +10,16 @@ Roles: `ADMIN` · `OFFICER` (accounts) · unauthenticated public access
 
 Check [context/progress.md](context/progress.md) at the start of every session — it is the single source of truth for what is actually built. Never assume a feature exists; verify there first.
 
-> ✅ **No open security findings, any severity, and no open decisions.** The report IDOR (B-43) was closed by **Phase 4.1**; login rate limiting, security headers, and password complexity (B-45–B-47) were closed by **Phase 4.2**, both 2026-08-16. **D-9** (the project's last open decision) was settled 2026-08-16 — refer out to DTI Consumer Care.
+> ✅ **No open security findings, any severity, and no open decisions.** The report IDOR (B-43) was closed by **Phase 4.1**; login rate limiting, security headers, and password complexity (B-45–B-47) were closed by **Phase 4.2**. **D-9** (the project's last open decision) was settled 2026-08-16 — refer out to DTI Consumer Care.
 
 **One phase is in play:**
 
 - **Phase 3 — Public Transparency** (3.1–3.3, findings B-31–B-38) — **fully closed, 3/3 ●**, completed 2026-08-16.
-- **Phase 4 — Hardening & Scale** (4.1–4.6, findings B-43–B-52) — **2/6 done.** 4.1 ● (B-43, B-44); 4.2 ● (B-45, B-46, B-47). The remaining four can be done in any order; **4.3 Server-Side Pagination** is the next-highest value for the effort.
+- **Phase 4 — Hardening & Scale** (4.1–4.6, findings B-43–B-52) — **4/6 done.** 4.1 ● (B-43, B-44); 4.2 ● (B-45, B-46, B-47); 4.3 ● (B-50); 4.4 ● (B-49), 2026-08-16. The remaining two (4.5, 4.6) are both user-visible — **the Feature Loop applies**, unlike 4.1–4.4's Refactor Gate treatment.
 
 **Ownership is not a role check.** `authorize(...roles)` gates *who may use a route*, never *whose row this is*. Any id-addressed route on an own-data domain also needs its module's scope helper applied in the repository — on writes as much as reads. That gap is what made B-43 reachable; see [context/architecture.md](context/architecture.md) §8.
 
-Verified baseline (2026-08-16): backend `tsc` clean · frontend `tsc` clean · `npm test` 67/67 passing.
+Verified baseline (2026-08-16): backend `tsc` clean · frontend `tsc` clean · `npm test` 74/74 passing.
 
 ## The one rule that governs everything
 

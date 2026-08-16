@@ -21,7 +21,12 @@ export const authenticate = asyncHandler(
       throw new AppError("Unauthorized", 401);
     }
 
-    const payload = jwt.verify(token, env.JWT_SECRET) as AuthUser;
+    let payload: AuthUser;
+    try {
+      payload = jwt.verify(token, env.JWT_SECRET) as AuthUser;
+    } catch {
+      throw new AppError("Unauthorized", 401);
+    }
 
     req.user = payload;
 

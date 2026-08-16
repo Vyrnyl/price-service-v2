@@ -1,5 +1,14 @@
 import { z } from 'zod';
 import { isPasswordComplex, PASSWORD_POLICY_MESSAGE } from '../../shared/utils/password-policy';
+import { paginationQuerySchema } from '../../shared/schema/pagination.schema';
+
+const emptyToUndefined = (value: unknown) => (value === '' ? undefined : value);
+const stringToBoolean = (value: unknown) => {
+  if (value === '' || value === undefined) return undefined;
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return value;
+};
 
 const passwordField = z
   .string()
@@ -60,7 +69,14 @@ export const changePasswordSchema = z
     path: ["confirmNewPassword"],
   });
 
+export const listUsersQuerySchema = paginationQuerySchema.extend({
+  search: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
+  role: z.preprocess(emptyToUndefined, z.enum(['ADMIN', 'OFFICER']).optional()),
+  isActive: z.preprocess(stringToBoolean, z.boolean().optional()),
+});
+
 export type CreateUserInput = z.infer<typeof createUserSchema>;
 export type UpdateUserInput = z.infer<typeof updateUserSchema>;
 export type UpdateProfileInput = z.infer<typeof updateProfileSchema>;
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+export type ListUsersQuery = z.infer<typeof listUsersQuerySchema>;

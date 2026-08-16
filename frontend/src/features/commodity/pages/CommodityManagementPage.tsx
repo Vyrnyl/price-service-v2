@@ -48,6 +48,9 @@ function mapCommoditiesToRows(commodities: CommodityItem[]): CommodityRow[] {
   return commodities.map(mapCommodityToRow);
 }
 
+const PAGE_SIZE = 5;
+const SEARCH_DEBOUNCE_MS = 300;
+
 type CommodityManagementPageProps = {
   userRole: UserRole;
 };
@@ -55,6 +58,8 @@ type CommodityManagementPageProps = {
 export default function CommodityManagementPage({ userRole }: CommodityManagementPageProps) {
   const canManage = userRole === "admin";
   const [commodityRows, setCommodityRows] = useState<CommodityRow[]>([]);
+  const [total, setTotal] = useState(0);
+  const [summaryStats, setSummaryStats] = useState({ total: 0, active: 0, categories: 0 });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -65,32 +70,62 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "Active" | "Inactive">("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const { showToast } = useToast();
 
-  const refreshCommodityRows = async () => {
+  const loadCommodities = async (page: number) => {
     try {
-      const commodities = await getCommodities();
-      setCommodityRows(mapCommoditiesToRows(commodities));
+      const response = await getCommodities({
+        page,
+        pageSize: PAGE_SIZE,
+        search: debouncedSearch || undefined,
+        status: statusFilter !== "ALL" ? statusFilter : undefined,
+      });
+      setCommodityRows(mapCommoditiesToRows(response.data));
+      setTotal(response.total);
     } catch {
       setError("Unable to load commodity list.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    async function loadCommodities() {
-      try {
-        const commodities = await getCommodities();
-        setCommodityRows(mapCommoditiesToRows(commodities));
-      } catch {
-        setError("Unable to load commodity list.");
-      } finally {
-        setIsLoading(false);
-      }
-    }
+    const handle = setTimeout(() => {
+      setDebouncedSearch(searchTerm.trim());
+      setCurrentPage(1);
+    }, SEARCH_DEBOUNCE_MS);
+    return () => clearTimeout(handle);
+  }, [searchTerm]);
 
-    void loadCommodities();
+  useEffect(() => {
+    async function run() {
+      await loadCommodities(currentPage);
+    }
+    void run();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, debouncedSearch, statusFilter]);
+
+  const loadStats = async () => {
+    try {
+      const response = await getCommodities({ pageSize: 100 });
+      setSummaryStats({
+        total: response.total,
+        active: response.data.filter((item) => item.status === "Active").length,
+        categories: new Set(response.data.map((item) => item.category)).size,
+      });
+    } catch {
+      // Summary stats are non-critical; leave the previous values in place.
+    }
+  };
+
+  useEffect(() => {
+    async function run() {
+      await loadStats();
+    }
+    void run();
   }, []);
 
   const handleSaveCommodity = async (data: CreateCommodityPayload) => {
@@ -100,20 +135,18 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
 
     try {
       if (editingCommodity) {
-        const updatedCommodity = await updateCommodity(editingCommodity.id, data);
-        setCommodityRows((prev) =>
-          prev.map((row, index) =>
-            row.id === updatedCommodity.id ? mapCommodityToRow(updatedCommodity, index) : row,
-          ),
-        );
+        await updateCommodity(editingCommodity.id, data);
         setFormSuccess("Commodity updated successfully.");
         showToast("Commodity updated successfully.", "success");
+        await loadCommodities(currentPage);
       } else {
-        const createdCommodity = await createCommodity(data);
-        setCommodityRows((prev) => [mapCommodityToRow(createdCommodity, prev.length), ...prev]);
+        await createCommodity(data);
         setFormSuccess("Commodity created successfully.");
         showToast("Commodity created successfully.", "success");
+        setCurrentPage(1);
+        await loadCommodities(1);
       }
+      await loadStats();
 
       setFormOpen(false);
       setEditingCommodity(null);
@@ -176,14 +209,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
 
       const refreshedCommodity = await getCommodityById(selectedCommodity.id);
       setSelectedCommodity(refreshedCommodity);
-      setCommodityRows((prev) =>
-        prev.map((row, index) =>
-          row.id === refreshedCommodity.id ? mapCommodityToRow(refreshedCommodity, index) : row,
-        ),
-      );
       setFormSuccess("SRP updated successfully.");
       showToast("SRP updated successfully.", "success");
-      await refreshCommodityRows();
+      await loadCommodities(currentPage);
       setUpdateSrpOpen(false);
     } catch (error: unknown) {
       if (error instanceof Error) {
@@ -197,9 +225,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     }
   };
 
-  const totalListed = commodityRows.length;
-  const activeCount = commodityRows.filter((row) => row.status === "Active").length;
-  const categoriesCount = new Set(commodityRows.map((row) => row.category)).size;
+  const totalListed = summaryStats.total;
+  const activeCount = summaryStats.active;
+  const categoriesCount = summaryStats.categories;
 
   const selectedCommoditySrp = selectedCommodity?.srps?.[0];
   const srpDefaultValues = selectedCommoditySrp
@@ -306,15 +334,13 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
           <div className="flex flex-col gap-6 xl:flex-row">
             <CommodityTable
               commodityRows={commodityRows}
+              total={total}
               isLoading={isLoading}
               error={error}
               searchTerm={searchTerm}
               statusFilter={statusFilter}
               currentPage={currentPage}
-              onSearchTermChange={(value) => {
-                setSearchTerm(value);
-                setCurrentPage(1);
-              }}
+              onSearchTermChange={setSearchTerm}
               onStatusFilterChange={(value) => {
                 setStatusFilter(value);
                 setCurrentPage(1);

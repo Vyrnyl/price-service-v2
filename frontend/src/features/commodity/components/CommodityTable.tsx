@@ -17,8 +17,11 @@ export type CommodityRow = {
   iconBg: string;
 };
 
+const PAGE_SIZE = 5;
+
 type CommodityTableProps = {
   commodityRows: CommodityRow[];
+  total: number;
   isLoading: boolean;
   error: string | null;
   searchTerm: string;
@@ -33,6 +36,7 @@ type CommodityTableProps = {
 
 export default function CommodityTable({
   commodityRows,
+  total,
   isLoading,
   error,
   searchTerm,
@@ -46,24 +50,12 @@ export default function CommodityTable({
 }: CommodityTableProps) {
   const showActions = Boolean(onOpenUpdateSrp || onEditCommodity);
   const columnCount = showActions ? 5 : 4;
-  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-  const filteredCommodityRows = commodityRows.filter((row) => {
-    const normalizedRow = `${row.name} ${row.category} ${row.status}`.toLowerCase();
-    const matchesSearch = normalizedRow.includes(normalizedSearchTerm);
-    const matchesStatus = statusFilter === "ALL" || row.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
 
-  const PAGE_SIZE = 5;
-  const totalPages = Math.max(1, Math.ceil(filteredCommodityRows.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  const paginatedCommodityRows = filteredCommodityRows.slice(
-    (safeCurrentPage - 1) * PAGE_SIZE,
-    (safeCurrentPage - 1) * PAGE_SIZE + PAGE_SIZE,
-  );
 
-  const startIndex = filteredCommodityRows.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
-  const endIndex = Math.min(startIndex + paginatedCommodityRows.length - 1, filteredCommodityRows.length);
+  const startIndex = total === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
+  const endIndex = Math.min(startIndex + commodityRows.length - 1, total);
 
   return (
     <div className="flex min-h-105 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
@@ -133,14 +125,14 @@ export default function CommodityTable({
               <tr>
                 <td colSpan={5} className="py-12 text-center text-sm text-error">{error}</td>
               </tr>
-            ) : filteredCommodityRows.length === 0 ? (
+            ) : commodityRows.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-12 text-center text-sm text-on-surface-variant">
                   No commodities match the current filters.
                 </td>
               </tr>
             ) : (
-              paginatedCommodityRows.map((item) => {
+              commodityRows.map((item) => {
                 const Icon = item.icon;
                 return (
                   <tr key={item.id}>
@@ -206,7 +198,7 @@ export default function CommodityTable({
 
       <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-body-sm text-on-surface-variant">
-          Showing {filteredCommodityRows.length === 0 ? 0 : `${startIndex}-${endIndex}`} of {filteredCommodityRows.length} commodities
+          Showing {total === 0 ? 0 : `${startIndex}-${endIndex}`} of {total} commodities
         </p>
         <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={onPageChange} />
       </div>

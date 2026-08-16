@@ -136,14 +136,14 @@ export default function AdminDashboardPage() {
     async function loadDashboardStats() {
       try {
         const [commodityResponse, storeResponse, userResponse] = await Promise.all([
-          apiFetch<{ status: string; data: unknown[] }>('/api/commodities'),
-          apiFetch<{ status: string; data: unknown[] }>('/api/stores'),
-          apiFetch<unknown[]>('/api/users'),
+          apiFetch<{ status: string; data: unknown[]; total: number }>('/api/commodities?pageSize=1'),
+          apiFetch<{ status: string; data: unknown[]; total: number }>('/api/stores?pageSize=1'),
+          apiFetch<{ status: string; data: unknown[]; total: number }>('/api/users?pageSize=1'),
         ]);
 
-        const totalCommodities = String(commodityResponse.data.length);
-        const totalStores = String(storeResponse.data.length);
-        const totalUsers = String(userResponse.length);
+        const totalCommodities = String(commodityResponse.total);
+        const totalStores = String(storeResponse.total);
+        const totalUsers = String(userResponse.total);
         const monitoredPrices = String(0);
 
         setStats([
@@ -184,9 +184,9 @@ export default function AdminDashboardPage() {
     async function loadActivityFeed() {
       try {
         const [storesResponse, commoditiesResponse, priceRecordsResponse] = await Promise.all([
-          apiFetch<{ status: string; data: Array<{ id: string; name: string; location?: string; createdAt?: string }> }>("/api/stores"),
-          apiFetch<{ status: string; data: Array<{ id: string; name: string; createdAt?: string }> }>("/api/commodities"),
-          apiFetch<{ status: string; data: Array<{ id: string; commodity?: { name?: string }; store?: { name?: string }; price?: number | string; createdAt?: string; dateAndTime?: string }> }>("/api/price-records"),
+          apiFetch<{ status: string; data: Array<{ id: string; name: string; location?: string; createdAt?: string }> }>("/api/stores?pageSize=100"),
+          apiFetch<{ status: string; data: Array<{ id: string; name: string; createdAt?: string }> }>("/api/commodities?pageSize=100"),
+          apiFetch<{ status: string; data: Array<{ id: string; commodity?: { name?: string }; store?: { name?: string }; price?: number | string; createdAt?: string; dateAndTime?: string }> }>("/api/price-records?pageSize=20"),
         ]);
 
         const nextItems: ActivityItem[] = [
@@ -232,7 +232,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadRecentStores() {
       try {
-        const storesResponse = await apiFetch<{ status: string; data: Array<{ id: string; name: string; location?: string; createdAt?: string; user?: { name?: string } }> }>('/api/stores');
+        const storesResponse = await apiFetch<{ status: string; data: Array<{ id: string; name: string; location?: string; createdAt?: string; user?: { name?: string } }> }>('/api/stores?pageSize=100');
 
         const rows = storesResponse.data
           .map((store) => ({
