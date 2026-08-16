@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
-import { MdAdd, MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
+import { MdAdd } from "react-icons/md";
 import { apiFetch } from "@/shared/services/api";
 import { useToast } from "@/shared/components/Toast";
 import PageShell from "@/shared/components/PageShell";
 import Modal from "@/shared/components/Modal";
+import Pagination from "@/shared/components/Pagination";
 import PriceRecordForm from "../components/PriceRecordForm";
 import PriceRecordFilters from "../components/PriceRecordFilters";
 import PriceRecordsTable from "../components/PriceRecordsTable";
@@ -411,40 +412,7 @@ export default function PriceRecordsPage({
                 <p className="text-[11px] text-on-surface-variant sm:text-sm">
                   Showing {(safePage - 1) * pageSize + 1}-{Math.min(safePage * pageSize, filteredRecords.length)} of {filteredRecords.length} records
                 </p>
-                <div className="flex items-center gap-1">
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:w-9"
-                    disabled={safePage === 1}
-                    onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                  >
-                    <MdOutlineChevronLeft size={18} />
-                  </button>
-
-                  {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-                    <button
-                      key={page}
-                      type="button"
-                      className={`flex h-8 w-8 items-center justify-center rounded-lg border text-[11px] font-semibold transition-colors sm:h-9 sm:w-9 sm:text-sm ${
-                        safePage === page
-                          ? "border-primary bg-primary text-on-primary"
-                          : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"
-                      }`}
-                      onClick={() => setCurrentPage(page)}
-                    >
-                      {page}
-                    </button>
-                  ))}
-
-                  <button
-                    type="button"
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:w-9"
-                    disabled={safePage === totalPages}
-                    onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-                  >
-                    <MdOutlineChevronRight size={18} />
-                  </button>
-                </div>
+                <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setCurrentPage} size="sm" />
               </div>
             ) : null}
           </div>

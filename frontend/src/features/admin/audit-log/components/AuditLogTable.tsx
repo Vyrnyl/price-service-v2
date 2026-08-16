@@ -1,8 +1,9 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MdOutlineChevronLeft, MdOutlineChevronRight, MdOutlineVisibility } from "react-icons/md";
+import { MdOutlineVisibility } from "react-icons/md";
 import Badge from "@/shared/components/Badge";
+import Pagination from "@/shared/components/Pagination";
 import { ACTION_BADGE_VARIANT, ACTION_LABELS } from "../constants/audit-log.constants";
 import type { AuditLogEntry } from "../types/audit-log.types";
 
@@ -154,37 +155,7 @@ export default function AuditLogTable({ entries, isLoading, error, onViewDetails
             <p className="text-body-sm text-on-surface-variant">
               Showing {entries.length === 0 ? 0 : `${startIndex}-${endIndex}`} of {entries.length} entries
             </p>
-            <div className="flex items-center gap-1">
-              <button
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={safeCurrentPage === 1}
-                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              >
-                <MdOutlineChevronLeft size={20} />
-              </button>
-
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-                <button
-                  key={page}
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${
-                    safeCurrentPage === page
-                      ? "border-primary bg-primary text-on-primary"
-                      : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"
-                  }`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
-
-              <button
-                className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
-                disabled={safeCurrentPage === totalPages}
-                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-              >
-                <MdOutlineChevronRight size={20} />
-              </button>
-            </div>
+            <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         </>
       )}

@@ -1,3 +1,6 @@
+import FormGroup from "@/shared/components/FormGroup";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
 import type { CommodityOption, StoreOption } from "../types/price-record.types";
 
 interface PriceRecordFiltersProps {
@@ -34,22 +37,20 @@ export default function PriceRecordFilters({
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">
-        <div className="space-y-1.5">
-          <label className="block text-body-sm font-medium text-on-surface">Search</label>
-          <input
+        <FormGroup label="Search" htmlFor="price-record-search">
+          <Input
+            id="price-record-search"
             value={search}
             onChange={(event) => onSearchChange(event.target.value)}
-            className="h-12 w-full rounded-lg border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
             placeholder="Search by store, commodity, or ID"
           />
-        </div>
+        </FormGroup>
 
-        <div className="space-y-1.5">
-          <label className="block text-body-sm font-medium text-on-surface">Store</label>
-          <select
+        <FormGroup label="Store" htmlFor="price-record-store-filter">
+          <Select
+            id="price-record-store-filter"
             value={storeFilter}
             onChange={(event) => onStoreChange(event.target.value)}
-            className="h-12 w-full rounded-lg border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
           >
             <option value="">All stores</option>
             {stores.map((store) => (
@@ -57,15 +58,14 @@ export default function PriceRecordFilters({
                 {store.name}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </FormGroup>
 
-        <div className="space-y-1.5">
-          <label className="block text-body-sm font-medium text-on-surface">Commodity</label>
-          <select
+        <FormGroup label="Commodity" htmlFor="price-record-commodity-filter">
+          <Select
+            id="price-record-commodity-filter"
             value={commodityFilter}
             onChange={(event) => onCommodityChange(event.target.value)}
-            className="h-12 w-full rounded-lg border border-outline-variant bg-surface px-4 text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/10"
           >
             <option value="">All commodities</option>
             {commodities.map((commodity) => (
@@ -73,8 +73,8 @@ export default function PriceRecordFilters({
                 {commodity.name}
               </option>
             ))}
-          </select>
-        </div>
+          </Select>
+        </FormGroup>
       </div>
     </div>
   );

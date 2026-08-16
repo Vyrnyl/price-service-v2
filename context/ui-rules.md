@@ -186,8 +186,8 @@ One row per component. Keep in lockstep with [ui-registry.md](ui-registry.md) �
 | Buttons | primary: `rounded-full bg-primary px-6 py-3 text-on-primary transition-colors` · secondary: `rounded-full border border-outline-variant hover:bg-surface-variant` | |
 | Table | wrapper `overflow-x-auto`; header `bg-surface-container-high` | Wrapper is required — tables must never break the page |
 | Modal | overlay + `rounded-xl bg-surface-container-lowest` | |
-| Form | `rounded-lg border border-outline-variant px-4 py-3 focus:border-primary` | `FieldError` renders validation text |
-| Chip / filter | `rounded-full border border-outline-variant px-3 py-1 text-label-caps` | |
+| Form | `rounded-lg border border-outline-variant px-4 py-3 focus:border-primary` | `FieldError` renders validation text. `Input`'s optional `icon` prop swaps to `pl-11 pr-4` and renders a leading icon at `left-3.5 top-1/2 -translate-y-1/2 text-outline` (added 2026-08-16 for search fields) |
+| Chip / filter | `rounded-full border px-4 py-1.5 text-label-caps font-medium` | Active: `border-transparent bg-primary-container text-on-primary-container` · inactive: `border-outline-variant text-on-surface-variant hover:bg-surface-container-high` (`Chip` component, added 2026-08-16) |
 | Nav item | `mx-2 flex items-center gap-4 rounded-full px-6 py-3 transition-all hover:bg-surface-variant` | Active: `bg-primary text-on-primary` |
 | Top app bar | `sticky top-0 z-50 border-b border-outline-variant bg-surface shadow-sm` | |
 | Bottom nav | `fixed bottom-0 z-50 rounded-t-xl border-t border-outline-variant bg-surface shadow-lg lg:hidden` | |

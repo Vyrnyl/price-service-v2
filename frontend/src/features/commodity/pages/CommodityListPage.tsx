@@ -1,16 +1,10 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
-import {
-  MdKeyboardArrowDown,
-  MdLocalDining,
-  MdLocalGroceryStore,
-  MdOutlineChevronLeft,
-  MdOutlineChevronRight,
-  MdSearch,
-} from "react-icons/md";
+import { MdKeyboardArrowDown, MdLocalDining, MdLocalGroceryStore, MdSearch } from "react-icons/md";
 import { PriceRecordsTable, type PriceRecord } from "@/features/price-record";
 import Modal from "@/shared/components/Modal";
+import Pagination from "@/shared/components/Pagination";
 import { getPublicCommodities, type PublicCommodityItem } from "../services/commodity.api";
 
 interface CommodityRow {
@@ -394,37 +388,7 @@ export default function CommodityListPage() {
           <p className="text-sm text-on-surface-variant">
             Showing {tableRows.length === 0 ? 0 : `${(safeCurrentPage - 1) * pageSize + 1}-${Math.min(safeCurrentPage * pageSize, tableRows.length)}`} of {tableRows.length} commodities
           </p>
-          <div className="flex items-center gap-1">
-            <button
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={safeCurrentPage === 1}
-              onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-            >
-              <MdOutlineChevronLeft size={20} />
-            </button>
-
-            {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-              <button
-                key={page}
-                className={`flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${
-                  safeCurrentPage === page
-                    ? "border-primary bg-primary text-on-primary"
-                    : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"
-                }`}
-                onClick={() => setCurrentPage(page)}
-              >
-                {page}
-              </button>
-            ))}
-
-            <button
-              className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
-              disabled={safeCurrentPage === totalPages}
-              onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-            >
-              <MdOutlineChevronRight size={20} />
-            </button>
-          </div>
+          <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
 
@@ -489,38 +453,12 @@ export default function CommodityListPage() {
                   <p className="text-[11px] text-on-surface-variant sm:text-xs">
                     Showing {filteredRecordRows.length === 0 ? 0 : `${(safeRecordPage - 1) * recordPageSize + 1}-${Math.min(safeRecordPage * recordPageSize, filteredRecordRows.length)}`} of {filteredRecordRows.length} records
                   </p>
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:w-9"
-                      disabled={safeRecordPage === 1}
-                      onClick={() => setRecordPage((page) => Math.max(1, page - 1))}
-                    >
-                      <MdOutlineChevronLeft size={20} />
-                    </button>
-                    {Array.from({ length: totalRecordPages }, (_, index) => index + 1).map((page) => (
-                      <button
-                        key={page}
-                        type="button"
-                        className={`flex h-7 w-7 items-center justify-center rounded-lg border text-[11px] font-semibold transition-colors sm:h-8 sm:w-8 sm:text-xs ${
-                          safeRecordPage === page
-                            ? "border-primary bg-primary text-on-primary"
-                            : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"
-                        }`}
-                        onClick={() => setRecordPage(page)}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                    <button
-                      type="button"
-                      className="flex h-8 w-8 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50 sm:h-9 sm:w-9"
-                      disabled={safeRecordPage === totalRecordPages}
-                      onClick={() => setRecordPage((page) => Math.min(totalRecordPages, page + 1))}
-                    >
-                      <MdOutlineChevronRight size={20} />
-                    </button>
-                  </div>
+                  <Pagination
+                    currentPage={safeRecordPage}
+                    totalPages={totalRecordPages}
+                    onPageChange={setRecordPage}
+                    size="sm"
+                  />
                 </div>
               </>
             ) : (

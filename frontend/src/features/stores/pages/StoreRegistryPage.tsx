@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MdChevronLeft, MdChevronRight } from "react-icons/md";
 import PageShell from "@/shared/components/PageShell";
+import Pagination from "@/shared/components/Pagination";
 import { CreateStoreDialog } from "../components/CreateStoreDialog";
 import { StoreRegistryHeader } from "../components/StoreRegistryHeader";
 import { StoreRegistryToolbar } from "../components/StoreRegistryToolbar";
@@ -10,7 +10,6 @@ import { StoreRegistryGrid } from "../components/StoreRegistryGrid";
 import { useStoreRegistryState } from "../hooks/use-stores";
 import { StorePriceRecordsModal } from "../components/StorePriceRecordsModal";
 import { StoreRegistryPageProps } from "../types/stores.types";
-import { ICON_BUTTON_CLASSES } from "../constants/stores.constants";
 
 export default function StoreRegistryPage({ showAssignedOfficer = true, canCreateStore = true }: StoreRegistryPageProps) {
   const {
@@ -145,33 +144,7 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
             <span className="font-sans text-on-surface-variant">
               Showing {filteredStores.length === 0 ? 0 : `${(safeCurrentPage - 1) * pageSize + 1}-${Math.min(safeCurrentPage * pageSize, filteredStores.length)}`} of {filteredStores.length} store{filteredStores.length === 1 ? "" : "s"}
             </span>
-            <div className="flex gap-2">
-              <button
-                className={ICON_BUTTON_CLASSES}
-                disabled={safeCurrentPage === 1}
-                onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-              >
-                <MdChevronLeft size={20} />
-              </button>
-              {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-                <button
-                  key={page}
-                  className={`flex h-10 w-10 items-center justify-center rounded-lg font-bold shadow-sm ${
-                    safeCurrentPage === page ? "bg-primary text-on-primary" : `${ICON_BUTTON_CLASSES} text-on-surface-variant`
-                  }`}
-                  onClick={() => setCurrentPage(page)}
-                >
-                  {page}
-                </button>
-              ))}
-              <button
-                className={ICON_BUTTON_CLASSES}
-                disabled={safeCurrentPage === totalPages}
-                onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-              >
-                <MdChevronRight size={20} />
-              </button>
-            </div>
+            <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         </div>
       </section>
