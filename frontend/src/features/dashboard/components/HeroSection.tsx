@@ -7,20 +7,20 @@ export default function HeroSection() {
     <section className="relative overflow-hidden bg-surface-container-lowest px-container-margin-mobile py-16 md:px-container-margin-desktop md:py-24">
       <div className="mx-auto flex max-w-6xl flex-col items-center gap-12 md:flex-row">
         <div className="flex-1 space-y-6">
-          <div className="inline-flex items-center gap-2 rounded-full bg-primary-container/10 px-3 py-1 font-label-caps text-label-caps text-primary">
+          <div className="inline-flex items-center gap-2 rounded-full bg-primary-container/10 px-3 py-1 font-sans text-label-caps text-primary">
            <MdVerified />
             OFFICIAL DTI MONITORING SYSTEM
           </div>
-          <h2 className="font-h1-desktop text-h1-desktop leading-tight text-on-surface">
+          <h2 className="font-sans text-h1-desktop leading-tight text-on-surface">
             Monitor Commodity Prices in <span className="text-primary">Real-Time</span>
           </h2>
-          <p className="max-w-lg font-body-lg text-body-lg text-on-surface-variant">
+          <p className="max-w-lg font-sans text-body-lg text-on-surface-variant">
             Empowering consumers and retailers in Catanduanes with transparent Suggested Retail Price (SRP) monitoring and market trend forecasting.
           </p>
           <div className="flex flex-wrap gap-4 pt-4">
             <Link
               href="/commodity-list"
-              className="flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-h3-desktop text-h3-desktop text-on-primary transition-all hover:shadow-lg active:scale-95"
+              className="flex items-center gap-2 rounded-xl bg-primary px-8 py-4 font-sans text-h3-desktop text-on-primary transition-all hover:shadow-lg active:scale-95"
             >
               View Commodity Prices
               <FaArrowRight />

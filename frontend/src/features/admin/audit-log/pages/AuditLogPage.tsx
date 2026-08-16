@@ -50,7 +50,7 @@ export default function AuditLogPage() {
       <section className="px-container-margin-mobile py-8 sm:py-10 md:px-container-margin-desktop md:py-12">
         <div className="mx-auto max-w-6xl space-y-6">
           <div>
-            <h1 className="font-h1-desktop text-h1-desktop text-on-surface mobile:font-h1-mobile mobile:text-h1-mobile">
+            <h1 className="font-sans text-h1-desktop text-on-surface mobile:font-sans mobile:text-h1-mobile">
               Audit Log
             </h1>
             <p className="mt-1 text-body-lg text-on-surface-variant">

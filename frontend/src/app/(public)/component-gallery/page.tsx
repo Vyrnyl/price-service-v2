@@ -15,7 +15,7 @@ import { useToast } from "@/shared/components/Toast";
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <section className="space-y-4">
-      <h2 className="font-h2-desktop text-h2-desktop text-on-surface">{title}</h2>
+      <h2 className="font-sans text-h2-desktop text-on-surface">{title}</h2>
       <Card className="p-6">{children}</Card>
     </section>
   );
@@ -29,7 +29,7 @@ export default function ComponentGalleryPage() {
   return (
     <PageShell className="space-y-10 px-container-margin-mobile py-stack-lg md:px-container-margin-desktop">
       <div>
-        <h1 className="font-h1-mobile text-h1-mobile text-on-surface md:font-h1-desktop md:text-h1-desktop">
+        <h1 className="font-sans text-h1-mobile text-on-surface md:font-sans md:text-h1-desktop">
           Component Gallery
         </h1>
         <p className="mt-2 text-body-sm text-on-surface-variant">
@@ -69,13 +69,13 @@ export default function ComponentGalleryPage() {
       <Section title="Cards">
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="p-6">
-            <h3 className="font-h3-desktop text-h3-desktop text-on-surface">Card title</h3>
+            <h3 className="font-sans text-h3-desktop text-on-surface">Card title</h3>
             <p className="mt-2 text-body-sm text-on-surface-variant">
               The canonical card recipe — rounded-xl border, lowest-container background, standard shadow.
             </p>
           </Card>
           <Card className="animate-stats p-6">
-            <p className="text-label-caps font-label-caps uppercase text-on-surface-variant">Stat card</p>
+            <p className="text-label-caps font-sans uppercase text-on-surface-variant">Stat card</p>
             <p className="mt-1 text-price-display font-bold text-on-surface">₱ 45.00</p>
           </Card>
         </div>

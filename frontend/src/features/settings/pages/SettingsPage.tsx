@@ -30,7 +30,7 @@ export default function SettingsPage() {
       <section className="px-container-margin-mobile py-8 sm:py-10 md:px-container-margin-desktop md:py-12">
         <div className="mx-auto max-w-3xl space-y-6">
           <div>
-            <h1 className="font-h1-desktop text-h1-desktop text-on-surface">Settings</h1>
+            <h1 className="font-sans text-h1-desktop text-on-surface">Settings</h1>
             <p className="mt-1 text-body-lg text-on-surface-variant">
               Manage your profile details and account password.
             </p>

@@ -41,7 +41,7 @@ export default function CommoditySummaryCards({ cards }: CommoditySummaryCardsPr
                 </span>
               ) : null}
             </div>
-            <p className="mb-1 font-label-caps text-label-caps text-on-surface-variant">
+            <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
               {stat.label}
             </p>
             <h3 className={`text-[32px] font-bold leading-none ${stat.valueColor ?? "text-on-surface"}`}>

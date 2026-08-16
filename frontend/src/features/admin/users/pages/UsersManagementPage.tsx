@@ -11,6 +11,7 @@ import {
 import { createUser, getUsers, updateUser, updateUserStatus } from "../services/users.api";
 import { ApiError } from "../../../../shared/services/api";
 import { useToast } from "@/shared/components/Toast";
+import PageShell from "@/shared/components/PageShell";
 import type { CreateUserFormSchema, UpdateUserFormSchema } from "../schemas/users.schema";
 import type { User, UserRole } from "../types/users.types";
 import AddUserDialog from "../components/AddUserDialog";
@@ -171,12 +172,12 @@ export default function UsersManagementPage() {
   });
 
   return (
-    <main className="min-h-screen lg:ml-72">
+    <PageShell>
       <section className="px-container-margin-mobile py-8 sm:py-10 md:px-container-margin-desktop md:py-12">
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h1 className="font-h1-desktop text-h1-desktop text-on-surface mobile:font-h1-mobile mobile:text-h1-mobile">
+              <h1 className="font-sans text-h1-desktop text-on-surface mobile:font-sans mobile:text-h1-mobile">
                 System Access
               </h1>
               <p className="mt-1 text-body-lg text-on-surface-variant">
@@ -244,6 +245,6 @@ export default function UsersManagementPage() {
           />
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

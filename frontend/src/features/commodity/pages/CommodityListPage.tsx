@@ -10,6 +10,7 @@ import {
   MdSearch,
 } from "react-icons/md";
 import { PriceRecordsTable, type PriceRecord } from "@/features/price-record";
+import Modal from "@/shared/components/Modal";
 import { getPublicCommodities, type PublicCommodityItem } from "../services/commodity.api";
 
 interface CommodityRow {
@@ -428,24 +429,13 @@ export default function CommodityListPage() {
       </div>
 
       {selectedCommodity ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-4xl rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow sm:p-5">
-            <div className="mb-3 flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-base font-semibold text-on-surface">Price Records</h2>
-                <p className="mt-0.5 text-[11px] text-on-surface-variant sm:text-xs">
-                  Recent submissions and compliance status.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={handleCloseCommodityRecords}
-                className="inline-flex rounded-full bg-surface px-2.5 py-1.5 text-xs text-on-surface transition hover:bg-surface-container-high sm:px-3 sm:py-2 sm:text-sm"
-              >
-                Close
-              </button>
-            </div>
-
+        <Modal
+          open
+          onClose={handleCloseCommodityRecords}
+          title="Price Records"
+          description="Recent submissions and compliance status."
+          maxWidth="max-w-4xl"
+        >
             <div className="mb-2 flex flex-col gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:flex-row sm:items-center sm:justify-between">
               <input
                 className="w-full rounded-xl border border-outline-variant bg-surface py-1.5 px-2.5 text-[11px] outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary sm:max-w-xs sm:text-xs"
@@ -538,8 +528,7 @@ export default function CommodityListPage() {
                 {selectedCommodity.records.length > 0 ? "No records match the current filters." : "No price records found for this commodity."}
               </div>
             )}
-          </div>
-        </div>
+        </Modal>
       ) : null}
     </main>
   );

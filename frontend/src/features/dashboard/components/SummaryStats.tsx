@@ -111,10 +111,10 @@ export default function SummaryStats() {
     <section className="bg-surface-container-low px-container-margin-mobile py-12 md:px-container-margin-desktop">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6">
-          <h3 className="font-h3-desktop text-h3-desktop text-on-surface">
+          <h3 className="font-sans text-h3-desktop text-on-surface">
             Quick summary
           </h3>
-          <p className="mt-1 font-body-sm text-on-surface-variant">
+          <p className="mt-1 font-sans text-on-surface-variant">
             A quick overview of the latest market activity and monitored coverage.
           </p>
         </div>
@@ -133,7 +133,7 @@ export default function SummaryStats() {
                     <Icon size={22} />
                   </span>
                   <span
-                    className={`text-xs font-label-caps ${
+                    className={`text-xs font-sans ${
                       stat.meta === "HIGH COMPLIANCE"
                         ? "text-success"
                         : "text-outline"
@@ -142,10 +142,10 @@ export default function SummaryStats() {
                     {stat.meta}
                   </span>
                 </div>
-                <div className="mb-1 font-h1-desktop text-[32px] text-on-surface">
+                <div className="mb-1 font-sans text-[32px] text-on-surface">
                   {stat.value}
                 </div>
-                <div className="font-label-caps text-label-caps text-on-surface-variant">
+                <div className="font-sans text-label-caps text-on-surface-variant">
                   {stat.label}
                 </div>
               </div>

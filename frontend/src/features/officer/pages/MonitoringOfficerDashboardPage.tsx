@@ -8,6 +8,7 @@ import { CommodityComparisonChart } from "@/shared/components/charts/CommodityCo
 import { SrpVsActualChart } from "@/shared/components/charts/SrpVsActualChart";
 import { fetchDashboardAnalytics } from "@/shared/services/dashboard.service";
 import type { DashboardAnalytics } from "@/shared/types/dashboard.types";
+import PageShell from "@/shared/components/PageShell";
 
 const stats = [
   {
@@ -93,15 +94,15 @@ export default function MonitoringOfficerDashboardPage() {
   }, []);
 
   return (
-    <main className="min-h-screen lg:ml-72">
+    <PageShell>
       <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <h2 className="font-h1-desktop text-h1-desktop text-on-surface">
+              <h2 className="font-sans text-h1-desktop text-on-surface">
                 Monitoring Officer Overview
               </h2>
-              <p className="mt-1 font-body-lg text-on-surface-variant">
+              <p className="mt-1 font-sans text-on-surface-variant">
                 Track the latest operational activity in your monitoring area.
               </p>
             </div>
@@ -130,7 +131,7 @@ export default function MonitoringOfficerDashboardPage() {
                       Total
                     </span>
                   </div>
-                  <p className="mb-1 font-label-caps text-label-caps text-on-surface-variant">
+                  <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
                     {stat.label}
                   </p>
                   <h3 className="text-[28px] font-bold leading-none text-on-surface">
@@ -142,7 +143,7 @@ export default function MonitoringOfficerDashboardPage() {
           </section>
 
           <section className="space-y-6">
-            <h3 className="font-h2-desktop text-h2-desktop text-on-surface">Market Insights</h3>
+            <h3 className="font-sans text-h2-desktop text-on-surface">Market Insights</h3>
             <PriceTrendLineChart
               points={analytics?.priceTrend ?? []}
               isLoading={analyticsLoading}
@@ -165,7 +166,7 @@ export default function MonitoringOfficerDashboardPage() {
           <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
             <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
               <div>
-                <h3 className="font-h3-desktop text-h3-desktop text-on-surface">
+                <h3 className="font-sans text-h3-desktop text-on-surface">
                   Recent Activity
                 </h3>
                 <p className="text-body-sm text-on-surface-variant">Latest stores, price records, and reports added to the system.</p>
@@ -174,7 +175,7 @@ export default function MonitoringOfficerDashboardPage() {
 
             <div className="grid gap-4 lg:grid-cols-3">
               <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
-                <p className="mb-3 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
+                <p className="mb-3 font-sans text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
                   Added Stores
                 </p>
                 <div className="space-y-3">
@@ -193,7 +194,7 @@ export default function MonitoringOfficerDashboardPage() {
               </div>
 
               <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
-                <p className="mb-3 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
+                <p className="mb-3 font-sans text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
                   Added Price Records
                 </p>
                 <div className="space-y-3">
@@ -212,7 +213,7 @@ export default function MonitoringOfficerDashboardPage() {
               </div>
 
               <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
-                <p className="mb-3 font-label-caps text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
+                <p className="mb-3 font-sans text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
                   Reports Activity
                 </p>
                 <div className="space-y-3">
@@ -233,6 +234,6 @@ export default function MonitoringOfficerDashboardPage() {
           </section>
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

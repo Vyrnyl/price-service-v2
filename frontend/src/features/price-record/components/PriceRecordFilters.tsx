@@ -25,7 +25,7 @@ export default function PriceRecordFilters({
     <div className="grid gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-5 data-card-shadow md:p-6">
       <div className="mb-4 flex items-center justify-between gap-3">
         <div>
-          <h2 className="font-h3-desktop text-h3-desktop text-on-surface">Search & Filters</h2>
+          <h2 className="font-sans text-h3-desktop text-on-surface">Search & Filters</h2>
           <p className="text-body-xs text-on-surface-variant">Narrow the list by store, commodity, or record ID.</p>
         </div>
         <span className="inline-flex items-center rounded-full bg-surface-container-low py-1.5 px-2.5 text-body-xs text-on-surface-variant">

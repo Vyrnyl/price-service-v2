@@ -12,6 +12,7 @@ import {
   getPublicForecastByCommodityId,
   type PublicCommodityItem,
 } from "@/features/commodity";
+import PageShell from "@/shared/components/PageShell";
 import { DailyChangesPanel } from "../components/price-analysis/DailyChangesPanel";
 import { ForecastDetailModal } from "../components/price-analysis/ForecastDetailModal";
 import { ForecastMethodPanel } from "../components/price-analysis/ForecastMethodPanel";
@@ -334,7 +335,7 @@ export default function PriceAnalysisPage() {
   );
 
   return (
-    <main className="min-h-screen bg-surface-container-low lg:ml-72">
+    <PageShell className="bg-surface-container-low">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-container-margin-mobile py-8 md:px-container-margin-desktop md:py-10">
         <PriceAnalysisHeader
           selectedCommodity={selectedCommodity}
@@ -394,6 +395,6 @@ export default function PriceAnalysisPage() {
           onClose={() => setShowDetailModal(false)}
         />
       ) : null}
-    </main>
+    </PageShell>
   );
 }

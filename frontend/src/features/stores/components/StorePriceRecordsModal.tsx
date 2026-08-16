@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
 import { PriceRecordsTable, type PriceRecord } from "@/features/price-record";
+import Modal from "@/shared/components/Modal";
 
 function getStatusLabel(status: string | undefined, price: number, srpPrice: number | null) {
   if (Number.isFinite(price) && srpPrice != null) {
@@ -58,29 +59,14 @@ export function StorePriceRecordsModal({ storeId, storeName, records, loading, o
   const safePage = Math.min(currentPage, totalPages);
   const pagedRecords = normalizedRecords.slice((safePage - 1) * pageSize, safePage * pageSize);
 
-  if (!storeId) {
-    return null;
-  }
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-4xl rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow sm:p-5">
-        <div className="mb-3 flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-base font-semibold text-on-surface">Store Price Records</h2>
-            <p className="mt-0.5 text-[11px] text-on-surface-variant sm:text-xs">
-              {storeName ? `Showing price records for ${storeName}.` : "Showing price records for the selected store."}
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex rounded-full bg-surface px-2.5 py-1.5 text-xs text-on-surface transition hover:bg-surface-container-high sm:px-3 sm:py-2 sm:text-sm"
-          >
-            Close
-          </button>
-        </div>
-
+    <Modal
+      open={Boolean(storeId)}
+      onClose={onClose}
+      title="Store Price Records"
+      description={storeName ? `Showing price records for ${storeName}.` : "Showing price records for the selected store."}
+      maxWidth="max-w-4xl"
+    >
         {loading ? (
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 text-[11px] text-on-surface-variant sm:text-xs">
             Loading price records...
@@ -135,7 +121,6 @@ export function StorePriceRecordsModal({ storeId, storeName, records, loading, o
             No price records found for this store.
           </div>
         )}
-      </div>
-    </div>
+    </Modal>
   );
 }

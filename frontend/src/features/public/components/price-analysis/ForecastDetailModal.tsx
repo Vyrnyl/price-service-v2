@@ -1,4 +1,5 @@
 import { MdClose } from "react-icons/md";
+import Modal from "@/shared/components/Modal";
 
 type ForecastDetailModalProps = {
   selectedCommodity: string;
@@ -38,8 +39,7 @@ export function ForecastDetailModal({
   onClose,
 }: ForecastDetailModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 px-4 py-6">
-      <div className="w-full max-w-3xl rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
+    <Modal open onClose={onClose} maxWidth="max-w-3xl">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">Detailed forecast report</p>
@@ -89,7 +89,6 @@ export function ForecastDetailModal({
             </div>
           ))}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

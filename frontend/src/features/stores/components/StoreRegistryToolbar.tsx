@@ -71,7 +71,7 @@ export function StoreRegistryToolbar({
       </div>
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
-        <span className="mr-2 whitespace-nowrap font-label-caps text-label-caps text-on-surface-variant">Quick Filter:</span>
+        <span className="mr-2 whitespace-nowrap font-sans text-label-caps text-on-surface-variant">Quick Filter:</span>
         {STATUS_CHIPS.map((chip) => {
           const isActive = quickFilter === chip;
           return (

@@ -4,6 +4,8 @@ import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { MdAdd, MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
 import { apiFetch } from "@/shared/services/api";
 import { useToast } from "@/shared/components/Toast";
+import PageShell from "@/shared/components/PageShell";
+import Modal from "@/shared/components/Modal";
 import PriceRecordForm from "../components/PriceRecordForm";
 import PriceRecordFilters from "../components/PriceRecordFilters";
 import PriceRecordsTable from "../components/PriceRecordsTable";
@@ -327,16 +329,16 @@ export default function PriceRecordsPage({
   };
 
   return (
-    <main className="min-h-screen lg:ml-72">
+    <PageShell>
       <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
         <div className="mx-auto max-w-7xl space-y-6">
           <header className="space-y-3">
-            <span className="font-label-caps text-label-caps uppercase tracking-[0.24em] text-outline">
+            <span className="font-sans text-label-caps uppercase tracking-[0.24em] text-outline">
               Monitoring Logs
             </span>
             <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
               <div>
-                <h1 className="font-h2-desktop text-h2-desktop text-on-surface">
+                <h1 className="font-sans text-h2-desktop text-on-surface">
                   Price Records
                 </h1>
                 <p className="mt-1 text-body-sm text-on-surface-variant">
@@ -348,7 +350,7 @@ export default function PriceRecordsPage({
                 <button
                   type="button"
                   onClick={handleOpenCreateForm}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-body-sm font-semibold text-on-primary shadow-sm transition-all hover:shadow-md"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-sans font-semibold text-on-primary shadow-sm transition-all hover:shadow-md"
                 >
                   <MdAdd size={20} />
                   New Entry
@@ -371,7 +373,17 @@ export default function PriceRecordsPage({
           </div>
 
           {formOpen ? (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm">
+            <Modal
+              open
+              onClose={handleCloseForm}
+              title={editingRecord ? "Edit Price Record" : "Add Price Record"}
+              description={
+                editingRecord
+                  ? "Update the selected commodity price entry from your assigned inspection route."
+                  : "Record a new commodity price entry from your assigned inspection route."
+              }
+              maxWidth="max-w-3xl"
+            >
               <PriceRecordForm
                 stores={stores}
                 commodities={commodities}
@@ -384,7 +396,7 @@ export default function PriceRecordsPage({
                 onCancel={handleCloseForm}
                 onSubmit={handleSubmitRecord}
               />
-            </div>
+            </Modal>
           ) : null}
 
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:p-3">
@@ -438,6 +450,6 @@ export default function PriceRecordsPage({
           </div>
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

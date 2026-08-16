@@ -149,7 +149,7 @@ export default function NavigationDrawer({
         }`}
       >
         <div className="mb-8 px-6 pt-8">
-          <h2 className="font-label-caps text-label-caps uppercase tracking-widest text-outline">
+          <h2 className="font-sans text-label-caps uppercase tracking-widest text-outline">
             Navigation
           </h2>
         </div>
@@ -175,7 +175,7 @@ export default function NavigationDrawer({
                 }`}
               >
                 <Icon />
-                <span className="font-body-sm text-body-sm">{item.label}</span>
+                <span className="font-sans text-body-sm">{item.label}</span>
               </Link>
             );
           })}
@@ -186,7 +186,7 @@ export default function NavigationDrawer({
                 className="mx-2 mt-2 flex items-center gap-4 rounded-full px-6 py-3 text-on-surface-variant transition-all hover:bg-surface-variant"
               >
                 <MdOutlineLogout />
-                <span className="font-body-sm text-body-sm">Logout</span>
+                <span className="font-sans text-body-sm">Logout</span>
               </button>
             ) : null}
             <hr className="mx-6 my-4 border-outline-variant" />

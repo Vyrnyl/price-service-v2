@@ -6,6 +6,7 @@ import {
   MdTrendingUp,
 } from "react-icons/md";
 import { getPublicCommodities, type PublicCommodityItem } from "@/features/commodity";
+import PageShell from "@/shared/components/PageShell";
 import HeroSection from "../components/HeroSection";
 import SummaryStats from "../components/SummaryStats";
 
@@ -184,7 +185,7 @@ export default function DashboardPage() {
   }, []);
 
   return (
-    <main className="min-h-screen lg:ml-72">
+    <PageShell>
       <HeroSection />
       <SummaryStats />
 
@@ -193,10 +194,10 @@ export default function DashboardPage() {
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
             <div className="mb-6 flex items-center justify-between">
               <div>
-                <h3 className="font-h3-desktop text-h3-desktop text-on-surface">
+                <h3 className="font-sans text-h3-desktop text-on-surface">
                   Recent SRP updates
                 </h3>
-                <p className="mt-1 font-body-sm text-on-surface-variant">
+                <p className="mt-1 font-sans text-on-surface-variant">
                   A quick look at the latest SRP-related commodity updates and their current status.
                 </p>
               </div>
@@ -214,12 +215,12 @@ export default function DashboardPage() {
                     className="flex items-center justify-between gap-4 rounded-xl border border-outline-variant bg-surface-container-low p-4"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="font-body-sm font-semibold text-on-surface">{item.name}</p>
+                      <p className="font-sans font-semibold text-on-surface">{item.name}</p>
                       <p className="mt-1 text-xs text-on-surface-variant">{item.updated}</p>
                     </div>
 
                     <div className="text-right">
-                      <p className="mt-1 font-h3-desktop text-h3-desktop text-on-surface">
+                      <p className="mt-1 font-sans text-h3-desktop text-on-surface">
                         {item.srp}
                       </p>
                     </div>
@@ -237,7 +238,7 @@ export default function DashboardPage() {
             <div className="rounded-xl border border-outline-variant bg-surface-container-low p-6 data-card-shadow">
               <div className="mb-4 flex items-center gap-2">
                 <MdTrendingUp className="text-primary" size={22} />
-                <h3 className="font-h3-desktop text-h3-desktop text-on-surface">
+                <h3 className="font-sans text-h3-desktop text-on-surface">
                   Market highlights
                 </h3>
               </div>
@@ -249,10 +250,10 @@ export default function DashboardPage() {
                 ) : marketHighlights.length > 0 ? (
                   marketHighlights.map((item) => (
                     <div key={item.title} className="rounded-xl bg-surface-container-lowest p-4">
-                      <p className="font-label-caps text-label-caps text-on-surface-variant">
+                      <p className="font-sans text-label-caps text-on-surface-variant">
                         {item.title}
                       </p>
-                      <p className="mt-1 font-h3-desktop text-h3-desktop text-on-surface">
+                      <p className="mt-1 font-sans text-h3-desktop text-on-surface">
                         {item.value}
                       </p>
                       <p className="mt-1 text-sm text-on-surface-variant">{item.note}</p>
@@ -269,17 +270,17 @@ export default function DashboardPage() {
             <div className="rounded-xl border border-outline-variant bg-primary-container/20 p-6 data-card-shadow">
               <div className="mb-3 flex items-center gap-2">
                 <MdStorefront className="text-primary" size={22} />
-                <h3 className="font-h3-desktop text-h3-desktop text-on-surface">
+                <h3 className="font-sans text-h3-desktop text-on-surface">
                   Helpful for shoppers
                 </h3>
               </div>
-              <p className="font-body-sm text-on-surface-variant">
+              <p className="font-sans text-on-surface-variant">
                 Compare nearby stores, review recent price updates, and quickly see whether a commodity is aligned with the current SRP guidance.
               </p>
             </div>
           </div>
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

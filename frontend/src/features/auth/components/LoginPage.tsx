@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MdLockOutline, MdOutlineMailOutline } from "react-icons/md";
+import { MdLockOutline, MdOutlineMailOutline, MdVisibility, MdVisibilityOff } from "react-icons/md";
 import { normalizeUserRole } from "@/shared/services/auth";
 import { useLogin } from "../hooks/use-login";
 import { type LoginInput } from "../auth.schema";
@@ -37,7 +37,7 @@ export default function LoginPage() {
     <main className="min-h-screen flex items-center justify-center bg-background px-container-margin-mobile py-12 md:px-container-margin-desktop">
       <div className="w-full max-w-120 rounded-xl border border-outline-variant bg-surface-container-lowest p-8 data-card-shadow">
         <div className="text-center mb-8">
-          <h1 className="font-h1-desktop text-h1-mobile font-bold text-on-surface md:text-h1-desktop">
+          <h1 className="font-sans text-h1-mobile font-bold text-on-surface md:text-h1-desktop">
             Welcome Back
           </h1>
           <p className="mt-2 text-body-lg text-on-surface-variant">
@@ -51,7 +51,7 @@ export default function LoginPage() {
               Email Address
             </label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-outline">
                 <MdOutlineMailOutline />
               </span>
               <input
@@ -73,7 +73,7 @@ export default function LoginPage() {
               </label>
             </div>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-outline">
                 <MdLockOutline />
               </span>
               <input
@@ -90,8 +90,8 @@ export default function LoginPage() {
                 onClick={() => setShowPassword((current) => !current)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                <span className="material-symbols-outlined">
-                  {showPassword ? "visibility_off" : "visibility"}
+                <span>
+                  {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
                 </span>
               </button>
             </div>

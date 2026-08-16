@@ -46,7 +46,7 @@ export default function TopAppBar({
         ) : null}
         <Link href="/" className="flex min-w-0 items-center gap-3">
           <MdOutlineAnalytics className="shrink-0 text-primary" size={28} />
-          <h1 className="truncate font-h2-desktop text-h2-desktop font-bold text-primary">
+          <h1 className="truncate font-sans text-h2-desktop font-bold text-primary">
             PresyoSerbisyo
           </h1>
         </Link>
@@ -54,7 +54,7 @@ export default function TopAppBar({
       <div className="shrink-0">
         {showLoginButton ? (
           <Link href="/login" className="inline-flex">
-            <button className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 py-2 font-label-caps text-label-caps text-on-primary transition-opacity hover:opacity-90">
+            <button className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 py-2 font-sans text-label-caps text-on-primary transition-opacity hover:opacity-90">
               <LuLogIn size={14} />
               <span>LOGIN</span>
             </button>

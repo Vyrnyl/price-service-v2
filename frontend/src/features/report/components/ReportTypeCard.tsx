@@ -37,7 +37,7 @@ export default function ReportTypeCard({
           </span>
         ) : null}
       </div>
-      <p className="mb-2 font-label-caps text-label-caps text-on-surface-variant">Report Type</p>
+      <p className="mb-2 font-sans text-label-caps text-on-surface-variant">Report Type</p>
       <h4 className={`text-[22px] font-semibold leading-tight ${isSelected ? "text-primary" : "text-on-surface"}`}>
         {type.title}
       </h4>

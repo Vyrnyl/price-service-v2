@@ -12,6 +12,7 @@ import { CommodityComparisonChart } from "@/shared/components/charts/CommodityCo
 import { SrpVsActualChart } from "@/shared/components/charts/SrpVsActualChart";
 import { fetchDashboardAnalytics } from "@/shared/services/dashboard.service";
 import type { DashboardAnalytics } from "@/shared/types/dashboard.types";
+import PageShell from "@/shared/components/PageShell";
 
 type DashboardStat = {
   label: string;
@@ -254,15 +255,15 @@ export default function AdminDashboardPage() {
   }, []);
 
   return (
-    <main className="min-h-screen lg:ml-72">
+    <PageShell>
       <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
         <div className="mx-auto max-w-6xl space-y-6">
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <h2 className="font-h1-desktop text-h1-desktop text-on-surface">
+              <h2 className="font-sans text-h1-desktop text-on-surface">
                 Admin monitoring dashboard
               </h2>
-              <p className="mt-1 font-body-lg text-on-surface-variant">
+              <p className="mt-1 font-sans text-on-surface-variant">
                 Here is the market overview for today, {new Date().toLocaleDateString("en-US", {
                   month: "long",
                   day: "numeric",
@@ -292,7 +293,7 @@ export default function AdminDashboardPage() {
                     </span>
                   ) : null}
                 </div>
-                <p className="mb-1 font-label-caps text-label-caps text-on-surface-variant">
+                <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
                   {stat.label}
                 </p>
                 <h3
@@ -307,7 +308,7 @@ export default function AdminDashboardPage() {
           </section>
 
           <section className="space-y-6">
-            <h3 className="font-h2-desktop text-h2-desktop text-on-surface">Market Insights</h3>
+            <h3 className="font-sans text-h2-desktop text-on-surface">Market Insights</h3>
             <PriceTrendLineChart
               points={analytics?.priceTrend ?? []}
               isLoading={analyticsLoading}
@@ -330,7 +331,7 @@ export default function AdminDashboardPage() {
           <section className="grid gap-6 xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)]">
             <div className="flex min-h-105 w-full flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
               <div className="mb-6 flex items-center justify-between">
-                <h4 className="font-h3-desktop text-h3-desktop text-on-surface">
+                <h4 className="font-sans text-h3-desktop text-on-surface">
                   Recent Activity
                 </h4>
                 <IoMdMore />
@@ -363,7 +364,7 @@ export default function AdminDashboardPage() {
 
             <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
               <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <h4 className="font-h3-desktop text-h3-desktop text-on-surface">
+                <h4 className="font-sans text-h3-desktop text-on-surface">
                   Recently Added Stores
                 </h4>
               </div>
@@ -398,6 +399,6 @@ export default function AdminDashboardPage() {
           </section>
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

@@ -68,7 +68,7 @@ export default function CommodityTable({
     <div className="flex min-h-105 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
       <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h4 className="font-h3-desktop text-h3-desktop text-on-surface">Commodity with SRP</h4>
+          <h4 className="font-sans text-h3-desktop text-on-surface">Commodity with SRP</h4>
           <p className="text-body-sm text-on-surface-variant">
             Active market listings and monitoring status
           </p>

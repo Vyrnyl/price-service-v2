@@ -53,7 +53,7 @@ All paths are relative to `frontend/`.
 | TopAppBar | built | `src/shared/components/TopAppBar.tsx` | `sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-outline-variant bg-surface px-container-margin-mobile py-stack-md shadow-sm md:px-container-margin-desktop` |
 | NavigationDrawer | built | `src/shared/components/NavigationDrawer.tsx` | nav item: `mx-2 mt-2 flex items-center gap-4 rounded-full px-6 py-3 text-on-surface-variant transition-all hover:bg-surface-variant` |
 | FooterSection | built | `src/shared/components/FooterSection.tsx` | `flex w-full lg:ml-72 lg:max-w-[calc(100%-18rem)] flex-col items-center justify-between gap-stack-md border-t border-outline-variant bg-surface-container-highest px-container-margin-mobile py-stack-lg md:flex-row md:px-container-margin-desktop` |
-| PageShell | built | `src/shared/components/PageShell.tsx` | `min-h-screen lg:ml-72` + any extra `className` — extracts the wrapper that was repeated verbatim in 10 page components (B-18). **Not yet adopted by the 10 pre-existing pages** — they keep their inline `<main className="min-h-screen lg:ml-72">` until migrated. First real adoption: `AuditLogPage` (2.2), built against it directly from the start. |
+| PageShell | built | `src/shared/components/PageShell.tsx` | `min-h-screen lg:ml-72` + any extra `className` — extracts the wrapper that was repeated verbatim across page components (B-18, resolved 2026-08-16). **Adopted by all 9 applicable pages**: `DashboardPage`, `AdminDashboardPage`, `UsersManagementPage`, `CommodityManagementPage`, `StoreRegistryPage`, `PriceRecordsPage`, `ReportGenerationPage`, `MonitoringOfficerDashboardPage`, and `PriceAnalysisPage` (via the `className` extension for its extra `bg-surface-container-low`). `CommodityListPage`/`LoginPage` intentionally excluded — their `<main>` wrappers use a structurally different recipe (flex-1/overflow-based, or no sidebar offset at all), not the pattern this component targets. |
 
 `AppShell` renders TopAppBar → NavigationDrawer → main → FooterSection.
 
@@ -67,15 +67,15 @@ Base component set built against the **documented** [ui-rules.md](ui-rules.md) �
 
 | Component | Status | File | Variants / notes |
 |---|---|---|---|
-| Button | built | `src/shared/components/Button.tsx` | `primary`/`secondary`/`danger` × `sm`/`md`; `loading` (spinner), `disabled`. `rounded-full` per the documented spec — diverges from existing inline buttons, which are `rounded-xl` (the drift this component is meant to converge, not match) |
+| Button | built | `src/shared/components/Button.tsx` | `primary`/`secondary`/`danger` × `sm`/`md`; `loading` (spinner), `disabled`. `rounded-full` per the documented spec. **Adopted 2026-08-16** by the 5 create/edit dialogs (submit + cancel actions) — remaining inline buttons are mostly filter/toggle pills (a different pattern, not a Button fit) |
 | Card | built | `src/shared/components/Card.tsx` | `rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow` — the one canonical recipe, per §6 |
 | Badge | built | `src/shared/components/Badge.tsx` | `primary`/`secondary`/`error`/`success`/`warning`/`info`/`neutral` — `success`/`warning`/`info` added in 2.2 |
-| Modal | built | `src/shared/components/Modal.tsx` | Overlay `bg-inverse-surface/40` (token-based, replaces the non-token `bg-slate-950/40` in 5 duplicated modals — B-22) + `rounded-xl bg-surface-container-lowest` container. Escape-to-close, click-outside-to-close, `role="dialog"`/`aria-modal`. **No focus trap** — that gap (noted in the Cross-Cutting Checklist) is not closed by this component. First real adoption: `AuditLogDetailModal` (2.2) — the 5 pre-existing hand-rolled dialogs are still not migrated. |
+| Modal | built | `src/shared/components/Modal.tsx` | Overlay `bg-inverse-surface/40` (token-based) + `rounded-xl bg-surface-container-lowest` container. Escape-to-close, click-outside-to-close, `role="dialog"`/`aria-modal`. **No focus trap** — that gap (noted in the Cross-Cutting Checklist) is not closed by this component. **B-22 resolved 2026-08-16** — all 7 hand-rolled dialogs (`AddUserDialog`, `AddCommodityDialog`, `UpdateSrpDialog`, `CreateStoreDialog`, `StorePriceRecordsModal`, `ForecastDetailModal`, `CommodityListPage`'s inline modal) plus `PriceRecordsPage`'s inline overlay now render through this component. |
 | Toast | built | `src/shared/components/Toast.tsx` | `ToastProvider` (mounted in root `layout.tsx`) + `useToast()` hook, `primary`/`success`/`error`/`neutral` variants (`success` added in 1.3 once B-13's token existed), auto-dismiss 4s, manual dismiss. **Wired into all 8 create/update/delete mutations across the app as of Phase 1.3** (2026-08-14) — closes B-23, self-verified via Playwright, pending human sign-off |
 | Alert | built | `src/shared/components/Alert.tsx` | `error`/`neutral`; inline banner, `role="alert"` |
-| Input | built | `src/shared/components/Input.tsx` | `forwardRef` (works with `react-hook-form`'s `register()`); `hasError` prop for the error border/ring treatment |
-| Select | built | `src/shared/components/Select.tsx` | Same pattern as Input |
-| FormGroup | built | `src/shared/components/FormGroup.tsx` | Composes label + field + `FieldError`; matches the `space-y-1.5` field wrapper pattern already used everywhere |
+| Input | built | `src/shared/components/Input.tsx` | `forwardRef` (works with `react-hook-form`'s `register()`); `hasError` prop for the error border/ring treatment. **Adopted 2026-08-16** by the 5 create/edit dialogs' text/number/date/password fields |
+| Select | built | `src/shared/components/Select.tsx` | Same pattern as Input. **Adopted 2026-08-16** by the 5 create/edit dialogs' role/status/store/commodity fields |
+| FormGroup | built | `src/shared/components/FormGroup.tsx` | Composes label + field + `FieldError`; matches the `space-y-1.5` field wrapper pattern already used everywhere. **Adopted 2026-08-16** by the 5 create/edit dialogs — remaining inline label+field pairs are in the 3 filter/search toolbars (icon-decorated inputs, a different pattern) |
 
 **Gallery page**: `src/app/(public)/component-gallery/page.tsx` — renders every component in every variant; visually verified at 1024/768/480 by the user on 2026-08-13.
 
@@ -126,14 +126,14 @@ Base component set built against the **documented** [ui-rules.md](ui-rules.md) �
 | Component | Status | File | Exact classes |
 |---|---|---|---|
 | FieldError | built | `src/shared/components/FieldError.tsx` | `mt-1 text-xs font-medium text-error` |
-| PriceRecordForm | built | `src/features/price-record/components/PriceRecordForm.tsx` | `mx-auto w-full max-w-3xl rounded-3xl border border-outline-variant bg-surface-container-lowest p-6 shadow-[0_24px_80px_rgba(15,23,42,0.12)]` — ⚠️ arbitrary inline shadow |
-| PriceRecordFilters | built | `src/features/price-record/components/PriceRecordFilters.tsx` | `grid gap-4 rounded-3xl border border-outline-variant bg-white p-5 data-card-shadow md:p-6` |
-| UsersSearchFilters | built | `src/features/admin/users/components/UsersSearchFilters.tsx` | `flex flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between` |
-| StoreRegistryToolbar | built | `src/features/stores/components/StoreRegistryToolbar.tsx` | `rounded-2xl border border-outline-variant bg-white p-6 shadow-sm` |
+| PriceRecordForm | built | `src/features/price-record/components/PriceRecordForm.tsx` | Built on `FormGroup`/`Input`/`Select`/`Button` as of 2026-08-16 (B-21) — no longer owns a card wrapper; renders through the `Modal` its caller (`PriceRecordsPage`) now wraps it in |
+| PriceRecordFilters | built | `src/features/price-record/components/PriceRecordFilters.tsx` | `grid gap-4 rounded-3xl border border-outline-variant bg-white p-5 data-card-shadow md:p-6` — filter bar, not yet migrated (icon/pill pattern, see B-21 note below) |
+| UsersSearchFilters | built | `src/features/admin/users/components/UsersSearchFilters.tsx` | `flex flex-col gap-4 rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm lg:flex-row lg:items-center lg:justify-between` — filter bar, not yet migrated |
+| StoreRegistryToolbar | built | `src/features/stores/components/StoreRegistryToolbar.tsx` | `rounded-2xl border border-outline-variant bg-white p-6 shadow-sm` — filter bar, not yet migrated |
 
 `FieldError` is the shared validation-message component — lives in `src/shared/components/` (moved there in R1.4, B-20 resolved).
 
-Forms use `react-hook-form` + Zod resolvers. Shared `Input` / `Select` / `FormGroup` components now exist (§1a, Phase 1.1) — **existing forms still use inline field markup** (as shown in the entries above); migrating them is follow-up work, not yet done (B-21 partially resolved: the component exists, adoption doesn't).
+Forms use `react-hook-form` + Zod resolvers. **B-21 mostly resolved 2026-08-16** — the 5 create/edit dialogs (`AddUserDialog`, `AddCommodityDialog`, `UpdateSrpDialog`, `CreateStoreDialog`, `PriceRecordForm`) now use `FormGroup`/`Input`/`Select`/`Button` instead of inline field markup; `shared/constants/form.constants.ts` (the old `INPUT_CLASSES`/`PRIMARY_BUTTON_CLASSES` strings) was deleted as dead code. **Still open**: the 3 filter/search toolbars above use icon-decorated search inputs and toggle-pill filter buttons — a genuinely different UI pattern that `Input`/`Button`'s current API doesn't support without a new icon-slot or chip variant (that's new component work, not adoption).
 
 ---
 
@@ -142,7 +142,7 @@ Forms use `react-hook-form` + Zod resolvers. Shared `Input` / `Select` / `FormGr
 | Component | Status | File | Exact classes |
 |---|---|---|---|
 | ExportFormatButton | built | `src/features/report/components/ExportFormatButton.tsx` | label: `text-body-sm font-semibold` |
-| Button | built | `src/shared/components/Button.tsx` | See §1a — Phase 1.1. Existing inline primary/secondary button classes across pages are **not yet migrated** onto this (B-21 partially resolved) |
+| Button | built | `src/shared/components/Button.tsx` | See §1a — Phase 1.1. **Adopted 2026-08-16** by the 5 create/edit dialogs' submit/cancel actions (B-21). Filter-pill buttons and other non-dialog buttons are not a fit for this component's variant set and remain inline. |
 
 ---
 
@@ -150,13 +150,13 @@ Forms use `react-hook-form` + Zod resolvers. Shared `Input` / `Select` / `FormGr
 
 | Component | Status | File | Exact classes |
 |---|---|---|---|
-| AddUserDialog | built | `src/features/admin/users/components/AddUserDialog.tsx` | error text: `mt-1 text-xs font-medium text-error` |
-| AddCommodityDialog | built | `src/features/commodity/components/AddCommodityDialog.tsx` | error text: `mt-1 text-xs font-medium text-error` |
-| UpdateSrpDialog | built | `src/features/commodity/components/UpdateSrpDialog.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
-| CreateStoreDialog | built | `src/features/stores/components/CreateStoreDialog.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
-| StorePriceRecordsModal | built | `src/features/stores/components/StorePriceRecordsModal.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm` |
-| ForecastDetailModal | built | `src/features/public/components/price-analysis/ForecastDetailModal.tsx` | overlay: `fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6` — ⚠️ diverges from the other five |
-| Modal | built | `src/shared/components/Modal.tsx` | See §1a — Phase 1.1. The 5 duplicated overlay copies above are **not yet migrated** onto this (B-22 partially resolved: the shell exists, adoption doesn't) |
+| AddUserDialog | built | `src/features/admin/users/components/AddUserDialog.tsx` | Renders through `Modal` (title/description) with `FormGroup`/`Input`/`Select`/`Button` fields as of 2026-08-16 |
+| AddCommodityDialog | built | `src/features/commodity/components/AddCommodityDialog.tsx` | Same — `Modal` + `FormGroup`/`Input`/`Select`/`Button` |
+| UpdateSrpDialog | built | `src/features/commodity/components/UpdateSrpDialog.tsx` | Same — `Modal` + `FormGroup`/`Input`/`Button` |
+| CreateStoreDialog | built | `src/features/stores/components/CreateStoreDialog.tsx` | Same — `Modal` + `FormGroup`/`Input`/`Button` |
+| StorePriceRecordsModal | built | `src/features/stores/components/StorePriceRecordsModal.tsx` | Renders through `Modal` (`title`/`description`/`maxWidth="max-w-4xl"`) as of 2026-08-16 — converged onto Modal's canonical `p-6`/`text-h3-desktop` header, replacing its previous bespoke compact recipe |
+| ForecastDetailModal | built | `src/features/public/components/price-analysis/ForecastDetailModal.tsx` | Renders through `Modal` (`maxWidth="max-w-3xl"`, no `title` prop) as of 2026-08-16 — kept its own custom eyebrow-label header as children since it's structurally different from Modal's title/description shape |
+| Modal | built | `src/shared/components/Modal.tsx` | See §1a — Phase 1.1. **B-22 resolved 2026-08-16** — all 7 dialogs above plus `CommodityListPage`'s inline price-records modal and `PriceRecordsPage`'s inline add/edit overlay now render through this component. No remaining hand-rolled overlay divs in the codebase. |
 | Toast | built | `src/shared/components/Toast.tsx` | See §1a — Phase 1.3. Provider mounted globally; **wired into every create/update/delete across the app** as of 2026-08-14 (B-23 implemented, pending sign-off) |
 | Alert | built | `src/shared/components/Alert.tsx` | See §1a — Phase 1.1 |
 | Progress bar | **not implemented** | — | (B-23) |
@@ -208,3 +208,4 @@ Route-level feature pages. Listed for completeness — these compose the compone
 | 2026-08-14 | Toast | Phase 1.3 — added a `success` variant (B-13's token made this possible); wired `showToast` into all 8 create/update/delete handlers across the app. Self-verified via Playwright screenshots; pending human sign-off. |
 | 2026-08-14 | PriceTrendLineChart, CommodityComparisonChart, SrpVsActualChart | Phase 2.1 — 3 new dashboard charts added under §4, all in `shared/components/charts/` (consumed by both `AdminDashboardPage` and `MonitoringOfficerDashboardPage`). Visually verified by the user at 1024/768/480 (mock data), then re-verified rendering real seeded aggregates after backend wiring. Extracted `readToken`/`hexToRgba` into `shared/utils/chart-tokens.ts` so a 3rd/4th copy of `PriceTrendPanel`'s inline helpers wasn't needed. |
 | 2026-08-14 | SettingsPage, ProfileForm, PasswordForm | Phase 2.3 — new `features/settings/` domain, added under §5/§8/§9. First feature built entirely on the Phase 1.1 shared primitives (`PageShell`/`Card`/`FormGroup`/`Input`/`Button`/`Alert`) from the start rather than migrating existing markup. Replaces the two empty-shell `/admin/settings` and `/officer/settings` routes. Visually verified by the user at 1024/768/480. |
+| 2026-08-16 | PageShell, Modal, Button, Input, Select, FormGroup | Adoption sweep closing B-18, B-22, and most of B-21 — 9 pages migrated onto `PageShell`; 7 hand-rolled dialogs + `PriceRecordsPage`'s inline overlay migrated onto `Modal`; the 5 create/edit dialogs migrated onto `FormGroup`/`Input`/`Select`/`Button`. Deleted the now-dead `shared/constants/form.constants.ts`. The 3 filter/search toolbars were deliberately left inline (icon/chip pattern not yet supported by the current component API). Pending human visual sign-off. |

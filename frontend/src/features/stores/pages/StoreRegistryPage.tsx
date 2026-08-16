@@ -1,7 +1,8 @@
-﻿"use client";
+"use client";
 
 import { useMemo, useState } from "react";
 import { MdChevronLeft, MdChevronRight } from "react-icons/md";
+import PageShell from "@/shared/components/PageShell";
 import { CreateStoreDialog } from "../components/CreateStoreDialog";
 import { StoreRegistryHeader } from "../components/StoreRegistryHeader";
 import { StoreRegistryToolbar } from "../components/StoreRegistryToolbar";
@@ -75,7 +76,7 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
   };
 
   return (
-    <main className="min-h-screen lg:ml-72">
+    <PageShell>
       <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
         <div className="mx-auto max-w-6xl space-y-6">
           <StoreRegistryHeader
@@ -141,7 +142,7 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
           )}
 
           <div className="flex flex-col items-center justify-between gap-4 border-t border-outline-variant py-6 md:flex-row">
-            <span className="font-body-sm text-on-surface-variant">
+            <span className="font-sans text-on-surface-variant">
               Showing {filteredStores.length === 0 ? 0 : `${(safeCurrentPage - 1) * pageSize + 1}-${Math.min(safeCurrentPage * pageSize, filteredStores.length)}`} of {filteredStores.length} store{filteredStores.length === 1 ? "" : "s"}
             </span>
             <div className="flex gap-2">
@@ -174,6 +175,6 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
           </div>
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

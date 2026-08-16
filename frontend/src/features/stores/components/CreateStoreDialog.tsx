@@ -1,7 +1,9 @@
 import { type FormEvent } from "react";
 import { StoreFormData } from "../types/stores.types";
-import { FieldError } from "@/shared/components/FieldError";
-import { INPUT_CLASSES, INPUT_ERROR_CLASSES, PRIMARY_BUTTON_CLASSES } from "@/shared/constants/form.constants";
+import Modal from "@/shared/components/Modal";
+import FormGroup from "@/shared/components/FormGroup";
+import Input from "@/shared/components/Input";
+import Button from "@/shared/components/Button";
 
 export function CreateStoreDialog({
   formData,
@@ -26,87 +28,60 @@ export function CreateStoreDialog({
 }) {
   const isEditMode = mode === "edit";
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-xl rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-          <div>
-            <h2 className="text-h3-desktop font-semibold text-on-surface">
-              {isEditMode ? "Edit Outlet" : "Add New Outlet"}
-            </h2>
-            <p className="mt-2 text-body-sm text-on-surface-variant">
-              {isEditMode ? "Update the selected outlet details below." : "Register a new store with your officer account."}
-            </p>
-          </div>
-          <button type="button" onClick={onClose} className="inline-flex rounded-full bg-surface px-3 py-2 text-on-surface transition hover:bg-surface-container-high">
-            Close
-          </button>
+    <Modal
+      open
+      onClose={onClose}
+      title={isEditMode ? "Edit Outlet" : "Add New Outlet"}
+      description={isEditMode ? "Update the selected outlet details below." : "Register a new store with your officer account."}
+    >
+      <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
+        <FormGroup label="Store Name" htmlFor="store-name" error={formErrors.name}>
+          <Input
+            id="store-name"
+            type="text"
+            value={formData.name}
+            onChange={(event) => onChange("name", event.target.value)}
+            hasError={Boolean(formErrors.name)}
+            placeholder="Virac Plaza Supermarket"
+          />
+        </FormGroup>
+
+        <FormGroup label="Location" htmlFor="store-location" error={formErrors.location}>
+          <Input
+            id="store-location"
+            type="text"
+            value={formData.location}
+            onChange={(event) => onChange("location", event.target.value)}
+            hasError={Boolean(formErrors.location)}
+            placeholder="Poblacion, Virac, Catanduanes"
+          />
+        </FormGroup>
+
+        <FormGroup label="Last Visited" htmlFor="last-visited">
+          <Input
+            id="last-visited"
+            type="date"
+            value={formData.lastVisited}
+            onChange={(event) => onChange("lastVisited", event.target.value)}
+          />
+        </FormGroup>
+
+        <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:justify-end">
+          <Button type="submit" disabled={submitLoading}>
+            {submitLoading ? (isEditMode ? "Updating..." : "Creating...") : isEditMode ? "Update Store" : "Create Store"}
+          </Button>
         </div>
 
-        <form className="grid gap-4 sm:grid-cols-2" onSubmit={onSubmit}>
-          <div className="space-y-1.5">
-            <label className="block text-body-sm font-medium text-on-surface" htmlFor="store-name">
-              Store Name
-            </label>
-            <input
-              id="store-name"
-              type="text"
-              value={formData.name}
-              onChange={(event) => onChange("name", event.target.value)}
-              aria-invalid={Boolean(formErrors.name)}
-              aria-describedby={formErrors.name ? "store-name-error" : undefined}
-              className={`${INPUT_CLASSES} ${formErrors.name ? INPUT_ERROR_CLASSES : ""}`.trim()}
-              placeholder="Virac Plaza Supermarket"
-            />
-            <FieldError message={formErrors.name} />
+        {(formError || formSuccess) && (
+          <div className="sm:col-span-2">
+            {formError ? (
+              <p className="text-center text-xs font-medium text-error">{formError}</p>
+            ) : (
+              <p className="text-center text-xs font-medium text-secondary">{formSuccess}</p>
+            )}
           </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-body-sm font-medium text-on-surface" htmlFor="store-location">
-              Location
-            </label>
-            <input
-              id="store-location"
-              type="text"
-              value={formData.location}
-              onChange={(event) => onChange("location", event.target.value)}
-              aria-invalid={Boolean(formErrors.location)}
-              aria-describedby={formErrors.location ? "store-location-error" : undefined}
-              className={`${INPUT_CLASSES} ${formErrors.location ? INPUT_ERROR_CLASSES : ""}`.trim()}
-              placeholder="Poblacion, Virac, Catanduanes"
-            />
-            <FieldError message={formErrors.location} />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="block text-body-sm font-medium text-on-surface" htmlFor="last-visited">
-              Last Visited
-            </label>
-            <input
-              id="last-visited"
-              type="date"
-              value={formData.lastVisited}
-              onChange={(event) => onChange("lastVisited", event.target.value)}
-              className={INPUT_CLASSES}
-            />
-          </div>
-
-          <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:justify-end">
-            <button type="submit" disabled={submitLoading} className={PRIMARY_BUTTON_CLASSES}>
-              {submitLoading ? (isEditMode ? "Updating..." : "Creating...") : isEditMode ? "Update Store" : "Create Store"}
-            </button>
-          </div>
-
-          {(formError || formSuccess) && (
-            <div className="sm:col-span-2">
-              {formError ? (
-                <p className="text-center text-xs font-medium text-error">{formError}</p>
-              ) : (
-                <p className="text-center text-xs font-medium text-secondary">{formSuccess}</p>
-              )}
-            </div>
-          )}
-        </form>
-      </div>
-    </div>
+        )}
+      </form>
+    </Modal>
   );
 }

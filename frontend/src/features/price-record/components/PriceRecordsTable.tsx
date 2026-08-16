@@ -61,17 +61,17 @@ export default function PriceRecordsTable({
         <table className="min-w-full table-fixed text-center">
           <thead>
             <tr className="border-b border-outline-variant/30">
-              <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-label-caps uppercase tracking-[0.24em] text-outline`}>Date & Time</th>
-              <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-label-caps uppercase tracking-[0.24em] text-outline`}>Store & Location</th>
+              <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-sans uppercase tracking-[0.24em] text-outline`}>Date & Time</th>
+              <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-sans uppercase tracking-[0.24em] text-outline`}>Store & Location</th>
               {!hideCommodityColumn ? (
-                <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-label-caps uppercase tracking-[0.24em] text-outline`}>Commodity</th>
+                <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-sans uppercase tracking-[0.24em] text-outline`}>Commodity</th>
               ) : null}
-              <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-label-caps uppercase tracking-[0.24em] text-outline`}>Price & Status</th>
+              <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-sans uppercase tracking-[0.24em] text-outline`}>Price & Status</th>
               {!hideOfficerColumn ? (
-                <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-label-caps uppercase tracking-[0.24em] text-outline`}>Officer</th>
+                <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-sans uppercase tracking-[0.24em] text-outline`}>Officer</th>
               ) : null}
               {!hideActions ? (
-                <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-label-caps uppercase tracking-[0.24em] text-outline`}>Action</th>
+                <th className={`${compact ? "pb-1 text-[8px]" : "pb-2 text-[9px]"} font-sans uppercase tracking-[0.24em] text-outline`}>Action</th>
               ) : null}
             </tr>
           </thead>

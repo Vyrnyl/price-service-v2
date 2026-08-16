@@ -37,7 +37,7 @@ export default function StoreCard({
           </div>
         </div>
 
-        <h3 className={`mb-1 truncate ${compact ? "text-sm font-semibold" : "font-h3-desktop text-h3-desktop"} text-on-surface`}>{store.name}</h3>
+        <h3 className={`mb-1 truncate ${compact ? "text-sm font-semibold" : "font-sans text-h3-desktop"} text-on-surface`}>{store.name}</h3>
 
         <div className={`mt-auto space-y-2 border-t border-outline-variant ${compact ? "pt-2" : "pt-4"}`}>
           <div className="flex items-center gap-2 text-on-surface-variant">
@@ -55,7 +55,7 @@ export default function StoreCard({
 
       <div className={`border-t border-outline-variant bg-surface-container-low ${compact ? "px-4 py-2" : "px-6 py-3"}`}>
         <div className="flex items-center justify-between gap-3">
-          <span className={`font-label-caps text-label-caps text-on-surface-variant ${compact ? "text-[10px]" : ""}`}>
+          <span className={`font-sans text-label-caps text-on-surface-variant ${compact ? "text-[10px]" : ""}`}>
             {showAssignedOfficer ? `Assigned Officer: ${store.user?.name ?? "Unassigned"}` : store.lastVisited ? "Last visit recorded" : "No visit data"}
           </span>
           <div className="flex items-center gap-2">
@@ -70,7 +70,7 @@ export default function StoreCard({
             <button
               type="button"
               onClick={() => onToggleDetails?.(store)}
-              className={`flex items-center gap-1 ${compact ? "text-body-sm" : "font-body-sm font-semibold text-primary"} transition-colors hover:underline`}
+              className={`flex items-center gap-1 ${compact ? "text-body-sm" : "font-sans font-semibold text-primary"} transition-colors hover:underline`}
             >
               {isExpanded ? "Hide Details" : "Details"}
               <IoMdArrowForward className={isExpanded ? "rotate-90 transition-transform" : "transition-transform"} />

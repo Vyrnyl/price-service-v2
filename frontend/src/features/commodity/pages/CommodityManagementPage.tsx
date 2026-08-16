@@ -11,6 +11,7 @@ import {
   MdOutlineTrendingUp,
   MdOutlineWarning,
 } from "react-icons/md";
+import PageShell from "@/shared/components/PageShell";
 import AddCommodityDialog from "../components/AddCommodityDialog";
 import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
@@ -237,7 +238,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
 
 
   return (
-    <main className="min-h-screen lg:ml-72">
+    <PageShell>
       <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
         <div className="mx-auto max-w-6xl space-y-6">
           <AddCommodityDialog
@@ -276,10 +277,10 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
           />
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
-              <h2 className="font-h1-desktop text-h1-desktop text-on-surface">
+              <h2 className="font-sans text-h1-desktop text-on-surface">
                 Commodity with SRP
               </h2>
-              <p className="mt-1 font-body-lg text-on-surface-variant">
+              <p className="mt-1 font-sans text-on-surface-variant">
                 Track and manage commodity listings, SRP updates, and compliance status.
               </p>
             </div>
@@ -325,6 +326,6 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
           </div>
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }

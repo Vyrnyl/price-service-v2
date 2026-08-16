@@ -1,8 +1,10 @@
 "use client";
 
 import { type FormEvent } from "react";
-import { FieldError } from "@/shared/components/FieldError";
-import { INPUT_CLASSES, INPUT_ERROR_CLASSES, PRIMARY_BUTTON_CLASSES } from "@/shared/constants/form.constants";
+import FormGroup from "@/shared/components/FormGroup";
+import Input from "@/shared/components/Input";
+import Select from "@/shared/components/Select";
+import Button from "@/shared/components/Button";
 import type {
   CommodityOption,
   CreatePriceRecordPayload,
@@ -36,36 +38,14 @@ export default function PriceRecordForm({
 }: PriceRecordFormProps) {
   const isEditMode = mode === "edit";
   return (
-    <div className="mx-auto w-full max-w-3xl rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
-      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div>
-          <h2 className="text-h3-desktop font-semibold text-on-surface">
-            {isEditMode ? "Edit Price Record" : "Add Price Record"}
-          </h2>
-          <p className="mt-2 text-body-sm text-on-surface-variant">
-            {isEditMode
-              ? "Update the selected commodity price entry from your assigned inspection route."
-              : "Record a new commodity price entry from your assigned inspection route."}
-          </p>
-        </div>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="inline-flex rounded-full bg-surface px-3 py-2 text-on-surface transition hover:bg-surface-container-high"
-        >
-          Close
-        </button>
-      </div>
-
       <form onSubmit={onSubmit} className="grid gap-4 sm:grid-cols-2">
         <div className="grid gap-4 lg:grid-cols-2 sm:col-span-2">
-          <div className="space-y-1.5">
-            <label className="block text-body-sm font-medium text-on-surface">Store</label>
-            <select
+          <FormGroup label="Store" htmlFor="record-store" error={formErrors.storeId}>
+            <Select
+              id="record-store"
               value={newRecord.storeId}
               onChange={(event) => onChange("storeId", event.target.value)}
-              className={`${INPUT_CLASSES} ${formErrors.storeId ? INPUT_ERROR_CLASSES : ""}`.trim()}
-              aria-invalid={Boolean(formErrors.storeId)}
+              hasError={Boolean(formErrors.storeId)}
             >
               <option value="">Select store</option>
               {stores.map((store) => (
@@ -73,17 +53,16 @@ export default function PriceRecordForm({
                   {store.name} · {store.location}
                 </option>
               ))}
-            </select>
-            <FieldError message={formErrors.storeId} />
-          </div>
+            </Select>
+          </FormGroup>
 
-          <div className="space-y-1.5">
-            <label className="block text-body-sm font-medium text-on-surface">Commodity</label>
-            <select
+          <FormGroup label="Commodity" htmlFor="record-commodity" error={formErrors.commodityId}>
+            <Select
+              id="record-commodity"
               value={newRecord.commodityId}
               onChange={(event) => onChange("commodityId", event.target.value)}
-              className={`${INPUT_CLASSES} max-h-48 overflow-y-auto ${formErrors.commodityId ? INPUT_ERROR_CLASSES : ""}`.trim()}
-              aria-invalid={Boolean(formErrors.commodityId)}
+              hasError={Boolean(formErrors.commodityId)}
+              className="max-h-48 overflow-y-auto"
             >
               <option value="">Select commodity</option>
               {commodities.map((commodity) => (
@@ -91,55 +70,45 @@ export default function PriceRecordForm({
                   {commodity.name}
                 </option>
               ))}
-            </select>
-            <FieldError message={formErrors.commodityId} />
-          </div>
+            </Select>
+          </FormGroup>
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3 sm:col-span-2">
-          <div className="space-y-1.5">
-            <label className="block text-body-sm font-medium text-on-surface">Date & Time</label>
-            <input
+          <FormGroup label="Date & Time" htmlFor="record-date" error={formErrors.dateAndTime}>
+            <Input
+              id="record-date"
               type="datetime-local"
               value={newRecord.dateAndTime}
               onChange={(event) => onChange("dateAndTime", event.target.value)}
-              className={`${INPUT_CLASSES} ${formErrors.dateAndTime ? INPUT_ERROR_CLASSES : ""}`.trim()}
-              aria-invalid={Boolean(formErrors.dateAndTime)}
+              hasError={Boolean(formErrors.dateAndTime)}
             />
-            <FieldError message={formErrors.dateAndTime} />
-          </div>
+          </FormGroup>
 
-          <div className="space-y-1.5">
-            <label className="block text-body-sm font-medium text-on-surface">Price</label>
-            <input
+          <FormGroup label="Price" htmlFor="record-price" error={formErrors.price}>
+            <Input
+              id="record-price"
               type="number"
               step="0.01"
               min="0"
               value={newRecord.price || ""}
               onChange={(event) => onChange("price", Number(event.target.value))}
-              className={`${INPUT_CLASSES} ${formErrors.price ? INPUT_ERROR_CLASSES : ""}`.trim()}
+              hasError={Boolean(formErrors.price)}
               placeholder="0.00"
-              aria-invalid={Boolean(formErrors.price)}
             />
-            <FieldError message={formErrors.price} />
-          </div>
+          </FormGroup>
         </div>
 
         {formError ? <p className="text-body-sm text-error sm:col-span-2">{formError}</p> : null}
 
         <div className="flex flex-wrap gap-3 sm:col-span-2">
-          <button type="submit" disabled={submitLoading} className={PRIMARY_BUTTON_CLASSES}>
+          <Button type="submit" disabled={submitLoading}>
             {submitLoading ? (isEditMode ? "Updating..." : "Saving...") : isEditMode ? "Update Record" : "Save Record"}
-          </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-xl border border-outline-variant bg-surface px-6 py-3 text-body-sm font-semibold text-on-surface transition hover:bg-surface-container-highest"
-          >
+          </Button>
+          <Button type="button" variant="secondary" onClick={onCancel}>
             Cancel
-          </button>
+          </Button>
         </div>
       </form>
-    </div>
   );
 }

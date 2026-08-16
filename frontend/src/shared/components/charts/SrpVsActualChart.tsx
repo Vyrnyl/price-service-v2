@@ -85,7 +85,7 @@ export function SrpVsActualChart({ points, isLoading, error }: SrpVsActualChartP
   return (
     <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
       <div className="mb-6 flex flex-col gap-1">
-        <h4 className="font-h3-desktop text-h3-desktop text-on-surface">SRP vs. Actual Price</h4>
+        <h4 className="font-sans text-h3-desktop text-on-surface">SRP vs. Actual Price</h4>
         <p className="text-body-sm text-on-surface-variant">
           Suggested Retail Price against the recorded average — red bars are trading above SRP.
         </p>

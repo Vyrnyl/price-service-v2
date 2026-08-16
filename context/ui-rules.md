@@ -105,7 +105,7 @@ Defined in `globals.css` under `@theme inline`. These are the only source of col
 - **Elevation**: `.data-card-shadow` is the single card elevation; `shadow-sm` for the top bar, `shadow-lg` for the mobile bottom nav
 - **Corner radius scale**: `rounded-lg` inputs/buttons · `rounded-xl` cards · `rounded-xl` modals · `rounded-full` pills
 - **Motion**: `transition-colors` / `transition-all` at Tailwind defaults; `.animate-stats` runs a 0.8s `countUp` entrance on stat tiles
-- **Icons**: **two libraries currently in use** — `react-icons` and Material Symbols Outlined. Prefer Material Symbols for new work to match the M3 language (**B-14**)
+- **Icons**: `react-icons` (`react-icons/md`, `/fi`, `/io5`, `/io`, `/lu`) — the single icon library, used across every component. Material Symbols Outlined was removed 2026-08-16 (**B-14**, resolved): it was loaded twice (a `<link>` in `layout.tsx` duplicating `globals.css`'s own `@import`) for exactly one real usage (the login page's password-visibility toggle, now `MdVisibility`/`MdVisibilityOff`) plus two vestigial `material-symbols-outlined` classNames wrapping `react-icons` SVGs where the class was a no-op. Prefer `react-icons` for all new icon work — it's what the other ~40 icon usages across the app already use.
 
 ---
 
@@ -135,7 +135,6 @@ Each step is both a font utility and a size utility, applied together (`font-h2-
 .data-card-shadow          0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -2px rgba(0,0,0,.05)
 .animate-stats             0.8s countUp entrance (fade + 10px rise)
 .scrollbar-none            hides scrollbar, keeps scrolling
-.material-symbols-outlined Material Symbols font-variation settings
 ```
 
 ### Badge pill utility
@@ -222,5 +221,5 @@ Browser default, except where `.scrollbar-none` is applied — horizontal chip r
 - Prefer native Tailwind v4 utilities over hand-rolled helper classes.
 - Preserve component naming (`card`, `badge`, `btn-*`, `nav-item`, `modal-*`) as the convention for equivalent components, so this doc stays a valid cross-reference.
 - Chart.js (via `react-chartjs-2`) replaces any CSS-only chart placeholder.
-- Nine `--font-*` tokens all resolve to the identical Inter stack; collapse them to `--font-sans` (**B-15**).
-- `body { min-height: max(884px, 100dvh) }` forces an 884px floor and causes a scrollbar on short viewports (**B-16**).
+- ~~Nine `--font-*` tokens all resolve to the identical Inter stack; collapse them to `--font-sans`~~ — resolved (**B-15**, 2026-08-16).
+- ~~`body { min-height: max(884px, 100dvh) }` forces an 884px floor and causes a scrollbar on short viewports~~ — resolved (**B-16**, 2026-08-16): now `min-height: 100dvh`, no artificial floor.

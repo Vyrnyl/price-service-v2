@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { MdDownload } from "react-icons/md";
 import { apiFetch } from "@/shared/services/api";
 import { useToast } from "@/shared/components/Toast";
+import PageShell from "@/shared/components/PageShell";
 import { reportTypes, exportFormats } from "../mocks/report.mock";
 import ExportFormatButton from "../components/ExportFormatButton";
 import RecentReportCard from "../components/RecentReportCard";
@@ -238,12 +239,12 @@ export default function ReportGenerationPage() {
   const displayReports = recentReports.length > 0 ? recentReports : [];
 
   return (
-    <main className="min-h-screen lg:ml-72">
+    <PageShell>
       <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
         <div className="mx-auto max-w-7xl">
           <header className="mb-10">
-            <h2 className="mb-2 font-h1-desktop text-h1-desktop text-on-surface">Report Generation</h2>
-            <p className="font-body-lg text-body-lg text-on-surface-variant">
+            <h2 className="mb-2 font-sans text-h1-desktop text-on-surface">Report Generation</h2>
+            <p className="font-sans text-body-lg text-on-surface-variant">
               Configure and generate official market monitoring documentation.
             </p>
           </header>
@@ -256,7 +257,7 @@ export default function ReportGenerationPage() {
                     <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-label-caps font-semibold uppercase tracking-[0.24em] text-primary">
                       Step 1
                     </span>
-                    <h3 className="mt-4 font-h3-desktop text-h3-desktop text-on-surface">Select Report Type</h3>
+                    <h3 className="mt-4 font-sans text-h3-desktop text-on-surface">Select Report Type</h3>
                   </div>
                 </div>
 
@@ -278,17 +279,17 @@ export default function ReportGenerationPage() {
                     <span className="inline-flex rounded-full bg-primary/10 px-3 py-1 text-label-caps font-semibold uppercase tracking-[0.24em] text-primary">
                       Step 2
                     </span>
-                    <h3 className="mt-4 font-h3-desktop text-h3-desktop text-on-surface">Configure Parameters</h3>
+                    <h3 className="mt-4 font-sans text-h3-desktop text-on-surface">Configure Parameters</h3>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   {!isDailyCompliance ? (
                     <div className="flex flex-col gap-2 min-w-0">
-                      <label className="font-label-caps text-label-caps text-on-surface-variant">Date Range</label>
+                      <label className="font-sans text-label-caps text-on-surface-variant">Date Range</label>
                       <div className="flex flex-col gap-2 md:flex-row md:items-center">
                         <input
-                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-body-sm text-body-sm"
+                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm"
                           type="date"
                           value={startDate}
                           onChange={(event) => handleStartDateChange(event.target.value)}
@@ -297,7 +298,7 @@ export default function ReportGenerationPage() {
                           to
                         </span>
                         <input
-                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-body-sm text-body-sm"
+                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm"
                           type="date"
                           value={endDate}
                           onChange={(event) => handleEndDateChange(event.target.value)}
@@ -313,9 +314,9 @@ export default function ReportGenerationPage() {
 
                   {isStoreMonitoring ? (
                     <div className="flex flex-col gap-2 min-w-0">
-                      <label className="font-label-caps text-label-caps text-on-surface-variant">Store</label>
+                      <label className="font-sans text-label-caps text-on-surface-variant">Store</label>
                       <select
-                        className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-body-sm text-body-sm"
+                        className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm"
                         value={selectedStoreId}
                         onChange={(event) => setSelectedStoreId(event.target.value)}
                         disabled={storesLoading}
@@ -330,9 +331,9 @@ export default function ReportGenerationPage() {
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2 min-w-0">
-                      <label className="font-label-caps text-label-caps text-on-surface-variant">Category list</label>
+                      <label className="font-sans text-label-caps text-on-surface-variant">Category list</label>
                       <select
-                        className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-body-sm text-body-sm"
+                        className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm"
                         value={commodityGroup}
                         onChange={(event) => setCommodityGroup(event.target.value)}
                       >
@@ -376,8 +377,8 @@ export default function ReportGenerationPage() {
               <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
                 <div className="mb-4 flex items-center justify-between">
                   <div>
-                    <p className="font-label-caps text-label-caps text-on-surface-variant">Recent Reports</p>
-                    <h3 className="font-h3-desktop text-h3-desktop text-on-surface">Available exports</h3>
+                    <p className="font-sans text-label-caps text-on-surface-variant">Recent Reports</p>
+                    <h3 className="font-sans text-h3-desktop text-on-surface">Available exports</h3>
                   </div>
                   <button
                     type="button"
@@ -416,6 +417,6 @@ export default function ReportGenerationPage() {
           </div>
         </div>
       </section>
-    </main>
+    </PageShell>
   );
 }
