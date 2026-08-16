@@ -1,7 +1,7 @@
 import AppError from '../../shared/utils/AppError';
 import { passwordUtils } from '../../shared/utils/password.utils';
 import { userRepository } from './user.repository';
-import { toUserProfileDto } from './user.types';
+import { toAdminUserDto, toUserProfileDto } from './user.types';
 import type { ChangePasswordInput, CreateUserInput, UpdateProfileInput, UpdateUserInput } from './user.schema';
 
 export const userService = {
@@ -16,14 +16,23 @@ export const userService = {
 
     const { confirmPassword, ...createData } = data;
 
-    return userRepository.create({
+    const created = await userRepository.create({
       ...createData,
       password: hashedPassword,
     });
+
+    return toAdminUserDto(created);
   },
 
-  getUsers: () => userRepository.findAll(),
-  getUserById: (id: string) => userRepository.findById(id),
+  getUsers: async () => {
+    const users = await userRepository.findAll();
+    return users.map(toAdminUserDto);
+  },
+
+  getUserById: async (id: string) => {
+    const user = await userRepository.findById(id);
+    return user ? toAdminUserDto(user) : null;
+  },
 
   updateUser: async (id: string, data: UpdateUserInput) => {
     if (typeof data.email === 'string') {
@@ -45,7 +54,8 @@ export const userService = {
 
     const { confirmPassword, ...finalData } = updateData;
 
-    return userRepository.update(id, finalData);
+    const updated = await userRepository.update(id, finalData);
+    return toAdminUserDto(updated);
   },
 
   deleteUser: (id: string) => userRepository.delete(id),
