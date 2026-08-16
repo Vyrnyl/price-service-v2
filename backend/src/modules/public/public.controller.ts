@@ -1,8 +1,13 @@
 import { Request, Response } from 'express';
-import { prisma } from '../../prisma';
 import AppError from '../../shared/utils/AppError';
 import { forecastService } from '../forecast';
-import { buildPublicCommoditiesPayload } from './public.service';
+import { publicRepository } from './public.repository';
+import {
+  buildPublicCommoditiesPayload,
+  buildPublicStatsDto,
+  resolveHistoryWindowStart,
+  resolveUpdatesCutoff,
+} from './public.service';
 
 export const publicController = {
   getPublicForecastByCommodityId: async (req: Request, res: Response) => {
@@ -22,33 +27,18 @@ export const publicController = {
   },
 
   getPublicCommodities: async (_req: Request, res: Response) => {
-    const commodities = await prisma.commodity.findMany({
-      orderBy: {
-        createdAt: 'desc',
-      },
-      include: {
-        srps: {
-          orderBy: [
-            { effectiveDate: 'desc' },
-            { createdAt: 'desc' },
-          ],
-          take: 1,
-        },
-        prices: {
-          orderBy: [
-            { dateAndTime: 'desc' },
-            { createdAt: 'desc' },
-          ],
-          take: 8,
-          include: {
-            store: true,
-          },
-        },
-      },
-    });
-
+    const commodities = await publicRepository.findCommoditiesForPublic(resolveHistoryWindowStart());
     const payload = buildPublicCommoditiesPayload(commodities);
 
     res.json({ status: 'success', data: payload });
+  },
+
+  getPublicStats: async (_req: Request, res: Response) => {
+    const [monitoredStoreCount, updatesToday] = await Promise.all([
+      publicRepository.countMonitoredStores(),
+      publicRepository.countPriceUpdatesSince(resolveUpdatesCutoff()),
+    ]);
+
+    res.json({ status: 'success', data: buildPublicStatsDto(monitoredStoreCount, updatesToday) });
   },
 };

@@ -21,6 +21,21 @@ export interface PublicCommodityPriceRecord {
   complianceStatus: string;
 }
 
+export interface PublicStorePrice {
+  storeId: string;
+  storeName: string | null;
+  storeLocation: string | null;
+  price: number;
+  dateAndTime: string;
+}
+
+export interface PublicPriceRange {
+  min: number;
+  max: number;
+  minStoreName: string | null;
+  maxStoreName: string | null;
+}
+
 export interface PublicCommodityItem {
   id: string;
   name: string;
@@ -32,7 +47,14 @@ export interface PublicCommodityItem {
   lastUpdatedAt: string | null;
   storeName: string | null;
   storeLocation: string | null;
+  priceRange: PublicPriceRange | null;
+  perStorePrices: PublicStorePrice[];
   priceRecords: PublicCommodityPriceRecord[];
+}
+
+export interface PublicStats {
+  monitoredStoreCount: number;
+  updatesToday: number;
 }
 
 export interface PublicForecastItem {
@@ -80,6 +102,15 @@ export async function getCommodities() {
 
 export async function getPublicCommodities() {
   const response = await apiFetch<{ status: string; data: PublicCommodityItem[] }>('/api/public/commodities', {
+    method: 'GET',
+    credentials: 'omit',
+  });
+
+  return response.data;
+}
+
+export async function getPublicStats() {
+  const response = await apiFetch<{ status: string; data: PublicStats }>('/api/public/stats', {
     method: 'GET',
     credentials: 'omit',
   });

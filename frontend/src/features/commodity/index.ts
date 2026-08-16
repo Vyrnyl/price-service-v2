@@ -3,5 +3,7 @@ export { default as CommodityManagementPage } from "./pages/CommodityManagementP
 export {
   getPublicCommodities,
   getPublicForecastByCommodityId,
+  getPublicStats,
   type PublicCommodityItem,
+  type PublicStats,
 } from "./services/commodity.api";

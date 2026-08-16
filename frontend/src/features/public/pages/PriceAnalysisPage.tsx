@@ -57,21 +57,32 @@ function formatTrendLabel(date: string | null | undefined, index: number) {
   return `P${index + 1}`;
 }
 
+interface WindowedRecord {
+  price: number | null;
+  dateAndTime: string | null;
+}
+
+/**
+ * `records` must already be filtered to the real calendar window the caller wants
+ * (last 7 or 30 days) — this only shapes them for display, it doesn't decide the window.
+ * That split is what makes "Last 7 Days" actually contain seven days of data instead of
+ * a fixed point count mislabeled with a range name (B-32).
+ */
 function buildTrendInsight({
   activeRange,
-  values,
-  latestPrice,
+  records,
   forecastConfidence,
 }: {
   activeRange: RangeKey;
-  values: number[];
-  latestPrice: number | null;
+  records: WindowedRecord[];
   forecastConfidence: number | null;
 }) {
-  const orderedValues = [...values].reverse();
-  const pointCount = activeRange === "Week" ? 6 : 8;
-  const visibleValues = orderedValues.slice(0, pointCount);
-  const changeValue = visibleValues.length > 1 ? visibleValues[visibleValues.length - 1] - visibleValues[0] : null;
+  const chronological = [...records].reverse();
+  const values = chronological
+    .map((record) => record.price)
+    .filter((price): price is number => price != null);
+  const latestPrice = records[0]?.price ?? null;
+  const changeValue = values.length > 1 ? values[values.length - 1]! - values[0]! : null;
   const confidenceLabel = forecastConfidence == null
     ? "Low"
     : forecastConfidence >= 0.75
@@ -88,8 +99,8 @@ function buildTrendInsight({
     projection: activeRange === "Week"
       ? "Recent weekly movement based on the latest available observations"
       : "Recent monthly movement based on the available price history",
-    path: buildTrendPath(visibleValues),
-    labels: visibleValues.map((_, index) => formatTrendLabel(null, index)),
+    path: buildTrendPath(values),
+    labels: chronological.map((record, index) => formatTrendLabel(record.dateAndTime, index)),
   };
 }
 
@@ -123,6 +134,15 @@ function average(values: number[]) {
   return sum / values.length;
 }
 
+function filterRecordsWithinRealWindow<T extends { dateAndTime: string | null }>(records: T[], days: number): T[] {
+  const cutoff = Date.now() - days * 24 * 60 * 60 * 1000;
+  return records.filter((record) => {
+    if (!record.dateAndTime) return false;
+    const recordDate = new Date(record.dateAndTime).getTime();
+    return !Number.isNaN(recordDate) && recordDate >= cutoff;
+  });
+}
+
 export default function PriceAnalysisPage() {
   const [activeRange, setActiveRange] = useState<RangeKey>("Week");
   const [commodityOptions, setCommodityOptions] = useState<string[]>([]);
@@ -138,7 +158,8 @@ export default function PriceAnalysisPage() {
   const selectedCommodityData = commodities.find(
     (commodity) => commodity.name === selectedCommodity,
   );
-  const priceValues = (selectedCommodityData?.priceRecords ?? [])
+  const allRecords = selectedCommodityData?.priceRecords ?? [];
+  const priceValues = allRecords
     .map((record) => (record.price != null ? Number(record.price) : null))
     .filter((price): price is number => price != null);
   const latestPrice = priceValues[0] ?? null;
@@ -150,43 +171,44 @@ export default function PriceAnalysisPage() {
       ? average(latestWindow)! - average(previousWindow)!
       : null
     : null;
-  const trendChange = priceValues.length > 1
-    ? latestPrice != null
-      ? latestPrice - (priceValues[priceValues.length - 1] ?? latestPrice)
-      : null
+
+  const thirtyDayValues = filterRecordsWithinRealWindow(allRecords, 30)
+    .map((record) => (record.price != null ? Number(record.price) : null))
+    .filter((price): price is number => price != null);
+  const trendChange = thirtyDayValues.length > 1
+    ? thirtyDayValues[0]! - thirtyDayValues[thirtyDayValues.length - 1]!
     : null;
+
+  const windowedRecords = filterRecordsWithinRealWindow(allRecords, activeRange === "Week" ? 7 : 30).map((record) => ({
+    price: record.price != null ? Number(record.price) : null,
+    dateAndTime: record.dateAndTime,
+  }));
   const activeInsight = buildTrendInsight({
     activeRange,
-    values: priceValues,
-    latestPrice,
+    records: windowedRecords,
     forecastConfidence,
   });
-  const trendPoints = (selectedCommodityData?.priceRecords ?? [])
-    .map((record, index) => {
-      const price = record.price != null ? Number(record.price) : null;
-      const pointCount = activeRange === "Week" ? 6 : 8;
-      const safeIndex = Math.max(0, index);
-      const pointValues = (selectedCommodityData?.priceRecords ?? [])
-        .map((entry) => (entry.price != null ? Number(entry.price) : null))
-        .filter((entry): entry is number => entry != null)
-        .slice(0, pointCount)
-        .reverse();
-      const minValue = pointValues.length > 0 ? Math.min(...pointValues) : 0;
-      const maxValue = pointValues.length > 0 ? Math.max(...pointValues) : 1;
-      const range = maxValue - minValue || 1;
-      const y = 280 - ((price != null ? price : minValue) - minValue) / range * 240;
-      const x = 40 + (safeIndex / Math.max(pointCount - 1, 1)) * 920;
 
-      return {
-        date: record.dateAndTime,
-        price,
-        label: formatTrendLabel(record.dateAndTime, index),
-        x,
-        y: Number.isNaN(y) ? 160 : y,
-      };
-    })
-    .slice(0, activeRange === "Week" ? 6 : 8)
-    .reverse();
+  const chronologicalWindow = [...windowedRecords].reverse();
+  const windowValues = chronologicalWindow
+    .map((record) => record.price)
+    .filter((price): price is number => price != null);
+  const windowMin = windowValues.length > 0 ? Math.min(...windowValues) : 0;
+  const windowMax = windowValues.length > 0 ? Math.max(...windowValues) : 1;
+  const windowRange = windowMax - windowMin || 1;
+  const trendPoints = chronologicalWindow.map((record, index) => {
+    const price = record.price;
+    const x = 40 + (chronologicalWindow.length > 1 ? (index / (chronologicalWindow.length - 1)) * 920 : 0);
+    const y = price != null ? 280 - ((price - windowMin) / windowRange) * 240 : 160;
+
+    return {
+      date: record.dateAndTime,
+      price,
+      label: formatTrendLabel(record.dateAndTime, index),
+      x,
+      y: Number.isNaN(y) ? 160 : y,
+    };
+  });
 
   const dailyChanges = [
     {

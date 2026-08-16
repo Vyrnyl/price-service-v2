@@ -6,7 +6,7 @@ import {
   MdOutlineStoreMallDirectory,
   MdOutlineUpdate,
 } from "react-icons/md";
-import { getPublicCommodities, type PublicCommodityItem } from "@/features/commodity";
+import { getPublicCommodities, getPublicStats } from "@/features/commodity";
 
 interface SummaryState {
   commodityCount: number;
@@ -33,34 +33,16 @@ export default function SummaryStats() {
 
     async function loadSummary() {
       try {
-        const commodities = await getPublicCommodities();
+        const [commodities, stats] = await Promise.all([getPublicCommodities(), getPublicStats()]);
 
         if (!isMounted) {
           return;
         }
 
-        const now = new Date();
-        const cutoff = new Date(now.getTime() - 24 * 60 * 60 * 1000);
-        const stores = new Set<string>();
-        let updatesLast24Hours = 0;
-
-        commodities.forEach((commodity: PublicCommodityItem) => {
-          if (commodity.storeName) {
-            stores.add(commodity.storeName);
-          }
-
-          if (commodity.lastUpdatedAt) {
-            const updatedAt = new Date(commodity.lastUpdatedAt);
-            if (!Number.isNaN(updatedAt.getTime()) && updatedAt >= cutoff) {
-              updatesLast24Hours += 1;
-            }
-          }
-        });
-
         setSummary({
           commodityCount: commodities.length,
-          storeCount: stores.size,
-          updatesLast24Hours,
+          storeCount: stats.monitoredStoreCount,
+          updatesLast24Hours: stats.updatesToday,
         });
       } catch {
         if (isMounted) {
