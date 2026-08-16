@@ -38,6 +38,7 @@ export const authService = {
     );
 
     await auditLogService.record({ actorId: user.id, action: 'LOGIN' });
+    await userRepository.update(user.id, { lastLoginAt: new Date() });
 
     return {
       user: {
