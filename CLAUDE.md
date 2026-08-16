@@ -10,11 +10,11 @@ Roles: `ADMIN` · `OFFICER` (accounts) · unauthenticated public access
 
 Check [context/progress.md](context/progress.md) at the start of every session — it is the single source of truth for what is actually built. Never assume a feature exists; verify there first.
 
-> ✅ **No open security findings, any severity.** The report IDOR (B-43) was closed by **Phase 4.1** on 2026-08-16 and live-verified with two real officer accounts.
+> ✅ **No open security findings, any severity, and no open decisions.** The report IDOR (B-43) was closed by **Phase 4.1** on 2026-08-16 and live-verified with two real officer accounts. **D-9** (the project's last open decision) was settled 2026-08-16 — refer out to DTI Consumer Care.
 
-**Two phases are in play:**
+**One phase is in play:**
 
-- **Phase 3 — Public Transparency** (3.1–3.3, findings B-31–B-38) — **unstarted.** **3.1 is the highest value-per-line item in the plan** — the public commodity table computes compliance status and price for every row and then renders neither; backend, transport, and row-mapping are already done. **D-9 is open and gates 3.3 only**; 3.1 and 3.2 are unblocked.
+- **Phase 3 — Public Transparency** (3.1–3.3, findings B-31–B-38) — **fully closed, 3/3 ●**, completed 2026-08-16.
 - **Phase 4 — Hardening & Scale** (4.1–4.6, findings B-43–B-52) — **1/6 done.** 4.1 ● (B-43, B-44). The remaining five can be done in any order; **4.2 Auth Hardening** is the next-highest value for the effort.
 
 **Ownership is not a role check.** `authorize(...roles)` gates *who may use a route*, never *whose row this is*. Any id-addressed route on an own-data domain also needs its module's scope helper applied in the repository — on writes as much as reads. That gap is what made B-43 reachable; see [context/architecture.md](context/architecture.md) §8.
@@ -72,8 +72,9 @@ These encode the workflow — prefer them over ad-hoc work:
 - **Report storage never touches the local filesystem.** Report bytes are stored as `Bytes` columns on the `Report` row in Postgres and served through `GET /api/v1/reports/:id/download`. The originally-planned pluggable `ReportStorage`/S3 interface was **not** built — there was no S3 credential or SDK to verify a second driver against. *(D-6, revised and built in Phase 2.4)*
 - **`MobileBottomNav` and `RoleSwitcher` are deleted**, not revived — both were non-functional scaffolding. No replacement bottom nav was built in Phase 1.1; if one is ever wanted it is net-new work. *(D-3)*
 - **Public compliance status comes from the price range, not the mean.** A commodity is non-compliant if *any* monitored store prices it above SRP — averaging across stores lets an overpricing store hide behind a cheaper one. *(D-8, Phase 3.2)*
+- **Consumer violation reports refer out to DTI Consumer Care** — no in-app report form, no `consumer_reports` table, no admin triage queue. `/report-a-concern` is static guidance plus one outbound link to `dti.gov.ph`. *(D-9, Phase 3.3)*
 
-**One decision is open: D-9** — consumer violation reports, refer out to DTI Consumer Care vs. build an in-app form + `consumer_reports` table + admin queue. It gates Phase 3.3 only; 3.1 and 3.2 are unblocked. The register lives in [context/build-plan.md](context/build-plan.md) §7.
+**All decisions are settled — none open.** The register lives in [context/build-plan.md](context/build-plan.md) §7.
 
 ## Conventions
 
@@ -92,7 +93,7 @@ These encode the workflow — prefer them over ad-hoc work:
 - **Check [context/ui-registry.md](context/ui-registry.md) before building any component.** The shared primitives live in `frontend/src/shared/components/` — `Button`, `Card`, `Badge`, `Modal`, `Toast`, `Alert`, `Input`, `Select`, `FormGroup`, `PageShell`, `Chip`, `Pagination`, `FieldError` — most demoed at `/component-gallery`. Use them; never hand-roll a sixth copy of markup one of them already owns.
 - **The card recipe is settled**: `rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow` (buttons `rounded-full`, form inputs `rounded-lg`). Converged across the app in Phase 1.2 — match it, and match [context/ui-rules.md](context/ui-rules.md) §6 for anything new.
 - **Every mutation must show a toast.** `Toast` is wired into all 8 write handlers (1.3); a new write without visible feedback fails the Definition of Done.
-- **The public pages are the exception to the adoption sweeps.** B-18/B-21/B-22 were closed for the admin/officer surface, but `CommodityListPage` and `HeroSection` still hand-roll their wrapper, toolbar, and CTA (B-35). Phase 3.1 fixes this — don't cite them as precedent.
+- **No local DTI Catanduanes address/phone appears anywhere in the app, by design.** Nothing in this repo verifies real contact details for the provincial office, and fabricating them on a consumer-complaint surface would mislead a real visitor. The footer and `/report-a-concern` link out to `dti.gov.ph` instead — ask the user before inventing institutional contact info elsewhere.
 - **`/api/*` in frontend code is the BFF namespace, not the backend contract.** Backend version changes are absorbed in `app/api/[...path]/route.ts`; don't rewrite the 30 client call sites.
 - **The real responsive break is 1024px (`lg`)**, not the 768px the generic standard assumes. Check 1024, 768, *and* 480.
 - **Every screen needs loading, empty, and error states drawn** — a blank state fails the visual-verify gate.

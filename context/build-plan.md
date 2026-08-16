@@ -577,12 +577,11 @@ Closes the privilege-escalation hole and the crash, makes the tests runnable, an
 | D-6 | Report file storage | **Make storage backend-independent.** Reports must not depend on the backend's local filesystem. → **Phase 2.4** |
 | D-7 | Is a `PUBLIC`-role account needed? | **No — remove the role.** Public access is unauthenticated via `/api/public/*`; there is no registration endpoint and no way to obtain a `PUBLIC` account. → **R0.3** |
 | D-8 | Public compliance status — derived from the mean or from the range? | **From the range.** A commodity is non-compliant if *any* monitored store prices it above SRP. Averaging across stores lets one overpricing store hide behind a cheaper one — which defeats the purpose of a compliance system. The mean stays on screen as "Avg. recent price"; it just no longer decides the badge. → **Phase 3.2** |
+| D-9 | Consumer violation reports — handled in-app, or referred to DTI's existing channels? | **Refer out.** A contact/how-to-report panel pointing at DTI Consumer Care. No schema change, no moderation burden, no new admin surface, and it does not duplicate a government process that already exists. The in-app alternative (report form + `consumer_reports` table + admin triage queue) was rejected — it's real added product scope and commits DTI staff to answering reports through this system, which wasn't asked for. → **Phase 3.3** |
 
 ### Open
 
-| # | Decision | Options | Blocks |
-|---|---|---|---|
-| D-9 | Consumer violation reports — handled in-app, or referred to DTI's existing channels? | **(a) Refer out** *(recommended)*: a contact/how-to-report panel pointing at DTI Consumer Care. No schema change, no moderation burden, no new admin surface, and it does not duplicate a government process that already exists. **(b) In-app**: a report form, a `consumer_reports` table, and an admin triage queue — real product scope, and it commits DTI staff to answering reports through this system. | **Phase 3.3** |
+None.
 
 ---
 
