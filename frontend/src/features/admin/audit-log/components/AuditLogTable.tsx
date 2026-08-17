@@ -109,10 +109,12 @@ export default function AuditLogTable({
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
-                          className="rounded-lg p-2 opacity-60 transition-opacity hover:bg-surface-container-high hover:text-on-surface group-hover:opacity-100"
+                          type="button"
+                          className="rounded-lg p-2 opacity-60 transition-opacity hover:bg-surface-container-high hover:text-on-surface group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                           title="View details"
                           onClick={() => onViewDetails(entry)}
                         >
+                          <span className="sr-only">View details</span>
                           <MdOutlineVisibility size={18} />
                         </button>
                       </td>
@@ -143,10 +145,12 @@ export default function AuditLogTable({
 
                 <div className="mt-4 flex items-center justify-end">
                   <button
-                    className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-surface-container-high"
+                    type="button"
+                    className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                     title="View details"
                     onClick={() => onViewDetails(entry)}
                   >
+                    <span className="sr-only">View details</span>
                     <MdOutlineVisibility size={18} />
                   </button>
                 </div>

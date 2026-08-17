@@ -74,17 +74,21 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-60 transition-opacity group-hover:opacity-100">
                       <button
-                        className="rounded-lg p-2 transition-colors hover:bg-surface-container-high hover:text-on-surface"
+                        type="button"
+                        className="rounded-lg p-2 transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                         title="Edit user"
                         onClick={() => onEdit(user)}
                       >
+                        <span className="sr-only">Edit user</span>
                         <MdOutlineEdit size={18} />
                       </button>
                       <button
-                        className="rounded-lg p-2 transition-colors hover:bg-error-container hover:text-error"
+                        type="button"
+                        className="rounded-lg p-2 transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                         title={user.isActive ? "Deactivate user" : "Activate user"}
                         onClick={() => onToggleActive(user)}
                       >
+                        <span className="sr-only">{user.isActive ? "Deactivate user" : "Activate user"}</span>
                         {user.isActive ? <MdOutlinePersonOff size={18} /> : <MdOutlinePerson2 size={18} />}
                       </button>
                     </div>
@@ -123,17 +127,21 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
 
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
-                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-surface-container-high"
+                type="button"
+                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 title="Edit user"
                 onClick={() => onEdit(user)}
               >
+                <span className="sr-only">Edit user</span>
                 <MdOutlineEdit size={18} />
               </button>
               <button
-                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-error-container hover:text-error"
+                type="button"
+                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 title={user.isActive ? "Deactivate user" : "Activate user"}
                 onClick={() => onToggleActive(user)}
               >
+                <span className="sr-only">{user.isActive ? "Deactivate user" : "Activate user"}</span>
                 {user.isActive ? <MdOutlinePersonOff size={18} /> : <MdOutlinePerson2 size={18} />}
               </button>
             </div>

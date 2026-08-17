@@ -168,7 +168,7 @@ export default function NavigationDrawer({
                 key={item.href}
                 href={item.href}
                 onClick={onClose}
-                className={`mx-2 flex items-center gap-4 rounded-full px-6 py-3 transition-all ${
+                className={`mx-2 flex items-center gap-4 rounded-full px-6 py-3 transition-all focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
                   isActive
                     ? "bg-secondary-container text-on-secondary-container"
                     : "text-on-surface-variant hover:bg-surface-variant"
@@ -183,7 +183,7 @@ export default function NavigationDrawer({
               <button
                 type="button"
                 onClick={handleLogout}
-                className="mx-2 mt-2 flex items-center gap-4 rounded-full px-6 py-3 text-on-surface-variant transition-all hover:bg-surface-variant"
+                className="mx-2 mt-2 flex items-center gap-4 rounded-full px-6 py-3 text-on-surface-variant transition-all hover:bg-surface-variant focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 <MdOutlineLogout />
                 <span className="font-sans text-body-sm">Logout</span>

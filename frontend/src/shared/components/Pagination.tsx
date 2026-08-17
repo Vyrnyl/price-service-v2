@@ -45,7 +45,9 @@ export default function Pagination({
   if (totalPages <= 1) return null;
 
   const { button: buttonClasses, icon: iconSize } = SIZE_CLASSES[size];
-  const navButtonClasses = `flex items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50 ${buttonClasses}`;
+  const FOCUS_RING_CLASSES =
+    "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
+  const navButtonClasses = `flex items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING_CLASSES} ${buttonClasses}`;
 
   return (
     <div className={`flex items-center gap-1 ${className}`.trim()}>
@@ -68,7 +70,7 @@ export default function Pagination({
           <button
             key={page}
             type="button"
-            className={`flex items-center justify-center rounded-lg border font-semibold transition-colors ${buttonClasses} ${
+            className={`flex items-center justify-center rounded-lg border font-semibold transition-colors ${FOCUS_RING_CLASSES} ${buttonClasses} ${
               currentPage === page
                 ? "border-primary bg-primary text-on-primary"
                 : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"

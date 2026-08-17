@@ -38,13 +38,16 @@ export default function TopAppBar({
           <button
             type="button"
             onClick={onMenuToggle}
-            className="shrink-0 rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant lg:hidden"
+            className="shrink-0 rounded-full p-2 text-on-surface-variant transition-colors hover:bg-surface-variant focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary lg:hidden"
             aria-label={isMenuOpen ? "Close navigation menu" : "Open navigation menu"}
           >
             {isMenuOpen ? <MdClose size={24} /> : <MdMenu size={24} />}
           </button>
         ) : null}
-        <Link href="/" className="flex min-w-0 items-center gap-3">
+        <Link
+          href="/"
+          className="flex min-w-0 items-center gap-3 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        >
           <MdOutlineAnalytics className="shrink-0 text-primary" size={28} />
           <h1 className="truncate font-sans text-h2-desktop font-bold text-primary">
             PresyoSerbisyo
@@ -53,11 +56,12 @@ export default function TopAppBar({
       </div>
       <div className="shrink-0">
         {showLoginButton ? (
-          <Link href="/login" className="inline-flex">
-            <button className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 py-2 font-sans text-label-caps text-on-primary transition-opacity hover:opacity-90">
-              <LuLogIn size={14} />
-              <span>LOGIN</span>
-            </button>
+          <Link
+            href="/login"
+            className="inline-flex items-center gap-2 whitespace-nowrap rounded-lg bg-primary px-4 py-2 font-sans text-label-caps text-on-primary transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+          >
+            <LuLogIn size={14} />
+            <span>LOGIN</span>
           </Link>
         ) : null}
       </div>

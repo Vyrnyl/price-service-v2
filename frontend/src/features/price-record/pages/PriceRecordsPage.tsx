@@ -355,7 +355,7 @@ export default function PriceRecordsPage({
                 <button
                   type="button"
                   onClick={handleOpenCreateForm}
-                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-sans font-semibold text-on-primary shadow-sm transition-all hover:shadow-md"
+                  className="flex items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-sans font-semibold text-on-primary shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 >
                   <MdAdd size={20} />
                   New Entry

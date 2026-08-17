@@ -36,6 +36,7 @@ export default function AuditLogFilters({
           <input
             className="w-full rounded-xl border border-outline-variant bg-surface-container-low py-2.5 pl-10 pr-4 text-body-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             placeholder="Search by actor name or email..."
+            aria-label="Search audit log"
             type="text"
             value={searchTerm}
             onChange={(event) => onSearchChange(event.target.value)}
@@ -72,7 +73,7 @@ export default function AuditLogFilters({
             key={option.value}
             type="button"
             onClick={() => onActionFilterChange(option.value)}
-            className={`rounded-full px-4 py-1.5 text-label-caps font-medium transition-colors ${
+            className={`rounded-full px-4 py-1.5 text-label-caps font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
               actionFilter === option.value
                 ? "bg-primary-container text-on-primary-container"
                 : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"

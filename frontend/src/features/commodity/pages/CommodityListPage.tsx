@@ -333,6 +333,7 @@ export default function CommodityListPage() {
           <Input
             icon={<MdSearch size={20} />}
             placeholder="Search commodity, store, or municipality..."
+            aria-label="Search commodities"
             type="text"
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
@@ -537,6 +538,7 @@ export default function CommodityListPage() {
               <input
                 className="w-full rounded-xl border border-outline-variant bg-surface py-1.5 px-2.5 text-[11px] outline-none transition-all focus:border-primary focus:ring-1 focus:ring-primary sm:max-w-xs sm:text-xs"
                 placeholder="Filter records by store, status, or price"
+                aria-label="Filter records by store, status, or price"
                 type="text"
                 value={recordSearchTerm}
                 onChange={(event) => setRecordSearchTerm(event.target.value)}

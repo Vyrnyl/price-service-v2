@@ -22,8 +22,8 @@ function getStatusClasses(status: string, compact = false) {
 
   if (status === "Above SRP") {
     return compact
-      ? "rounded-full bg-error-container text-error px-2 py-0.5 text-[10px] font-semibold"
-      : "rounded-full bg-error-container text-error px-3 py-1 text-[12px] font-semibold";
+      ? "rounded-full bg-error-container text-on-error-container px-2 py-0.5 text-[10px] font-semibold"
+      : "rounded-full bg-error-container text-on-error-container px-3 py-1 text-[12px] font-semibold";
   }
 
   return compact

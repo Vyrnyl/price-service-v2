@@ -107,7 +107,7 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
               Loading stores...
             </div>
           ) : error ? (
-            <div className="rounded-xl border border-error bg-error-container p-8 text-center text-body-sm text-on-error">
+            <div className="rounded-xl border border-error bg-error-container p-8 text-center text-body-sm text-on-error-container">
               {error}
             </div>
           ) : (

@@ -10,7 +10,7 @@ export default function Chip({ active = false, className = "", children, ...rest
     <button
       type="button"
       aria-pressed={active}
-      className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-label-caps font-medium transition-colors ${
+      className={`whitespace-nowrap rounded-full border px-4 py-1.5 text-label-caps font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary ${
         active
           ? "border-transparent bg-primary-container text-on-primary-container"
           : "border-outline-variant text-on-surface-variant hover:bg-surface-container-high"

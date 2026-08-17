@@ -6,20 +6,15 @@ Roles: `ADMIN` · `OFFICER` (accounts) · unauthenticated public access
 
 ## Current state — read this first
 
-**The application is built, running, and structurally current.** Nine product modules work end to end for both account roles plus unauthenticated public access. It was built *before* these standards existed, but refactor phases R0–R3 closed the structural gap, and Phases 0, P, 1, and 2 are all complete.
+**The application is built, running, and structurally current.** Nine product modules work end to end for both account roles plus unauthenticated public access. It was built *before* these standards existed, but refactor phases R0–R3 closed the structural gap, and every phase in the plan — 0, P, 1, 2, 3, 4 — is now complete.
 
 Check [context/progress.md](context/progress.md) at the start of every session — it is the single source of truth for what is actually built. Never assume a feature exists; verify there first.
 
-> ✅ **No open security findings, any severity, and no open decisions.** The report IDOR (B-43) was closed by **Phase 4.1**; login rate limiting, security headers, and password complexity (B-45–B-47) were closed by **Phase 4.2**. **D-9** (the project's last open decision) was settled 2026-08-16 — refer out to DTI Consumer Care.
-
-**One phase is in play:**
-
-- **Phase 3 — Public Transparency** (3.1–3.3, findings B-31–B-38) — **fully closed, 3/3 ●**, completed 2026-08-16.
-- **Phase 4 — Hardening & Scale** (4.1–4.6, findings B-43–B-52) — **4/6 done.** 4.1 ● (B-43, B-44); 4.2 ● (B-45, B-46, B-47); 4.3 ● (B-50); 4.4 ● (B-49), 2026-08-16. The remaining two (4.5, 4.6) are both user-visible — **the Feature Loop applies**, unlike 4.1–4.4's Refactor Gate treatment.
+> ✅ **The entire tracked plan is done — 48/48 (100%).** No open security findings at any severity, no open decisions, no open blockers. Phase 3 — Public Transparency closed 2026-08-16 (3/3 ●). Phase 4 — Hardening & Scale closed 2026-08-16 (6/6 ●): the report IDOR (B-43/B-44), login rate limiting/headers/password complexity (B-45–B-47), server-side pagination (B-50), refresh-token session continuity (B-49), differentiated report types (B-48), and the accessibility pass — modal focus trap, label association, focus-visible rings, WCAG AA status-colour contrast (B-52) — are all resolved. **No phase is currently in play.** Any new work is net-new scope, not a gap in the plan.
 
 **Ownership is not a role check.** `authorize(...roles)` gates *who may use a route*, never *whose row this is*. Any id-addressed route on an own-data domain also needs its module's scope helper applied in the repository — on writes as much as reads. That gap is what made B-43 reachable; see [context/architecture.md](context/architecture.md) §8.
 
-Verified baseline (2026-08-16): backend `tsc` clean · frontend `tsc` clean · `npm test` 74/74 passing.
+Verified baseline (2026-08-16): backend `tsc` clean · frontend `tsc` clean · backend `npm test` 83/83 passing.
 
 ## The one rule that governs everything
 

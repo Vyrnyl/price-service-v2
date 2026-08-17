@@ -321,7 +321,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
                   setFormError(null);
                   setFormSuccess(null);
                 }}
-                className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-sm transition-all hover:shadow-md"
+                className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
               >
                 <MdAddCircle size={20} />
                 New Commodity

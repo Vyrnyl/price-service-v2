@@ -241,7 +241,7 @@ export default function UsersManagementPage() {
                 setFormSuccess(null);
                 setFormOpen(true);
               }}
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary transition-all hover:shadow-md active:scale-[0.98] md:w-auto"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary transition-all hover:shadow-md active:scale-[0.98] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary md:w-auto"
             >
               <MdOutlinePersonAdd size={20} />
               <span>Add New User</span>

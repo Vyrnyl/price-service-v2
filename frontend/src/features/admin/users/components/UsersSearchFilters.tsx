@@ -28,6 +28,7 @@ export default function UsersSearchFilters({
         <Input
           icon={<MdOutlineSearch size={20} />}
           placeholder="Search by name, email or role..."
+          aria-label="Search users"
           type="text"
           value={searchTerm}
           onChange={(event) => onSearchChange(event.target.value)}

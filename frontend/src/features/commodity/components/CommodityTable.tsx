@@ -74,6 +74,7 @@ export default function CommodityTable({
           <input
             className="w-full rounded-xl border border-outline-variant bg-surface py-2.5 pl-10 pr-4 text-body-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             placeholder="Filter by commodity name, category, or status..."
+            aria-label="Search commodities"
             type="text"
             value={searchTerm}
             onChange={(event) => onSearchTermChange(event.target.value)}

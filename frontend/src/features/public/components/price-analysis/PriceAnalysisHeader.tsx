@@ -58,6 +58,7 @@ export function PriceAnalysisHeader({
                 value={commoditySearch}
                 onChange={(event) => onCommoditySearchChange(event.target.value)}
                 placeholder="Search commodity"
+                aria-label="Search commodity"
                 className="w-full rounded-xl border border-outline-variant bg-surface-container-high py-2 pl-9 pr-3 text-sm outline-none focus:border-primary"
               />
             </div>
