@@ -1,5 +1,5 @@
 import ReportGenerationPage from "@/features/report";
 
-export default function OfficerReportsRoute() {
+export default function AdminReportsRoute() {
   return <ReportGenerationPage />;
 }

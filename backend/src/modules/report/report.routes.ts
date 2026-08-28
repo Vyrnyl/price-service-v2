@@ -5,7 +5,7 @@ import { reportController } from './report.controller';
 
 const router = Router();
 
-router.use(authorize('ADMIN', 'OFFICER'));
+router.use(authorize('ADMIN'));
 
 router.post('/', asyncHandler(reportController.createReport));
 router.get('/', asyncHandler(reportController.getReports));
