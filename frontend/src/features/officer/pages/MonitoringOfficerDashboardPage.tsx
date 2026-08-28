@@ -40,7 +40,6 @@ export default function MonitoringOfficerDashboardPage() {
   const [totalPriceRecords, setTotalPriceRecords] = useState(0);
   const [latestStores, setLatestStores] = useState<Array<{ id: string; name: string; location: string; createdAt: string }>>([]);
   const [latestPriceRecords, setLatestPriceRecords] = useState<Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>>([]);
-  const [latestReports, setLatestReports] = useState<Array<{ id: string; type: string; period: string; createdAt: string }>>([]);
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
@@ -66,11 +65,10 @@ export default function MonitoringOfficerDashboardPage() {
   useEffect(() => {
     async function loadDashboardCounts() {
       try {
-        const [commoditiesResponse, storesResponse, priceRecordsResponse, reportsResponse] = await Promise.all([
+        const [commoditiesResponse, storesResponse, priceRecordsResponse] = await Promise.all([
           apiFetch<{ status: string; data: unknown[]; total: number }>("/api/commodities?pageSize=1"),
           apiFetch<{ status: string; data: Array<{ id: string; name: string; location: string; createdAt: string }>; total: number }>("/api/stores?pageSize=100"),
           apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>; total: number }>("/api/price-records"),
-          apiFetch<{ status: string; data: Array<{ id: string; type: string; period: string; createdAt: string }> }>("/api/reports"),
         ]);
 
         setTotalCommodities(commoditiesResponse.total);
@@ -82,9 +80,6 @@ export default function MonitoringOfficerDashboardPage() {
 
         const sortedPriceRecords = [...priceRecordsResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         setLatestPriceRecords(sortedPriceRecords.slice(0, 3));
-
-        const sortedReports = [...reportsResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
-        setLatestReports(sortedReports.slice(0, 3));
       } catch (error) {
         console.error("Failed to load dashboard counts", error);
       }
@@ -169,11 +164,11 @@ export default function MonitoringOfficerDashboardPage() {
                 <h3 className="font-sans text-h3-desktop text-on-surface">
                   Recent Activity
                 </h3>
-                <p className="text-body-sm text-on-surface-variant">Latest stores, price records, and reports added to the system.</p>
+                <p className="text-body-sm text-on-surface-variant">Latest stores and price records added to the system.</p>
               </div>
             </div>
 
-            <div className="grid gap-4 lg:grid-cols-3">
+            <div className="grid gap-4 lg:grid-cols-2">
               <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
                 <p className="mb-3 font-sans text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
                   Added Stores
@@ -208,25 +203,6 @@ export default function MonitoringOfficerDashboardPage() {
                     ))
                   ) : (
                     <p className="text-body-sm text-on-surface-variant">No recent price records.</p>
-                  )}
-                </div>
-              </div>
-
-              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
-                <p className="mb-3 font-sans text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
-                  Reports Activity
-                </p>
-                <div className="space-y-3">
-                  {latestReports.length > 0 ? (
-                    latestReports.map((report) => (
-                      <div key={report.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
-                        <p className="font-semibold text-on-surface">{report.type.replace(/_/g, " ")}</p>
-                        <p className="text-body-sm text-on-surface-variant">{report.period}</p>
-                        <p className="mt-2 text-[11px] text-on-surface-variant">{new Date(report.createdAt).toLocaleDateString()}</p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-body-sm text-on-surface-variant">No recent report activity.</p>
                   )}
                 </div>
               </div>

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { MdOutlineAnalytics, MdMenu, MdClose } from "react-icons/md";
 import { LuLogIn } from "react-icons/lu";
 import { useEffect, useState } from "react";
-import { getRoleFromServer, type UserRole } from "@/shared/services/auth";
+import { getSessionUser, type SessionUser } from "@/shared/services/auth";
 
 export default function TopAppBar({
   activePath,
@@ -17,19 +17,19 @@ export default function TopAppBar({
   onMenuToggle: () => void;
   showMenuButton: boolean;
 }) {
-  const [role, setRole] = useState<UserRole | null>(null);
+  const [sessionUser, setSessionUser] = useState<SessionUser | null>(null);
 
   useEffect(() => {
     let mounted = true;
-    getRoleFromServer().then((userRole) => {
-      if (mounted) setRole(userRole);
+    getSessionUser().then((user) => {
+      if (mounted) setSessionUser(user);
     });
     return () => {
       mounted = false;
     };
   }, [activePath]);
 
-  const showLoginButton = role !== "admin" && role !== "officer" && activePath !== "/login";
+  const showLoginButton = !sessionUser && activePath !== "/login";
 
   return (
     <header className="sticky top-0 z-50 flex items-center justify-between gap-3 border-b border-outline-variant bg-surface px-container-margin-mobile py-stack-md shadow-sm md:px-container-margin-desktop">

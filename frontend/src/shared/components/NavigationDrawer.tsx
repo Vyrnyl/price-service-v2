@@ -15,8 +15,9 @@ import { HiUsers } from "react-icons/hi2";
 import { HiOutlineDocumentReport } from "react-icons/hi";
 import { useRouter } from "next/navigation";
 import {
-  getRoleFromServer,
+  getSessionUser,
   logoutFromServer,
+  type SessionUser,
   type UserRole,
 } from "../services/auth";
 import { useToast } from "./Toast";
@@ -97,6 +98,15 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
   ],
 };
 
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((part) => part[0] ?? "")
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
+}
+
 export default function NavigationDrawer({
   activePath,
   isOpen,
@@ -106,21 +116,22 @@ export default function NavigationDrawer({
   isOpen: boolean;
   onClose: () => void;
 }) {
-  const [role, setRole] = useState<UserRole | "guest" | null>(null);
+  const [sessionUser, setSessionUser] = useState<SessionUser | null | undefined>(undefined);
   const router = useRouter();
   const { showToast } = useToast();
 
   useEffect(() => {
     let mounted = true;
-    getRoleFromServer().then((r) => {
-      if (mounted) setRole(r ?? "guest");
+    getSessionUser().then((user) => {
+      if (mounted) setSessionUser(user);
     });
     return () => {
       mounted = false;
     };
   }, [activePath]);
 
-  const links = role === "admin" || role === "officer" ? roleSpecificLinks[role] : publicLinks;
+  const isLoading = sessionUser === undefined;
+  const links = sessionUser ? roleSpecificLinks[sessionUser.role] : publicLinks;
 
   const handleLogout = async () => {
     try {
@@ -130,7 +141,7 @@ export default function NavigationDrawer({
       showToast("Logout failed on the server, but you've been signed out on this device.", "error");
     }
 
-    setRole("guest");
+    setSessionUser(null);
     router.push("/login");
     onClose();
   };
@@ -148,12 +159,24 @@ export default function NavigationDrawer({
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="mb-8 px-6 pt-8">
-          <h2 className="font-sans text-label-caps uppercase tracking-widest text-outline">
-            Navigation
-          </h2>
+        <div className="mb-4">
+          {sessionUser ? (
+            <div className="mx-6 mt-16 flex items-center gap-3 rounded-xl border border-outline-variant p-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-lg font-bold text-primary">
+                {getInitials(sessionUser.name)}
+              </div>
+              <p className="min-w-0 font-sans text-body-lg font-bold leading-snug text-on-surface">
+                {sessionUser.name}
+                <span className="text-primary"> - {sessionUser.role.toUpperCase()}</span>
+              </p>
+            </div>
+          ) : (
+            <h2 className="px-6 pt-8 font-sans text-label-caps uppercase tracking-widest text-outline">
+              Navigation
+            </h2>
+          )}
         </div>
-        {!role ? (
+        {isLoading ? (
           <div className="px-6 py-4 text-sm text-on-surface-variant">
             Loading navigation...
           </div>
@@ -179,7 +202,7 @@ export default function NavigationDrawer({
               </Link>
             );
           })}
-            {role !== "guest" ? (
+            {sessionUser ? (
               <button
                 type="button"
                 onClick={handleLogout}

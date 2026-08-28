@@ -2,6 +2,13 @@ import { apiFetch } from "./api";
 
 export type UserRole = "officer" | "admin";
 
+export interface SessionUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+}
+
 export function normalizeUserRole(role: string | null | undefined): UserRole | null {
   const normalized = role?.trim().toLowerCase();
 
@@ -12,12 +19,15 @@ export function normalizeUserRole(role: string | null | undefined): UserRole | n
   return null;
 }
 
-export async function getRoleFromServer(): Promise<UserRole | null> {
+export async function getSessionUser(): Promise<SessionUser | null> {
   try {
-    const res = await fetch("/api/auth/role", { cache: "no-store" });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return normalizeUserRole(data?.role);
+    const data = await apiFetch<{ id: string; name: string; email: string; role: string }>(
+      "/api/users/me",
+    );
+    const role = normalizeUserRole(data.role);
+    if (!role) return null;
+
+    return { id: data.id, name: data.name, email: data.email, role };
   } catch {
     return null;
   }
