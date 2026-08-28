@@ -5,10 +5,10 @@ import { srpController } from './srp.controller';
 
 const router = Router();
 
-router.post('/', authorize('ADMIN'), asyncHandler(srpController.createSrp));
+router.post('/', authorize('OFFICER'), asyncHandler(srpController.createSrp));
 router.get('/', asyncHandler(srpController.getSrps));
 router.get('/:id', asyncHandler(srpController.getSrpById));
-router.put('/:id', authorize('ADMIN'), asyncHandler(srpController.updateSrp));
-router.delete('/:id', authorize('ADMIN'), asyncHandler(srpController.deleteSrp));
+router.put('/:id', authorize('OFFICER'), asyncHandler(srpController.updateSrp));
+router.delete('/:id', authorize('OFFICER'), asyncHandler(srpController.deleteSrp));
 
 export default router;

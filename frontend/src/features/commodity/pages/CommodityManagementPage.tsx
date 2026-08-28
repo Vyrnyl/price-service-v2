@@ -56,7 +56,10 @@ type CommodityManagementPageProps = {
 };
 
 export default function CommodityManagementPage({ userRole }: CommodityManagementPageProps) {
-  const canManage = userRole === "admin";
+  // Commodity and SRP management belongs to the officer (Phase 5.1); the admin
+  // route renders the same page read-only. Mirrors authorize('OFFICER') on the
+  // commodity and srp write routes — both layers are required.
+  const canManage = userRole === "officer";
   const [commodityRows, setCommodityRows] = useState<CommodityRow[]>([]);
   const [total, setTotal] = useState(0);
   const [summaryStats, setSummaryStats] = useState({ total: 0, active: 0, categories: 0 });
