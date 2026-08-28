@@ -555,6 +555,79 @@ Never audited — the standing ☐ on the cross-cutting checklist. `Modal` handl
 
 ---
 
+## Phase 5 — Panel Revisions
+
+Scoped 2026-08-28 from a review pass on the built application. Unlike Phases 3 and 4, these are **not** gaps found by audit — they are requested changes to behaviour that already meets its Definition of Done. Several *reverse* earlier placement decisions, so the tracker records them as new features rather than reopening closed ones.
+
+> **The organising change is a role swap**: **ADMIN gains Reports, OFFICER gains Commodity CRUD.** 5.1 and 5.3 are the two halves of it and should land together — doing one without the other inverts the ownership model rather than moving it.
+
+> **Deferred from this phase.** "Price Entry Page — Category should be dropdown" was raised but **skipped** — the price entry form has no Category field to convert (it holds only Store, Commodity, Date & Time, Price), so the revision could not be applied as written. The only free-text category input in the app is on the Add Commodity form. Revisit with the reviewer; if it returns, it pairs naturally with **B-8** (`Commodity.category` is unconstrained free text) and would pin the 8 seeded categories into a real enum.
+
+### 5.1 Commodity CRUD → Officer
+
+`canManage = userRole === "admin"` in `CommodityManagementPage.tsx` gates the commodity page's write affordances, and commodity/SRP writes are `authorize('ADMIN')` on the backend. The officer's `/officer/commodities` route renders the same page read-only. This is a **strict move**: the officer becomes the owner; admin keeps a read-only view and its nav link.
+
+- **Files (edit)**: `commodity.routes.ts` and `srp.routes.ts` (POST/PUT/DELETE `ADMIN` → `OFFICER`), `CommodityManagementPage.tsx` (`canManage` flips to `officer`)
+- **Watch**: SRP writes must move **with** commodity writes — 5.2's merged create form writes an SRP, so splitting the two leaves the new form broken for its own owner. Note also that audit-logged SRP changes will now record an **officer** as the actor.
+- **Gate**: Refactor Gate (§5a). Route RBAC has **no test coverage** — the 83 backend tests are unit tests on services, scopes, and the `authorize` middleware itself, none assert route wiring — so verify live over HTTP with real tokens.
+- **Done gate**: an OFFICER token creates/edits a commodity and an SRP successfully; an ADMIN token gets **403** on the same calls and sees no write controls on `/admin/commodities`.
+
+### 5.2 Merged Commodity + SRP Create, Effective-Date Column
+
+Adding a commodity and setting its first SRP are two separate dialogs today. Merge SRP into the create form, and surface the effective date the list already receives but never shows.
+
+- **Contract**: `POST /commodities` accepts an **optional** SRP price + effective date and writes both rows in a single `$transaction`
+- **Files (edit)**: `AddCommodityDialog.tsx` (optional SRP fields, **create mode only**), `commodity.schema.ts` on both sides, `commodity.service.ts` / `commodity.repository.ts`, `CommodityTable.tsx` (Effective Date column from `srps[0].effectiveDate` — already on the wire via the repository's `include`, so display-only)
+- **Decision**: SRP is **optional** — a commodity without one shows `_` as it does today. `UpdateSrpDialog` stays the single path for *changing* an SRP, keeping that audit-logged route intact.
+- **Watch**: do the write server-side in one transaction rather than as two sequential client calls; two calls can leave a created commodity whose SRP silently vanished.
+- **Gate**: Feature Loop. Sign-off on create-with-SRP, create-without-SRP, and the new column.
+- **Done gate**: one dialog creates a commodity with its opening SRP; omitting the SRP still succeeds; the list shows each commodity's effective date.
+
+### 5.3 Reports → Admin *(reverses current placement)*
+
+Reports currently live at `/officer/reports` with an officer-only nav link, and `report.routes.ts` permits `authorize('ADMIN','OFFICER')`. Reporting moves to ADMIN at every layer.
+
+- **Files (new)**: `app/(protected)/admin/reports/page.tsx`
+- **Files (delete)**: `app/(protected)/officer/reports/page.tsx`
+- **Files (edit)**: `NavigationDrawer.tsx` (Reports link moves officer → admin), `report.routes.ts` (`authorize('ADMIN')`)
+- **Keep `report.scope.ts` unchanged.** Its OFFICER branch becomes unreachable through the routes, but it is the service-layer half of the B-43 fix and the defence-in-depth CLAUDE.md requires. Deleting it would silently reopen the IDOR if officer access is ever restored.
+- **No data migration.** `resolveReportScope` returns `undefined` for ADMIN, so an admin already reads every report regardless of `generatedBy`; existing officer-generated rows stay visible.
+- **Gate**: Refactor Gate (§5a) — same untested-route-RBAC caveat as 5.1.
+- **Done gate**: an ADMIN reaches and generates reports; an OFFICER gets **403** from the API and has no Reports nav entry.
+
+### 5.4 Session Identity in the Sidebar
+
+The drawer's top slot is a static "Navigation" heading. A signed-in user has no on-screen confirmation of who they are or what role they hold.
+
+- **Files (edit)**: `NavigationDrawer.tsx` (name + role replace the heading, at the top of the drawer directly below the header), `shared/services/auth.ts` (new `getSessionUser()`)
+- **No backend change** — `/api/auth/me` already returns `{ id, name, email, role, isActive }`.
+- **Watch**: the drawer and `TopAppBar` each call `/api/auth/role` independently today; derive role from the single `getSessionUser()` call rather than adding a third round trip. The drawer also renders for unauthenticated visitors, so it needs a real loading state and a guest fallback.
+- **Gate**: Feature Loop.
+- **Done gate**: an admin and an officer each see their own name and role; a public visitor sees neither a name nor a broken slot; no duplicate identity requests on navigation.
+
+### 5.5 Strip Click-Through From the Public List
+
+`/commodity-list` rows and mobile cards open a price-history modal. The public surface becomes a commodity list only.
+
+- **Files (edit)**: `CommodityListPage.tsx` — remove the row/card `onClick` and `cursor-pointer`, the modal block, `selectedCommodity` state, and the three record-filter states with their derived memos (~150 lines out)
+- **Keep**: the table, its filters, the compliance badges, and the loading/empty/error states. The public API keeps returning `priceRecords`; the page simply stops rendering them.
+- **Gate**: Feature Loop.
+- **Done gate**: no row is clickable, no modal can be opened, and the list's own filters and states still work at 1024/768/480.
+
+### 5.6 Price Trends for Admin and Officer
+
+`PriceAnalysisPage` exists only as a public route — and `middleware.ts` redirects any logged-in admin or officer away from every public route to their dashboard, so **a signed-in user currently cannot open `/price-analysis` at all.** Give both roles their own route.
+
+- **Files (new)**: `app/(protected)/admin/price-trends/page.tsx`, `app/(protected)/officer/price-trends/page.tsx`
+- **Files (edit)**: `NavigationDrawer.tsx` (a Price Trends link for both roles)
+- **No backend change** — the page reads only unauthenticated `/api/public/*` endpoints, so it works unmodified inside a protected route.
+- **Gate**: Feature Loop.
+- **Done gate**: a logged-in admin and a logged-in officer each reach the trends page from their own nav without being redirected, and the charts render real data.
+
+**Phase 5 exit**: the officer owns commodity and SRP management, the admin owns reporting, both roles can see price trends and their own identity, and the public list is a list.
+
+---
+
 ## 6. Recommended MVP Slice (if time-boxed)
 
 **R0 → R2.1 → R2.6 → R1.1 → R1.2**
