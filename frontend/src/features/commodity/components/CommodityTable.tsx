@@ -1,8 +1,9 @@
 "use client";
 
-import { MdEdit, MdOutlineChevronLeft, MdOutlineChevronRight, MdSearch } from "react-icons/md";
+import { MdEdit, MdSearch } from "react-icons/md";
 import type { ComponentType } from "react";
-import type { CommodityItem } from "../api/commodity.api";
+import Pagination from "@/shared/components/Pagination";
+import type { CommodityItem } from "../services/commodity.api";
 import type { CommodityStatus } from "../commodity.schema";
 
 export type CommodityRow = {
@@ -16,8 +17,11 @@ export type CommodityRow = {
   iconBg: string;
 };
 
+const PAGE_SIZE = 5;
+
 type CommodityTableProps = {
   commodityRows: CommodityRow[];
+  total: number;
   isLoading: boolean;
   error: string | null;
   searchTerm: string;
@@ -32,6 +36,7 @@ type CommodityTableProps = {
 
 export default function CommodityTable({
   commodityRows,
+  total,
   isLoading,
   error,
   searchTerm,
@@ -45,42 +50,31 @@ export default function CommodityTable({
 }: CommodityTableProps) {
   const showActions = Boolean(onOpenUpdateSrp || onEditCommodity);
   const columnCount = showActions ? 5 : 4;
-  const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-  const filteredCommodityRows = commodityRows.filter((row) => {
-    const normalizedRow = `${row.name} ${row.category} ${row.status}`.toLowerCase();
-    const matchesSearch = normalizedRow.includes(normalizedSearchTerm);
-    const matchesStatus = statusFilter === "ALL" || row.status === statusFilter;
-    return matchesSearch && matchesStatus;
-  });
 
-  const PAGE_SIZE = 5;
-  const totalPages = Math.max(1, Math.ceil(filteredCommodityRows.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
-  const paginatedCommodityRows = filteredCommodityRows.slice(
-    (safeCurrentPage - 1) * PAGE_SIZE,
-    (safeCurrentPage - 1) * PAGE_SIZE + PAGE_SIZE,
-  );
 
-  const startIndex = filteredCommodityRows.length === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
-  const endIndex = Math.min(startIndex + paginatedCommodityRows.length - 1, filteredCommodityRows.length);
+  const startIndex = total === 0 ? 0 : (safeCurrentPage - 1) * PAGE_SIZE + 1;
+  const endIndex = Math.min(startIndex + commodityRows.length - 1, total);
 
   return (
-    <div className="flex min-h-105 flex-1 flex-col rounded-3xl border border-outline-variant bg-white p-6 data-card-shadow md:p-8">
+    <div className="flex min-h-105 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
       <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
         <div>
-          <h4 className="font-h3-desktop text-h3-desktop text-on-surface">Commodity with SRP</h4>
+          <h4 className="font-sans text-h3-desktop text-on-surface">Commodity with SRP</h4>
           <p className="text-body-sm text-on-surface-variant">
             Active market listings and monitoring status
           </p>
         </div>
       </div>
 
-      <div className="mb-4 rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+      <div className="mb-4 rounded-xl border border-outline-variant bg-surface-container-low p-4">
         <div className="relative w-full">
           <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />
           <input
             className="w-full rounded-xl border border-outline-variant bg-surface py-2.5 pl-10 pr-4 text-body-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
             placeholder="Filter by commodity name, category, or status..."
+            aria-label="Search commodities"
             type="text"
             value={searchTerm}
             onChange={(event) => onSearchTermChange(event.target.value)}
@@ -132,14 +126,14 @@ export default function CommodityTable({
               <tr>
                 <td colSpan={5} className="py-12 text-center text-sm text-error">{error}</td>
               </tr>
-            ) : filteredCommodityRows.length === 0 ? (
+            ) : commodityRows.length === 0 ? (
               <tr>
                 <td colSpan={5} className="py-12 text-center text-sm text-on-surface-variant">
                   No commodities match the current filters.
                 </td>
               </tr>
             ) : (
-              paginatedCommodityRows.map((item) => {
+              commodityRows.map((item) => {
                 const Icon = item.icon;
                 return (
                   <tr key={item.id}>
@@ -205,40 +199,9 @@ export default function CommodityTable({
 
       <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-6 py-4 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-body-sm text-on-surface-variant">
-          Showing {filteredCommodityRows.length === 0 ? 0 : `${startIndex}-${endIndex}`} of {filteredCommodityRows.length} commodities
+          Showing {total === 0 ? 0 : `${startIndex}-${endIndex}`} of {total} commodities
         </p>
-        <div className="flex items-center gap-1">
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={safeCurrentPage === 1}
-            onClick={() => onPageChange(Math.max(1, safeCurrentPage - 1))}
-          >
-            <MdOutlineChevronLeft size={20} />
-          </button>
-
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-            <button
-              key={page}
-              type="button"
-              className={`flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${
-                safeCurrentPage === page
-                  ? "border-primary bg-primary text-on-primary"
-                  : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"
-              }`}
-              onClick={() => onPageChange(page)}
-            >
-              {page}
-            </button>
-          ))}
-
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={safeCurrentPage === totalPages}
-            onClick={() => onPageChange(Math.min(totalPages, safeCurrentPage + 1))}
-          >
-            <MdOutlineChevronRight size={20} />
-          </button>
-        </div>
+        <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={onPageChange} />
       </div>
     </div>
   );

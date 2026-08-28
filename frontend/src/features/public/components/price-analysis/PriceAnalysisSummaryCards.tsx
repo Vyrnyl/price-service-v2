@@ -21,13 +21,13 @@ export function PriceAnalysisSummaryCards({ cards }: PriceAnalysisSummaryCardsPr
         return (
           <div
             key={card.title}
-            className="rounded-3xl border border-outline-variant/80 bg-gradient-to-br from-surface-container-lowest via-surface-container-lowest to-surface-container p-4 shadow-[0_10px_30px_rgba(0,0,0,0.06)] transition-transform duration-200 hover:-translate-y-1"
+            className="rounded-xl border border-outline-variant/80 bg-linear-to-br from-surface-container-lowest via-surface-container-lowest to-surface-container p-4 data-card-shadow transition-transform duration-200 hover:-translate-y-1"
           >
             <div className="mb-3 flex items-center justify-between gap-3">
               <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline sm:text-[11px]">
                 {card.title}
               </span>
-              <div className={`rounded-2xl bg-surface-container-high p-2.5 shadow-sm ${card.accent}`}>
+              <div className={`rounded-xl bg-surface-container-high p-2.5 shadow-sm ${card.accent}`}>
                 <Icon size={18} />
               </div>
             </div>

@@ -54,6 +54,28 @@ function formatCurrency(value: number | null | undefined) {
   }).format(value);
 }
 
+function readToken(name: string, fallback: string) {
+  if (typeof window === "undefined") {
+    return fallback;
+  }
+
+  const value = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+  return value || fallback;
+}
+
+function hexToRgba(hex: string, alpha: number) {
+  const match = /^#([0-9a-f]{6})$/i.exec(hex);
+  if (!match) {
+    return hex;
+  }
+
+  const int = parseInt(match[1], 16);
+  const r = (int >> 16) & 255;
+  const g = (int >> 8) & 255;
+  const b = int & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
 export function PriceTrendPanel({
   activeInsight,
   activeRange,
@@ -89,6 +111,14 @@ export function PriceTrendPanel({
       })
     : "No date available";
 
+  const lineColor = readToken("--color-primary-container", "#2563eb");
+  const selectedPointColor = readToken("--color-primary-fixed", "#dbe1ff");
+  const surfaceLowest = readToken("--color-surface-container-lowest", "#ffffff");
+  const onSurface = readToken("--color-on-surface", "#191b23");
+  const onSurfaceVariant = readToken("--color-on-surface-variant", "#434655");
+  const primaryFixed = readToken("--color-primary-fixed", "#dbe1ff");
+  const outline = readToken("--color-outline", "#737686");
+
   const chartData = {
     labels: points.map((point) => {
       if (!point.date) {
@@ -104,26 +134,26 @@ export function PriceTrendPanel({
       {
         label: activeInsight.title,
         data: points.map((point) => point.price),
-        borderColor: "#2563eb",
+        borderColor: lineColor,
         backgroundColor: (context: { chart: { ctx: CanvasRenderingContext2D; chartArea?: { top: number; bottom: number } } }) => {
           const chart = context.chart;
           const { ctx, chartArea } = chart;
 
           if (!chartArea) {
-            return "rgba(37, 99, 235, 0.14)";
+            return hexToRgba(lineColor, 0.14);
           }
 
           const gradient = ctx.createLinearGradient(0, chartArea.top, 0, chartArea.bottom);
-          gradient.addColorStop(0, "rgba(37, 99, 235, 0.28)");
-          gradient.addColorStop(1, "rgba(37, 99, 235, 0.04)");
+          gradient.addColorStop(0, hexToRgba(lineColor, 0.28));
+          gradient.addColorStop(1, hexToRgba(lineColor, 0.04));
           return gradient;
         },
         borderWidth: 3,
         tension: 0.35,
         pointRadius: points.map((_, index) => (selectedPointIndex === index ? 6 : 4)),
         pointHoverRadius: 6,
-        pointBackgroundColor: points.map((_, index) => (selectedPointIndex === index ? "#eff6ff" : "#ffffff")),
-        pointBorderColor: "#2563eb",
+        pointBackgroundColor: points.map((_, index) => (selectedPointIndex === index ? selectedPointColor : surfaceLowest)),
+        pointBorderColor: lineColor,
         pointBorderWidth: points.map((_, index) => (selectedPointIndex === index ? 3 : 2)),
         fill: true,
       },
@@ -154,10 +184,10 @@ export function PriceTrendPanel({
         display: false,
       },
       tooltip: {
-        backgroundColor: "#ffffff",
-        titleColor: "#111827",
-        bodyColor: "#374151",
-        borderColor: "#dbeafe",
+        backgroundColor: surfaceLowest,
+        titleColor: onSurface,
+        bodyColor: onSurfaceVariant,
+        borderColor: primaryFixed,
         borderWidth: 1,
         padding: 10,
         callbacks: {
@@ -170,7 +200,7 @@ export function PriceTrendPanel({
       x: {
         display: true,
         ticks: {
-          color: "#6b7280",
+          color: outline,
           maxTicksLimit: isCompactScreen ? 4 : 6,
           autoSkip: true,
           autoSkipPadding: 10,
@@ -200,7 +230,7 @@ export function PriceTrendPanel({
   };
 
   return (
-    <section className="rounded-3xl border border-outline-variant/80 bg-linear-to-br from-surface-container-lowest to-surface-container p-4 shadow-[0_14px_40px_rgba(0,0,0,0.08)] sm:p-6">
+    <section className="rounded-xl border border-outline-variant/80 bg-linear-to-br from-surface-container-lowest to-surface-container p-4 data-card-shadow sm:p-6">
       <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">Price trend</p>
@@ -227,7 +257,7 @@ export function PriceTrendPanel({
         </div>
       </div>
 
-      <div className="overflow-hidden rounded-[1.35rem] border border-outline-variant/70 bg-surface-container p-3 shadow-inner sm:p-4">
+      <div className="overflow-hidden rounded-xl border border-outline-variant/70 bg-surface-container p-3 shadow-inner sm:p-4">
         <div className="relative h-60 sm:h-70 md:h-80 lg:h-90">
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
             {[0, 1, 2, 3, 4].map((line) => (
@@ -239,7 +269,7 @@ export function PriceTrendPanel({
             <Line data={chartData} options={chartOptions} />
           </div>
 
-          <div className="mt-3 w-full rounded-2xl border border-outline-variant/70 bg-surface-container-lowest p-3 shadow-sm sm:absolute sm:inset-x-3 sm:bottom-3 sm:mt-0 sm:w-auto sm:max-w-56 sm:shadow-md md:left-[60%] md:right-auto md:top-4 md:bottom-auto md:max-w-60">
+          <div className="mt-3 w-full rounded-xl border border-outline-variant/70 bg-surface-container-lowest p-3 data-card-shadow sm:absolute sm:inset-x-3 sm:bottom-3 sm:mt-0 sm:w-auto sm:max-w-56 md:left-[60%] md:right-auto md:top-4 md:bottom-auto md:max-w-60">
             <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline">Selected point</p>
             <p className="text-lg font-semibold text-on-surface sm:text-xl">{selectedPoint ? formatCurrency(selectedPoint.price) : activeInsight.price}</p>
             <p className="text-sm text-success">{selectedDateLabel}</p>

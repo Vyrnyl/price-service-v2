@@ -25,7 +25,7 @@ export default function CommoditySummaryCards({ cards }: CommoditySummaryCardsPr
         return (
           <div
             key={stat.label}
-            className="flex min-w-52.5 flex-1 flex-col rounded-2xl border border-outline-variant bg-white p-6 data-card-shadow"
+            className="flex min-w-52.5 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow"
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <div className={`rounded-xl p-2 ${stat.iconBg}`}>
@@ -41,7 +41,7 @@ export default function CommoditySummaryCards({ cards }: CommoditySummaryCardsPr
                 </span>
               ) : null}
             </div>
-            <p className="mb-1 font-label-caps text-label-caps text-on-surface-variant">
+            <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
               {stat.label}
             </p>
             <h3 className={`text-[32px] font-bold leading-none ${stat.valueColor ?? "text-on-surface"}`}>

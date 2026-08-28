@@ -23,7 +23,7 @@ export default function UsersStatsSection({ stats }: UsersStatsSectionProps) {
         return (
           <div
             key={stat.label}
-            className="flex min-w-0 flex-col rounded-2xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm sm:p-6"
+            className="flex min-w-0 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow sm:p-6"
           >
             <div className="mb-4 flex items-start justify-between gap-3">
               <span className={`rounded-xl p-2 ${stat.accent}`}>

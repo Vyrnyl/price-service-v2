@@ -1,6 +1,10 @@
 import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import Modal from "@/shared/components/Modal";
+import FormGroup from "@/shared/components/FormGroup";
+import Input from "@/shared/components/Input";
+import Button from "@/shared/components/Button";
 
 type UpdateSrpDialogProps = {
   open: boolean;
@@ -64,89 +68,53 @@ export default function UpdateSrpDialog({
     await onSubmit(parsed.data);
   });
 
-  if (!open) return null;
-
-  const inputBase = "w-full rounded-xl border border-outline bg-surface px-4 py-3 text-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20";
-  const inputError = "border-error focus:border-error focus:ring-error/20";
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-      <div className="w-full max-w-xl rounded-3xl border border-outline-variant bg-surface-container-lowest p-6 shadow-[0_24px_80px_rgba(15,23,42,0.12)]">
-        <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Update Commodity SRP"
+      description={`Provide the latest suggested retail price for ${commodityName ?? "this commodity"}.`}
+    >
+      <form className="grid gap-4" onSubmit={handleFormSubmit}>
+        <FormGroup label="SRP Price (PHP)" htmlFor="price" error={errors.price?.message}>
+          <Input
+            id="price"
+            type="number"
+            step="0.01"
+            {...register("price")}
+            hasError={Boolean(errors.price)}
+            placeholder="e.g. 55.00"
+          />
+        </FormGroup>
+
+        <FormGroup label="Effective Date" htmlFor="effectiveDate" error={errors.effectiveDate?.message}>
+          <Input
+            id="effectiveDate"
+            type="date"
+            {...register("effectiveDate")}
+            hasError={Boolean(errors.effectiveDate)}
+          />
+        </FormGroup>
+
+        {(formError || formSuccess) && (
           <div>
-            <h2 className="text-h3-desktop font-semibold text-on-surface">Update Commodity SRP</h2>
-            <p className="mt-2 text-body-sm text-on-surface-variant">
-              Provide the latest suggested retail price for {commodityName ?? "this commodity"}.
-            </p>
+            {formError ? (
+              <p className="text-xs font-medium text-error">{formError}</p>
+            ) : (
+              <p className="text-xs font-medium text-secondary">{formSuccess}</p>
+            )}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="inline-flex rounded-full bg-surface px-3 py-2 text-on-surface transition hover:bg-surface-container-high"
-          >
-            Close
-          </button>
+        )}
+
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
+          <Button type="submit" disabled={submitLoading || isSubmitting}>
+            {submitLoading || isSubmitting ? "Saving..." : "Update SRP"}
+          </Button>
+          <Button type="button" variant="secondary" onClick={onClose}>
+            Cancel
+          </Button>
         </div>
-
-        <form className="grid gap-4" onSubmit={handleFormSubmit}>
-          <div>
-            <label htmlFor="price" className="block text-body-sm font-medium text-on-surface">
-              SRP Price (PHP)
-            </label>
-            <input
-              id="price"
-              type="number"
-              step="0.01"
-              {...register("price")}
-              className={`${inputBase} ${errors.price ? inputError : ""}`}
-              placeholder="e.g. 55.00"
-            />
-            {errors.price?.message ? <p className="mt-1 text-xs text-error">{errors.price.message}</p> : null}
-          </div>
-
-          <div>
-            <label htmlFor="effectiveDate" className="block text-body-sm font-medium text-on-surface">
-              Effective Date
-            </label>
-            <input
-              id="effectiveDate"
-              type="date"
-              {...register("effectiveDate")}
-              className={`${inputBase} ${errors.effectiveDate ? inputError : ""}`}
-            />
-            {errors.effectiveDate?.message ? (
-              <p className="mt-1 text-xs text-error">{errors.effectiveDate.message}</p>
-            ) : null}
-          </div>
-
-          {(formError || formSuccess) && (
-            <div>
-              {formError ? (
-                <p className="text-xs font-medium text-error">{formError}</p>
-              ) : (
-                <p className="text-xs font-medium text-secondary">{formSuccess}</p>
-              )}
-            </div>
-          )}
-
-          <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:justify-end">
-            <button
-              type="submit"
-              disabled={submitLoading || isSubmitting}
-              className="rounded-xl bg-primary px-6 py-3 text-sm font-semibold text-on-primary transition hover:bg-primary-container disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {submitLoading || isSubmitting ? "Saving..." : "Update SRP"}
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-xl border border-outline px-6 py-3 text-sm font-semibold text-on-surface transition hover:bg-surface-container-high"
-            >
-              Cancel
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+      </form>
+    </Modal>
   );
 }

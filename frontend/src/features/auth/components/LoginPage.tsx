@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { MdLockOutline, MdOutlineMailOutline } from "react-icons/md";
-import { normalizeUserRole } from "@/lib/auth";
-import { useLogin } from "../hooks/useLogin";
+import { MdLockOutline, MdOutlineMailOutline, MdVisibility, MdVisibilityOff } from "react-icons/md";
+import { normalizeUserRole } from "@/shared/services/auth";
+import { useLogin } from "../hooks/use-login";
 import { type LoginInput } from "../auth.schema";
 
 const getRedirectPath = (role: string | undefined) => {
@@ -14,6 +14,14 @@ const getRedirectPath = (role: string | undefined) => {
   if (normalizedRole === "officer") return "/officer";
   return "/";
 };
+
+// Seeded accounts from backend/prisma/seed.ts — dev/testing convenience only.
+const DEMO_ACCOUNTS: Array<{ label: string; email: string; password: string }> = [
+  { label: "Fill Admin", email: "admin@presyoserbisyo.gov.ph", password: "Password123!" },
+  { label: "Fill Officer", email: "officer@presyoserbisyo.gov.ph", password: "Password123!" },
+];
+
+const isDemoFillEnabled = process.env.NODE_ENV !== "production";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,9 +43,9 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center bg-background px-container-margin-mobile py-12 md:px-container-margin-desktop">
-      <div className="w-full max-w-120 rounded-3xl border border-outline-variant bg-surface-container-lowest p-8 shadow-sm">
+      <div className="w-full max-w-120 rounded-xl border border-outline-variant bg-surface-container-lowest p-8 data-card-shadow">
         <div className="text-center mb-8">
-          <h1 className="font-h1-desktop text-h1-mobile font-bold text-on-surface md:text-h1-desktop">
+          <h1 className="font-sans text-h1-mobile font-bold text-on-surface md:text-h1-desktop">
             Welcome Back
           </h1>
           <p className="mt-2 text-body-lg text-on-surface-variant">
@@ -45,13 +53,33 @@ export default function LoginPage() {
           </p>
         </div>
 
+        {isDemoFillEnabled ? (
+          <div className="mb-6 rounded-xl border border-dashed border-outline-variant bg-surface p-4">
+            <p className="text-body-xs font-medium uppercase tracking-wide text-on-surface-variant">
+              Testing only — demo accounts
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  onClick={() => setFormData({ email: account.email, password: account.password })}
+                  className="rounded-full border border-outline-variant px-4 py-1.5 text-label-caps font-medium text-on-surface-variant transition hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  {account.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
+
         <form className="space-y-6" onSubmit={handleSubmit} noValidate>
           <div className="space-y-1.5">
             <label className="block text-body-sm font-medium text-on-surface" htmlFor="email">
               Email Address
             </label>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-outline">
                 <MdOutlineMailOutline />
               </span>
               <input
@@ -73,7 +101,7 @@ export default function LoginPage() {
               </label>
             </div>
             <div className="relative">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+              <span className="absolute left-4 top-1/2 -translate-y-1/2 text-outline">
                 <MdLockOutline />
               </span>
               <input
@@ -90,8 +118,8 @@ export default function LoginPage() {
                 onClick={() => setShowPassword((current) => !current)}
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
-                <span className="material-symbols-outlined">
-                  {showPassword ? "visibility_off" : "visibility"}
+                <span>
+                  {showPassword ? <MdVisibilityOff /> : <MdVisibility />}
                 </span>
               </button>
             </div>
@@ -104,7 +132,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="rounded-2xl bg-primary px-6 py-3 text-body-sm font-semibold text-on-primary transition hover:bg-primary-focus disabled:cursor-not-allowed disabled:opacity-60"
+              className="rounded-full bg-primary px-6 py-3 text-body-sm font-semibold text-on-primary transition hover:bg-primary-focus disabled:cursor-not-allowed disabled:opacity-60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
             >
               {isLoading ? "Signing In..." : "Sign In"}
             </button>

@@ -1,4 +1,5 @@
 import { MdClose } from "react-icons/md";
+import Modal from "@/shared/components/Modal";
 
 type ForecastDetailModalProps = {
   selectedCommodity: string;
@@ -38,8 +39,7 @@ export function ForecastDetailModal({
   onClose,
 }: ForecastDetailModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
-      <div className="w-full max-w-3xl rounded-3xl border border-outline-variant bg-surface-container-lowest p-6 shadow-2xl">
+    <Modal open onClose={onClose} maxWidth="max-w-3xl">
         <div className="flex items-start justify-between gap-4">
           <div>
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">Detailed forecast report</p>
@@ -58,19 +58,19 @@ export function ForecastDetailModal({
         </div>
 
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-outline-variant bg-surface-container-high p-4">
+          <div className="rounded-xl border border-outline-variant bg-surface-container-high p-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">Current price</p>
             <p className="mt-2 text-3xl font-semibold text-on-surface">{formatCurrency(currentPrice)}</p>
             <p className="mt-1 text-sm text-on-surface-variant">Compared with the SRP benchmark of {formatCurrency(srpPrice)}</p>
           </div>
-          <div className="rounded-2xl border border-outline-variant bg-surface-container-high p-4">
+          <div className="rounded-xl border border-outline-variant bg-surface-container-high p-4">
             <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">Forecast window</p>
             <p className="mt-2 text-3xl font-semibold text-on-surface">{formatCurrency(projectedPrice)}</p>
             <p className="mt-1 text-sm text-on-surface-variant">Projected for the next week</p>
           </div>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-outline-variant bg-surface-container p-4">
+        <div className="mt-6 rounded-xl border border-outline-variant bg-surface-container p-4">
           <p className="text-sm font-semibold text-on-surface">Why this forecast matters</p>
           <p className="mt-2 text-sm leading-7 text-on-surface-variant">
             The outlook is based on the latest price pattern, seasonality, and recent market volatility. The ARIMA model continues to update as new price points arrive, making this view useful for short-term monitoring and planning.
@@ -89,7 +89,6 @@ export function ForecastDetailModal({
             </div>
           ))}
         </div>
-      </div>
-    </div>
+    </Modal>
   );
 }

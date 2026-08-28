@@ -1,0 +1,239 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { MdInventory2, MdNotificationsActive, MdSearch, MdStore, MdTrendingUp } from "react-icons/md";
+import { apiFetch } from "@/shared/services/api";
+import { PriceTrendLineChart } from "@/shared/components/charts/PriceTrendLineChart";
+import { CommodityComparisonChart } from "@/shared/components/charts/CommodityComparisonChart";
+import { SrpVsActualChart } from "@/shared/components/charts/SrpVsActualChart";
+import { fetchDashboardAnalytics } from "@/shared/services/dashboard.service";
+import type { DashboardAnalytics } from "@/shared/types/dashboard.types";
+import PageShell from "@/shared/components/PageShell";
+
+const stats = [
+  {
+    label: "Total Commodities",
+    valueKey: "commodities",
+    icon: MdInventory2,
+    tone: "text-primary",
+    bg: "bg-primary/10",
+  },
+  {
+    label: "Added Stores",
+    valueKey: "stores",
+    icon: MdStore,
+    tone: "text-secondary",
+    bg: "bg-secondary/10",
+  },
+  {
+    label: "Added Price Records",
+    valueKey: "priceRecords",
+    icon: MdTrendingUp,
+    tone: "text-success",
+    bg: "bg-success-container",
+  },
+];
+
+export default function MonitoringOfficerDashboardPage() {
+  const [totalCommodities, setTotalCommodities] = useState(0);
+  const [totalStores, setTotalStores] = useState(0);
+  const [totalPriceRecords, setTotalPriceRecords] = useState(0);
+  const [latestStores, setLatestStores] = useState<Array<{ id: string; name: string; location: string; createdAt: string }>>([]);
+  const [latestPriceRecords, setLatestPriceRecords] = useState<Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>>([]);
+  const [latestReports, setLatestReports] = useState<Array<{ id: string; type: string; period: string; createdAt: string }>>([]);
+  const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
+  const [analyticsLoading, setAnalyticsLoading] = useState(true);
+  const [analyticsError, setAnalyticsError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadAnalytics() {
+      try {
+        setAnalyticsLoading(true);
+        setAnalyticsError(null);
+        const data = await fetchDashboardAnalytics();
+        setAnalytics(data);
+      } catch (error) {
+        console.error("Failed to load dashboard analytics", error);
+        setAnalyticsError("Unable to load market insights right now.");
+      } finally {
+        setAnalyticsLoading(false);
+      }
+    }
+
+    void loadAnalytics();
+  }, []);
+
+  useEffect(() => {
+    async function loadDashboardCounts() {
+      try {
+        const [commoditiesResponse, storesResponse, priceRecordsResponse, reportsResponse] = await Promise.all([
+          apiFetch<{ status: string; data: unknown[]; total: number }>("/api/commodities?pageSize=1"),
+          apiFetch<{ status: string; data: Array<{ id: string; name: string; location: string; createdAt: string }>; total: number }>("/api/stores?pageSize=100"),
+          apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>; total: number }>("/api/price-records"),
+          apiFetch<{ status: string; data: Array<{ id: string; type: string; period: string; createdAt: string }> }>("/api/reports"),
+        ]);
+
+        setTotalCommodities(commoditiesResponse.total);
+        setTotalStores(storesResponse.total);
+        setTotalPriceRecords(priceRecordsResponse.total);
+
+        const sortedStores = [...storesResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        setLatestStores(sortedStores.slice(0, 3));
+
+        const sortedPriceRecords = [...priceRecordsResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        setLatestPriceRecords(sortedPriceRecords.slice(0, 3));
+
+        const sortedReports = [...reportsResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        setLatestReports(sortedReports.slice(0, 3));
+      } catch (error) {
+        console.error("Failed to load dashboard counts", error);
+      }
+    }
+
+    void loadDashboardCounts();
+  }, []);
+
+  return (
+    <PageShell>
+      <section className="px-container-margin-mobile py-12 md:px-container-margin-desktop">
+        <div className="mx-auto max-w-6xl space-y-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <h2 className="font-sans text-h1-desktop text-on-surface">
+                Monitoring Officer Overview
+              </h2>
+              <p className="mt-1 font-sans text-on-surface-variant">
+                Track the latest operational activity in your monitoring area.
+              </p>
+            </div>
+          </div>
+
+          <section className="flex flex-wrap gap-6">
+            {stats.map((stat) => {
+              const Icon = stat.icon;
+              const value =
+                stat.valueKey === "commodities"
+                  ? totalCommodities
+                  : stat.valueKey === "stores"
+                  ? totalStores
+                  : totalPriceRecords;
+
+              return (
+                <div
+                  key={stat.label}
+                  className="flex min-w-48 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow"
+                >
+                  <div className="mb-3 flex items-start justify-between gap-3">
+                    <span className={`rounded-xl p-2 ${stat.bg}`}>
+                      <Icon className={stat.tone} size={20} />
+                    </span>
+                    <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline">
+                      Total
+                    </span>
+                  </div>
+                  <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
+                    {stat.label}
+                  </p>
+                  <h3 className="text-[28px] font-bold leading-none text-on-surface">
+                    {value}
+                  </h3>
+                </div>
+              );
+            })}
+          </section>
+
+          <section className="space-y-6">
+            <h3 className="font-sans text-h2-desktop text-on-surface">Market Insights</h3>
+            <PriceTrendLineChart
+              points={analytics?.priceTrend ?? []}
+              isLoading={analyticsLoading}
+              error={analyticsError}
+            />
+            <div className="grid gap-6 xl:grid-cols-2">
+              <CommodityComparisonChart
+                points={analytics?.commodityComparison ?? []}
+                isLoading={analyticsLoading}
+                error={analyticsError}
+              />
+              <SrpVsActualChart
+                points={analytics?.srpVsActual ?? []}
+                isLoading={analyticsLoading}
+                error={analyticsError}
+              />
+            </div>
+          </section>
+
+          <section className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
+            <div className="mb-6 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+              <div>
+                <h3 className="font-sans text-h3-desktop text-on-surface">
+                  Recent Activity
+                </h3>
+                <p className="text-body-sm text-on-surface-variant">Latest stores, price records, and reports added to the system.</p>
+              </div>
+            </div>
+
+            <div className="grid gap-4 lg:grid-cols-3">
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
+                <p className="mb-3 font-sans text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
+                  Added Stores
+                </p>
+                <div className="space-y-3">
+                  {latestStores.length > 0 ? (
+                    latestStores.map((store) => (
+                      <div key={store.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
+                        <p className="font-semibold text-on-surface">{store.name}</p>
+                        <p className="text-body-sm text-on-surface-variant">{store.location}</p>
+                        <p className="mt-2 text-[11px] text-on-surface-variant">{new Date(store.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-body-sm text-on-surface-variant">No recently added stores.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
+                <p className="mb-3 font-sans text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
+                  Added Price Records
+                </p>
+                <div className="space-y-3">
+                  {latestPriceRecords.length > 0 ? (
+                    latestPriceRecords.map((record) => (
+                      <div key={record.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
+                        <p className="font-semibold text-on-surface">{record.commodity.name}</p>
+                        <p className="text-body-sm text-on-surface-variant">{record.store?.name ?? "Unknown store"}</p>
+                        <p className="mt-2 text-[11px] text-on-surface-variant">{new Date(record.createdAt).toLocaleDateString()} • {record.price}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-body-sm text-on-surface-variant">No recent price records.</p>
+                  )}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
+                <p className="mb-3 font-sans text-label-caps text-on-surface-variant uppercase tracking-[0.24em]">
+                  Reports Activity
+                </p>
+                <div className="space-y-3">
+                  {latestReports.length > 0 ? (
+                    latestReports.map((report) => (
+                      <div key={report.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
+                        <p className="font-semibold text-on-surface">{report.type.replace(/_/g, " ")}</p>
+                        <p className="text-body-sm text-on-surface-variant">{report.period}</p>
+                        <p className="mt-2 text-[11px] text-on-surface-variant">{new Date(report.createdAt).toLocaleDateString()}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-body-sm text-on-surface-variant">No recent report activity.</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+        </div>
+      </section>
+    </PageShell>
+  );
+}

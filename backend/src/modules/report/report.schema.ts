@@ -15,7 +15,6 @@ export const createReportSchema = z.object({
 export const updateReportSchema = z.object({
   type: reportTypeEnum.optional(),
   period: z.string().min(1, 'Period is required').optional(),
-  fileUrl: z.string().min(1, 'URL is required').optional(),
   format: reportFormatEnum.optional(),
   commodityGroup: z.string().optional(),
   storeId: z.string().uuid('Invalid store ID').optional(),

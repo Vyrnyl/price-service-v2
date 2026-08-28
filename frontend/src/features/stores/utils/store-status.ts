@@ -1,0 +1,28 @@
+import type { IconType } from "react-icons";
+import { MdCheckCircle, MdHourglassEmpty } from "react-icons/md";
+import type { Store } from "../types/stores.types";
+
+export function getStoreStatus(store: Store): { label: "Monitored" | "Pending"; tone: string; icon: IconType } {
+  if (!store.lastVisited) {
+    return {
+      label: "Pending",
+      tone: "border border-secondary-fixed bg-secondary-fixed/20 text-on-secondary-container",
+      icon: MdHourglassEmpty,
+    };
+  }
+
+  const lastVisitedDate = new Date(store.lastVisited);
+  const ageInDays = Math.floor((Date.now() - lastVisitedDate.getTime()) / 86400000);
+
+  return ageInDays > 30
+    ? {
+        label: "Pending",
+        tone: "border border-secondary-fixed bg-secondary-fixed/20 text-on-secondary-container",
+        icon: MdHourglassEmpty,
+      }
+    : {
+        label: "Monitored",
+        tone: "border border-success-container bg-success-container/40 text-on-success-container",
+        icon: MdCheckCircle,
+      };
+}

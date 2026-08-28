@@ -1,8 +1,8 @@
 import 'dotenv/config';
 import { prisma } from '../src/prisma';
-import { passwordUtils } from '../src/utils/passwordUtils';
+import { passwordUtils } from '../src/shared/utils/password.utils';
 
-type UserRoleInput = 'ADMIN' | 'OFFICER' | 'PUBLIC';
+type UserRoleInput = 'ADMIN' | 'OFFICER';
 
 interface CliOptions {
   email: string;
@@ -12,7 +12,7 @@ interface CliOptions {
 }
 
 function printHelp(): void {
-  console.log(`Usage: npm run create:admin -- [options]\n\nOptions:\n  --email, -e    Email address for the admin user\n  --password, -p Password for the admin user\n  --name, -n     Display name for the admin user\n  --role         Role to assign (ADMIN, OFFICER, PUBLIC)\n  --help, -h     Show this help message`);
+  console.log(`Usage: npm run create:admin -- [options]\n\nOptions:\n  --email, -e    Email address for the admin user\n  --password, -p Password for the admin user\n  --name, -n     Display name for the admin user\n  --role         Role to assign (ADMIN, OFFICER)\n  --help, -h     Show this help message`);
 }
 
 function parseArgs(): CliOptions {
@@ -90,7 +90,7 @@ function parseArgs(): CliOptions {
   }
 
   const role = (options.role ?? process.env.ADMIN_ROLE ?? 'ADMIN').toUpperCase();
-  if (!['ADMIN', 'OFFICER', 'PUBLIC'].includes(role)) {
+  if (!['ADMIN', 'OFFICER'].includes(role)) {
     throw new Error(`Invalid role: ${role}`);
   }
 

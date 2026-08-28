@@ -20,7 +20,7 @@ export function PriceAnalysisHeader({
   onSelectCommodity,
 }: PriceAnalysisHeaderProps) {
   return (
-    <div className="flex flex-col gap-4 rounded-3xl border border-outline-variant bg-surface-container-lowest p-4 shadow-sm sm:p-6 md:flex-row md:items-end md:justify-between">
+    <div className="flex flex-col gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow sm:p-6 md:flex-row md:items-end md:justify-between">
       <div className="max-w-2xl">
         <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-primary sm:text-[11px]">
           <MdBarChart size={14} />
@@ -37,7 +37,7 @@ export function PriceAnalysisHeader({
       <div className="relative w-full md:w-[20rem] lg:w-[24rem]">
         <button
           type="button"
-          className="flex w-full items-center justify-between rounded-2xl border border-outline-variant bg-surface-container-high px-3 py-2.5 text-left"
+          className="flex w-full items-center justify-between rounded-xl border border-outline-variant bg-surface-container-high px-3 py-2.5 text-left"
           onClick={onToggleCommodity}
         >
           <span className="flex flex-col">
@@ -50,7 +50,7 @@ export function PriceAnalysisHeader({
         </button>
 
         {isCommodityOpen ? (
-          <div className="absolute left-0 top-full z-20 mt-2 w-full rounded-2xl border border-outline-variant bg-surface-container-lowest p-2 shadow-lg">
+          <div className="absolute left-0 top-full z-20 mt-2 w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-2 data-card-shadow">
             <div className="relative mb-2">
               <MdSearch className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-outline" />
               <input
@@ -58,6 +58,7 @@ export function PriceAnalysisHeader({
                 value={commoditySearch}
                 onChange={(event) => onCommoditySearchChange(event.target.value)}
                 placeholder="Search commodity"
+                aria-label="Search commodity"
                 className="w-full rounded-xl border border-outline-variant bg-surface-container-high py-2 pl-9 pr-3 text-sm outline-none focus:border-primary"
               />
             </div>

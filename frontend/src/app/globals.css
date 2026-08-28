@@ -1,5 +1,4 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 @import "tailwindcss";
 
 :root {
@@ -46,6 +45,18 @@
   --color-error-container: #ffdad6;
   --color-on-error: #ffffff;
   --color-on-error-container: #93000a;
+  --color-success: #146c2e;
+  --color-success-container: #b6f2c4;
+  --color-on-success: #ffffff;
+  --color-on-success-container: #072111;
+  --color-warning: #7a5900;
+  --color-warning-container: #ffe083;
+  --color-on-warning: #ffffff;
+  --color-on-warning-container: #271a00;
+  --color-info: #00639b;
+  --color-info-container: #cde5ff;
+  --color-on-info: #ffffff;
+  --color-on-info-container: #001d33;
   --color-outline: #737686;
   --color-outline-variant: #c3c6d7;
   --color-inverse-surface: #2e3039;
@@ -58,14 +69,6 @@
   --color-surface-container-high: #e7e7f3;
   --color-surface-container-highest: #e1e2ed;
   --font-sans: "Inter", "Segoe UI", sans-serif;
-  --font-body-lg: "Inter", "Segoe UI", sans-serif;
-  --font-body-sm: "Inter", "Segoe UI", sans-serif;
-  --font-price-display: "Inter", "Segoe UI", sans-serif;
-  --font-label-caps: "Inter", "Segoe UI", sans-serif;
-  --font-h1-desktop: "Inter", "Segoe UI", sans-serif;
-  --font-h1-mobile: "Inter", "Segoe UI", sans-serif;
-  --font-h2-desktop: "Inter", "Segoe UI", sans-serif;
-  --font-h3-desktop: "Inter", "Segoe UI", sans-serif;
   --text-body-lg: 16px;
   --text-body-sm: 14px;
   --text-price-display: 20px;
@@ -96,10 +99,9 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: "Inter", "Segoe UI", sans-serif;
-  min-height: max(884px, 100dvh);
+  min-height: 100dvh;
 }
 
-.font-body-lg,
 .text-body-lg {
   font-family: "Inter", "Segoe UI", sans-serif;
 }
@@ -113,28 +115,21 @@ body {
   display: none;
 }
 
-.font-body-sm,
 .text-body-sm {
   font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-.font-price-display,
 .text-price-display {
   font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-.font-label-caps,
 .text-label-caps {
   font-family: "Inter", "Segoe UI", sans-serif;
 }
 
-.font-h1-desktop,
 .text-h1-desktop,
-.font-h1-mobile,
 .text-h1-mobile,
-.font-h2-desktop,
 .text-h2-desktop,
-.font-h3-desktop,
 .text-h3-desktop {
   font-family: "Inter", "Segoe UI", sans-serif;
 }
@@ -196,39 +191,10 @@ body {
   font-weight: 600;
 }
 
-.material-symbols-outlined {
-  font-family: "Material Symbols Outlined";
-  font-variation-settings:
-    "FILL" 0,
-    "wght" 400,
-    "GRAD" 0,
-    "opsz" 24;
-}
-
 .data-card-shadow {
   box-shadow:
     0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -2px rgba(0, 0, 0, 0.05);
-}
-
-.text-primary {
-  color: #004ac6 !important;
-}
-
-.text-on-surface {
-  color: #191b23 !important;
-}
-
-.text-on-surface-variant {
-  color: #434655 !important;
-}
-
-.text-on-primary {
-  color: #ffffff !important;
-}
-
-.text-outline {
-  color: #737686 !important;
 }
 
 svg {

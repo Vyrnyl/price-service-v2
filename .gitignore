@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.next/
+*.tsbuildinfo
+*.log
+backend/reports/*
+!backend/reports/.gitkeep
+!backend/reports/*.md

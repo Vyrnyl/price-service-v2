@@ -1,30 +1,26 @@
 import { Request, Response } from 'express';
-import AppError from '../../utils/AppError';
+import AppError from '../../shared/utils/AppError';
 import { commodityService } from './commodity.service';
-import { createCommoditySchema, updateCommoditySchema, commodityIdParamSchema } from './commodity.schema';
-import type { AuthUser } from '../../../types/express';
-
-function requireAdmin(user?: AuthUser) {
-  if (!user || user.role !== 'ADMIN') {
-    throw new AppError('Forbidden', 403);
-  }
-}
+import {
+  createCommoditySchema,
+  updateCommoditySchema,
+  commodityIdParamSchema,
+  listCommoditiesQuerySchema,
+} from './commodity.schema';
 
 export const commodityController = {
   createCommodity: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const validated = createCommoditySchema.parse(req.body);
     const commodity = await commodityService.createCommodity(validated);
 
     res.status(201).json({ status: 'success', data: commodity });
   },
 
-  getCommodities: async (_req: Request, res: Response) => {
-    const commodities = await commodityService.getCommodities();
+  getCommodities: async (req: Request, res: Response) => {
+    const query = listCommoditiesQuerySchema.parse(req.query);
+    const { data, total, page, pageSize } = await commodityService.getCommodities(query);
 
-    res.json({ status: 'success', data: commodities });
+    res.json({ status: 'success', data, total, page, pageSize });
   },
 
   getCommodityById: async (req: Request, res: Response) => {
@@ -39,9 +35,6 @@ export const commodityController = {
   },
 
   updateCommodity: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const { id } = commodityIdParamSchema.parse(req.params);
     const data = updateCommoditySchema.parse(req.body);
 
@@ -51,9 +44,6 @@ export const commodityController = {
   },
 
   deleteCommodity: async (req: Request, res: Response) => {
-    const authUser = req.user as AuthUser | undefined;
-    requireAdmin(authUser);
-
     const { id } = commodityIdParamSchema.parse(req.params);
 
     await commodityService.deleteCommodity(id);

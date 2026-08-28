@@ -1,7 +1,8 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { MdOutlineEdit, MdOutlinePersonOff, MdOutlinePerson2, MdOutlineChevronLeft, MdOutlineChevronRight } from "react-icons/md";
+import { MdOutlineEdit, MdOutlinePersonOff, MdOutlinePerson2 } from "react-icons/md";
+import Pagination from "@/shared/components/Pagination";
 import type { User, UserRole } from "../types/users.types";
 
 type UsersTableProps = {
@@ -29,7 +30,7 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
   const endIndex = Math.min(startIndex + paginatedUsers.length - 1, users.length);
 
   return (
-    <div className="overflow-hidden rounded-2xl border border-outline-variant bg-surface-container-lowest shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-outline-variant bg-surface-container-lowest data-card-shadow">
       <div className="hidden md:block">
         <div className="overflow-x-auto">
           <table className="w-full border-collapse text-left">
@@ -73,17 +74,21 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
                   <td className="px-6 py-4 text-right">
                     <div className="flex items-center justify-end gap-2 opacity-60 transition-opacity group-hover:opacity-100">
                       <button
-                        className="rounded-lg p-2 transition-colors hover:bg-surface-container-high hover:text-on-surface"
+                        type="button"
+                        className="rounded-lg p-2 transition-colors hover:bg-surface-container-high hover:text-on-surface focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                         title="Edit user"
                         onClick={() => onEdit(user)}
                       >
+                        <span className="sr-only">Edit user</span>
                         <MdOutlineEdit size={18} />
                       </button>
                       <button
-                        className="rounded-lg p-2 transition-colors hover:bg-error-container hover:text-error"
+                        type="button"
+                        className="rounded-lg p-2 transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                         title={user.isActive ? "Deactivate user" : "Activate user"}
                         onClick={() => onToggleActive(user)}
                       >
+                        <span className="sr-only">{user.isActive ? "Deactivate user" : "Activate user"}</span>
                         {user.isActive ? <MdOutlinePersonOff size={18} /> : <MdOutlinePerson2 size={18} />}
                       </button>
                     </div>
@@ -97,7 +102,7 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
 
       <div className="space-y-3 p-3 md:hidden">
         {paginatedUsers.map((user) => (
-          <div key={user.id} className="rounded-2xl border border-outline-variant bg-surface-container-low p-4">
+          <div key={user.id} className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-high font-bold text-primary">
@@ -122,17 +127,21 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
 
             <div className="mt-4 flex items-center justify-end gap-2">
               <button
-                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-surface-container-high"
+                type="button"
+                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 title="Edit user"
                 onClick={() => onEdit(user)}
               >
+                <span className="sr-only">Edit user</span>
                 <MdOutlineEdit size={18} />
               </button>
               <button
-                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-error-container hover:text-error"
+                type="button"
+                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                 title={user.isActive ? "Deactivate user" : "Activate user"}
                 onClick={() => onToggleActive(user)}
               >
+                <span className="sr-only">{user.isActive ? "Deactivate user" : "Activate user"}</span>
                 {user.isActive ? <MdOutlinePersonOff size={18} /> : <MdOutlinePerson2 size={18} />}
               </button>
             </div>
@@ -144,37 +153,7 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
         <p className="text-body-sm text-on-surface-variant">
           Showing {users.length === 0 ? 0 : `${startIndex}-${endIndex}`} of {users.length} users
         </p>
-        <div className="flex items-center gap-1">
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={safeCurrentPage === 1}
-            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-          >
-            <MdOutlineChevronLeft size={20} />
-          </button>
-
-          {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
-            <button
-              key={page}
-              className={`flex h-10 w-10 items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${
-                safeCurrentPage === page
-                  ? "border-primary bg-primary text-on-primary"
-                  : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"
-              }`}
-              onClick={() => setCurrentPage(page)}
-            >
-              {page}
-            </button>
-          ))}
-
-          <button
-            className="flex h-10 w-10 items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50"
-            disabled={safeCurrentPage === totalPages}
-            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-          >
-            <MdOutlineChevronRight size={20} />
-          </button>
-        </div>
+        <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
       </div>
     </div>
   );

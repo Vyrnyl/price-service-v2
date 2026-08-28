@@ -11,12 +11,30 @@ model User {
   name      String
   email     String       @unique
   password  String
-  role      UserRole     @default(PUBLIC)
+  role      UserRole
   isActive  Boolean      @default(true)
+  lastLoginAt DateTime?
   createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   prices    PriceRecord[]
   reports   Report[]
   stores    Store[]
+  auditLogs AuditLog[]
+  refreshTokens RefreshToken[]
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  familyId  String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([familyId])
 }
 
 model Commodity {
@@ -25,6 +43,7 @@ model Commodity {
   status    String
   category  String
   createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
   srps      SRP[]
   prices    PriceRecord[]
   forecasts Forecast[]
@@ -36,7 +55,10 @@ model SRP {
   price        Decimal   @db.Decimal(20, 4)
   effectiveDate DateTime
   createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
   commodity    Commodity @relation(fields: [commodityId], references: [id])
+
+  @@index([commodityId, effectiveDate])
 }
 
 model Store {
@@ -46,22 +68,32 @@ model Store {
   userId      String       @db.Uuid
   lastVisited DateTime?
   createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   prices      PriceRecord[]
   user        User         @relation(fields: [userId], references: [id])
+
+  @@index([userId])
 }
 
 model PriceRecord {
   id          String    @id @default(uuid()) @db.Uuid
   commodityId String    @db.Uuid
-  storeId     String    @db.Uuid
+  storeId     String?   @db.Uuid
   userId      String    @db.Uuid
   price       Decimal   @db.Decimal(20, 4)
   dateAndTime DateTime
   status      PriceStatus
   createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   commodity   Commodity @relation(fields: [commodityId], references: [id])
-  store       Store     @relation(fields: [storeId], references: [id])
+  store       Store?    @relation(fields: [storeId], references: [id], onDelete: SetNull)
   user        User      @relation(fields: [userId], references: [id])
+
+  @@index([commodityId])
+  @@index([storeId])
+  @@index([userId])
+  @@index([dateAndTime])
+  @@index([commodityId, dateAndTime])
 }
 
 model Report {
@@ -69,9 +101,14 @@ model Report {
   type        ReportType
   generatedBy String     @db.Uuid
   period      String
-  fileUrl     String
+  filename    String
+  contentType String
+  fileContent Bytes
   createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
   user        User       @relation(fields: [generatedBy], references: [id])
+
+  @@index([generatedBy])
 }
 
 model Forecast {
@@ -81,13 +118,39 @@ model Forecast {
   confidence     Float
   forecastDate   DateTime
   createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
   commodity      Commodity @relation(fields: [commodityId], references: [id])
+
+  @@index([commodityId])
+}
+
+model AuditLog {
+  id        String      @id @default(uuid()) @db.Uuid
+  actorId   String      @db.Uuid
+  action    AuditAction
+  targetId  String?     @db.Uuid
+  metadata  Json?
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt])
 }
 
 enum UserRole {
   ADMIN
   OFFICER
-  PUBLIC
+}
+
+enum AuditAction {
+  LOGIN
+  USER_CREATE
+  USER_UPDATE
+  USER_DELETE
+  SRP_CREATE
+  SRP_UPDATE
+  PRICE_RECORD_DELETE
 }
 
 enum PriceStatus {

@@ -1,12 +1,10 @@
 import { prisma } from '../../prisma';
 import type { Prisma } from '@prisma/client';
-import type { CreatePriceRecordInput, UpdatePriceRecordInput } from './price-record.schema';
-import type { AuthUser } from '../../../types/express';
+import type { ListPriceRecordsQuery, UpdatePriceRecordInput } from './price-record.schema';
+import type { AuthUser } from '../../shared/types/express';
 import { resolvePriceRecordScope } from './price-record.scope';
-
-export type CreatePriceRecordWithUserInput = CreatePriceRecordInput & {
-  userId: string;
-};
+import { toSkipTake } from '../../shared/schema/pagination.schema';
+import type { CreatePriceRecordWithUserInput } from './price-record.types';
 
 type PriceStatus = 'COMPLIANT' | 'OVERPRICE' | 'UNDERPRICE';
 
@@ -61,13 +59,39 @@ export const priceRecordRepository = {
     });
   },
 
-  findAll: (authUser?: AuthUser) => {
+  findAll: async (authUser: AuthUser | undefined, query: ListPriceRecordsQuery) => {
     const scope = resolvePriceRecordScope(authUser);
+    const { page, pageSize, search, storeId, commodityId, status } = query;
+    const { skip, take } = toSkipTake({ page, pageSize });
 
-    return prisma.priceRecord.findMany({
-      where: scope,
-      include: { commodity: true, store: true, user: true },
-    });
+    const where: Prisma.PriceRecordWhereInput = {
+      ...scope,
+      ...(storeId ? { storeId } : {}),
+      ...(commodityId ? { commodityId } : {}),
+      ...(status ? { status } : {}),
+      ...(search
+        ? {
+            OR: [
+              { store: { name: { contains: search, mode: 'insensitive' } } },
+              { commodity: { name: { contains: search, mode: 'insensitive' } } },
+              { user: { name: { contains: search, mode: 'insensitive' } } },
+            ],
+          }
+        : {}),
+    };
+
+    const [data, total] = await prisma.$transaction([
+      prisma.priceRecord.findMany({
+        where,
+        include: { commodity: true, store: true, user: true },
+        orderBy: { dateAndTime: 'desc' },
+        skip,
+        take,
+      }),
+      prisma.priceRecord.count({ where }),
+    ]);
+
+    return { data, total, page, pageSize };
   },
 
   findById: (id: string) =>

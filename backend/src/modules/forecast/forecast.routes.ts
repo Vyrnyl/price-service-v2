@@ -1,8 +1,11 @@
 import { Router } from 'express';
-import { asyncHandler } from '../../utils/asyncHandler';
+import { asyncHandler } from '../../shared/handlers/asyncHandler';
+import { authorize } from '../../shared/middleware/authorize';
 import { forecastController } from './forecast.controller';
 
 const router = Router();
+
+router.use(authorize('ADMIN', 'OFFICER'));
 
 router.post('/generate', asyncHandler(forecastController.generateForecast));
 router.post('/', asyncHandler(forecastController.createForecast));
