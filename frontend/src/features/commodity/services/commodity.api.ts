@@ -94,6 +94,8 @@ export interface CreateCommodityPayload {
   name: string;
   category: string;
   status: CommodityStatus;
+  srpPrice?: number;
+  srpEffectiveDate?: string;
 }
 
 export interface CommodityUpdateResponse {

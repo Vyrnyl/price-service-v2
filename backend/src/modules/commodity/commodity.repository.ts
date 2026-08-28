@@ -3,9 +3,30 @@ import type { Prisma } from '@prisma/client';
 import type { CreateCommodityInput, ListCommoditiesQuery, UpdateCommodityInput } from './commodity.schema';
 import { toSkipTake } from '../../shared/schema/pagination.schema';
 
+const srpInclude = {
+  srps: {
+    orderBy: [
+      { effectiveDate: 'desc' as const },
+      { createdAt: 'desc' as const },
+    ],
+    take: 1,
+  },
+};
+
 export const commodityRepository = {
-  create: (data: CreateCommodityInput) =>
-    prisma.commodity.create({ data }),
+  create: (data: CreateCommodityInput) => {
+    const { srpPrice, srpEffectiveDate, ...commodityData } = data;
+
+    return prisma.commodity.create({
+      data: {
+        ...commodityData,
+        ...(srpPrice !== undefined && srpEffectiveDate !== undefined
+          ? { srps: { create: [{ price: srpPrice, effectiveDate: srpEffectiveDate }] } }
+          : {}),
+      },
+      include: srpInclude,
+    });
+  },
 
   findAll: async (query: ListCommoditiesQuery) => {
     const { page, pageSize, search, status } = query;
@@ -26,15 +47,7 @@ export const commodityRepository = {
     const [data, total] = await prisma.$transaction([
       prisma.commodity.findMany({
         where,
-        include: {
-          srps: {
-            orderBy: [
-              { effectiveDate: "desc" },
-              { createdAt: "desc" },
-            ],
-            take: 1,
-          },
-        },
+        include: srpInclude,
         orderBy: { name: 'asc' },
         skip,
         take,
@@ -48,15 +61,7 @@ export const commodityRepository = {
   findById: (id: string) =>
     prisma.commodity.findUnique({
       where: { id },
-      include: {
-        srps: {
-          orderBy: [
-            { effectiveDate: "desc" },
-            { createdAt: "desc" },
-          ],
-          take: 1,
-        },
-      },
+      include: srpInclude,
     }),
 
   update: (id: string, data: UpdateCommodityInput) =>

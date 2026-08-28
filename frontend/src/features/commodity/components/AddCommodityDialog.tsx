@@ -30,6 +30,8 @@ const emptyFormValues: CreateCommodityFormSchema = {
   name: "",
   category: "",
   status: "Active",
+  srpPrice: "",
+  srpEffectiveDate: "",
 };
 
 export default function AddCommodityDialog({
@@ -124,6 +126,38 @@ export default function AddCommodityDialog({
             ))}
           </Select>
         </FormGroup>
+
+        {mode === "create" ? (
+          <>
+            <FormGroup
+              label="SRP Price (PHP) — Optional"
+              htmlFor="srpPrice"
+              error={errors.srpPrice?.message}
+            >
+              <Input
+                id="srpPrice"
+                type="number"
+                step="0.01"
+                {...register("srpPrice")}
+                hasError={Boolean(errors.srpPrice)}
+                placeholder="e.g. 55.00"
+              />
+            </FormGroup>
+
+            <FormGroup
+              label="Effective Date — Optional"
+              htmlFor="srpEffectiveDate"
+              error={errors.srpEffectiveDate?.message}
+            >
+              <Input
+                id="srpEffectiveDate"
+                type="date"
+                {...register("srpEffectiveDate")}
+                hasError={Boolean(errors.srpEffectiveDate)}
+              />
+            </FormGroup>
+          </>
+        ) : null}
 
         <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:justify-end">
           <Button type="submit" disabled={submitLoading || isSubmitting}>

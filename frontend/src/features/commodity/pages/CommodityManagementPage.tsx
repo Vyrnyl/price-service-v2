@@ -26,9 +26,17 @@ import {
   type CreateCommodityPayload,
 } from "../services/commodity.api";
 import { createSrp } from "../services/srp.api";
-import type { CommodityStatus } from "../commodity.schema";
+import type { CreateCommodityFormSchema } from "../commodity.schema";
 import type { UserRole } from "@/shared/services/auth";
 import { useToast } from "@/shared/components/Toast";
+
+function formatEffectiveDate(value: string) {
+  return new Date(value).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+}
 
 function mapCommodityToRow(item: CommodityItem, index: number) {
   const latestSrp = item.srps?.[0];
@@ -38,6 +46,7 @@ function mapCommodityToRow(item: CommodityItem, index: number) {
     category: item.category,
     status: item.status,
     srp: latestSrp ? `₱${latestSrp.price}` : "_",
+    effectiveDate: latestSrp ? formatEffectiveDate(latestSrp.effectiveDate) : "_",
     statusClass: "border border-primary text-primary",
     icon: index % 2 === 0 ? MdBakeryDining : MdOutlineStorefront,
     iconBg: index % 2 === 0 ? "bg-primary-fixed text-primary" : "bg-secondary-container text-secondary",
@@ -131,19 +140,31 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     void run();
   }, []);
 
-  const handleSaveCommodity = async (data: CreateCommodityPayload) => {
+  const handleSaveCommodity = async (data: CreateCommodityFormSchema) => {
     setFormError(null);
     setFormSuccess(null);
     setSubmitLoading(true);
 
     try {
       if (editingCommodity) {
-        await updateCommodity(editingCommodity.id, data);
+        await updateCommodity(editingCommodity.id, {
+          name: data.name,
+          category: data.category,
+          status: data.status,
+        });
         setFormSuccess("Commodity updated successfully.");
         showToast("Commodity updated successfully.", "success");
         await loadCommodities(currentPage);
       } else {
-        await createCommodity(data);
+        const payload: CreateCommodityPayload = {
+          name: data.name,
+          category: data.category,
+          status: data.status,
+          ...(data.srpPrice && data.srpEffectiveDate
+            ? { srpPrice: Number(data.srpPrice), srpEffectiveDate: data.srpEffectiveDate }
+            : {}),
+        };
+        await createCommodity(payload);
         setFormSuccess("Commodity created successfully.");
         showToast("Commodity created successfully.", "success");
         setCurrentPage(1);
@@ -281,6 +302,8 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
                     name: editingCommodity.name,
                     category: editingCommodity.category,
                     status: editingCommodity.status,
+                    srpPrice: "",
+                    srpEffectiveDate: "",
                   }
                 : undefined
             }

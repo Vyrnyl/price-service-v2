@@ -12,6 +12,7 @@ export type CommodityRow = {
   category: string;
   status: CommodityStatus;
   srp: string;
+  effectiveDate: string;
   statusClass: string;
   icon: ComponentType<{ className?: string; size?: number }>;
   iconBg: string;
@@ -49,7 +50,7 @@ export default function CommodityTable({
   onEditCommodity,
 }: CommodityTableProps) {
   const showActions = Boolean(onOpenUpdateSrp || onEditCommodity);
-  const columnCount = showActions ? 5 : 4;
+  const columnCount = showActions ? 6 : 5;
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -110,6 +111,7 @@ export default function CommodityTable({
               <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">Category</th>
               <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">Status</th>
               <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">SRP (PHP)</th>
+              <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">Effective Date</th>
               {showActions ? (
                 <th className="pb-4 text-right text-[10px] font-semibold uppercase tracking-wide text-outline">Actions</th>
               ) : null}
@@ -118,17 +120,17 @@ export default function CommodityTable({
           <tbody className="divide-y divide-outline-variant/20">
             {isLoading ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-sm text-on-surface-variant">
+                <td colSpan={columnCount} className="py-12 text-center text-sm text-on-surface-variant">
                   Loading commodities...
                 </td>
               </tr>
             ) : error ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-sm text-error">{error}</td>
+                <td colSpan={columnCount} className="py-12 text-center text-sm text-error">{error}</td>
               </tr>
             ) : commodityRows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="py-12 text-center text-sm text-on-surface-variant">
+                <td colSpan={columnCount} className="py-12 text-center text-sm text-on-surface-variant">
                   No commodities match the current filters.
                 </td>
               </tr>
@@ -157,6 +159,7 @@ export default function CommodityTable({
                       </span>
                     </td>
                     <td className="py-4 text-sm font-semibold text-primary">{item.srp}</td>
+                    <td className="py-4 text-sm text-on-surface-variant">{item.effectiveDate}</td>
                     <td className="py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         {onOpenUpdateSrp ? (
