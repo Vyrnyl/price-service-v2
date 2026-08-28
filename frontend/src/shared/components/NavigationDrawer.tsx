@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
+  MdBarChart,
   MdOutlineDashboard,
   MdOutlineHistory,
   MdOutlineInventory2,
@@ -58,6 +59,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       label: "Price Records",
     },
     {
+      href: "/admin/price-trends",
+      icon: MdBarChart,
+      label: "Price Trends",
+    },
+    {
       href: "/admin/audit-log",
       icon: MdOutlineHistory,
       label: "Audit Log",
@@ -89,6 +95,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       href: "/officer/price-records",
       icon: MdOutlineTrendingUp,
       label: "Price Records",
+    },
+    {
+      href: "/officer/price-trends",
+      icon: MdBarChart,
+      label: "Price Trends",
     },
     {
       href: "/officer/settings",
