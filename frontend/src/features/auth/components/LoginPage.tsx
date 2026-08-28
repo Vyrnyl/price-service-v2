@@ -15,6 +15,14 @@ const getRedirectPath = (role: string | undefined) => {
   return "/";
 };
 
+// Seeded accounts from backend/prisma/seed.ts — dev/testing convenience only.
+const DEMO_ACCOUNTS: Array<{ label: string; email: string; password: string }> = [
+  { label: "Fill Admin", email: "admin@presyoserbisyo.gov.ph", password: "Password123!" },
+  { label: "Fill Officer", email: "officer@presyoserbisyo.gov.ph", password: "Password123!" },
+];
+
+const isDemoFillEnabled = process.env.NODE_ENV !== "production";
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<LoginInput>({ email: "", password: "" });
@@ -44,6 +52,26 @@ export default function LoginPage() {
             Sign in to access the Monitoring & SRP Portal
           </p>
         </div>
+
+        {isDemoFillEnabled ? (
+          <div className="mb-6 rounded-xl border border-dashed border-outline-variant bg-surface p-4">
+            <p className="text-body-xs font-medium uppercase tracking-wide text-on-surface-variant">
+              Testing only — demo accounts
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {DEMO_ACCOUNTS.map((account) => (
+                <button
+                  key={account.email}
+                  type="button"
+                  onClick={() => setFormData({ email: account.email, password: account.password })}
+                  className="rounded-full border border-outline-variant px-4 py-1.5 text-label-caps font-medium text-on-surface-variant transition hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  {account.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <form className="space-y-6" onSubmit={handleSubmit} noValidate>
           <div className="space-y-1.5">
