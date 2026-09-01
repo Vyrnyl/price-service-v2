@@ -21,7 +21,8 @@ const DEMO_ACCOUNTS: Array<{ label: string; email: string; password: string }> =
   { label: "Fill Officer", email: "officer@presyoserbisyo.gov.ph", password: "Password123!" },
 ];
 
-const isDemoFillEnabled = process.env.NODE_ENV !== "production";
+const isDemoFillEnabled =
+  process.env.NODE_ENV !== "production" || process.env.NEXT_PUBLIC_SHOW_DEMO_LOGIN === "true";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
