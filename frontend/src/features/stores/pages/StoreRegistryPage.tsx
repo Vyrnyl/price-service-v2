@@ -34,7 +34,6 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
     setMunicipalityFilter,
     statusFilter,
     setStatusFilter,
-    quickFilter,
     handleFormChange,
     handleOpenCreateForm,
     handleEditStore,
@@ -42,7 +41,6 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
     handleCreateStore,
     handleToggleStoreDetails,
     handleClosePriceRecords,
-    handleQuickFilterChange,
   } = useStoreRegistryState();
 
   const selectedStoreName = stores.find((store) => store.id === expandedStoreId)?.name;
@@ -59,10 +57,6 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
 
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value);
-  };
-
-  const handleQuickFilterSelect = (value: string) => {
-    handleQuickFilterChange(value);
   };
 
   return (
@@ -97,8 +91,6 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
             onMunicipalityFilterChange={handleMunicipalityFilterChange}
             statusFilter={statusFilter}
             onStatusFilterChange={handleStatusFilterChange}
-            quickFilter={quickFilter}
-            onQuickFilterChange={handleQuickFilterSelect}
             storeCount={total}
           />
 

@@ -5,7 +5,7 @@ import { apiFetch } from "../../../shared/services/api";
 import { MdOutlineInventory2, MdOutlineTrendingUp, MdOutlineStorefront } from "react-icons/md";
 import { FiUsers } from "react-icons/fi";
 import { IoFilterOutline } from "react-icons/io5";
-import { IoMdAdd, IoMdMore } from "react-icons/io";
+import { IoMdAdd } from "react-icons/io";
 import { LuDownload } from "react-icons/lu";
 import { PriceTrendLineChart } from "@/shared/components/charts/PriceTrendLineChart";
 import { CommodityComparisonChart } from "@/shared/components/charts/CommodityComparisonChart";
@@ -330,11 +330,10 @@ export default function AdminDashboardPage() {
 
           <section className="grid gap-6 xl:grid-cols-[minmax(320px,0.8fr)_minmax(0,1.2fr)]">
             <div className="flex min-h-105 w-full flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
-              <div className="mb-6 flex items-center justify-between">
+              <div className="mb-6">
                 <h4 className="font-sans text-h3-desktop text-on-surface">
                   Recent Activity
                 </h4>
-                <IoMdMore />
               </div>
               <div className="flex-1 space-y-6">
                 {activityItems.map((item) => (

@@ -16,13 +16,11 @@ export const storeIdParamSchema = z.object({
 });
 
 const storeStatusEnum = z.enum(['Monitored', 'Pending']);
-const storeQuickFilterEnum = z.enum(['Monitored', 'Pending']);
 
 export const listStoresQuerySchema = paginationQuerySchema.extend({
   search: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
   municipality: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
   status: z.preprocess(emptyToUndefined, storeStatusEnum.optional()),
-  quickFilter: z.preprocess(emptyToUndefined, storeQuickFilterEnum.optional()),
 });
 
 export type CreateStoreInput = z.infer<typeof createStoreSchema>;

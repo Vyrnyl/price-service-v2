@@ -131,7 +131,6 @@ export interface FetchStoresParams {
   search?: string;
   municipality?: string;
   status?: string;
-  quickFilter?: string;
 }
 
 export async function fetchStores(params: FetchStoresParams = {}) {
@@ -141,7 +140,6 @@ export async function fetchStores(params: FetchStoresParams = {}) {
   if (params.search) query.set("search", params.search);
   if (params.municipality) query.set("municipality", params.municipality);
   if (params.status) query.set("status", params.status);
-  if (params.quickFilter) query.set("quickFilter", params.quickFilter);
 
   const queryString = query.toString();
   return apiFetch<{ status: string; data: Store[]; total: number; page: number; pageSize: number }>(

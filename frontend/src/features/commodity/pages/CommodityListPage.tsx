@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
 import { MdLocalDining, MdLocalGroceryStore, MdSearch } from "react-icons/md";
-import Badge, { type BadgeVariant } from "@/shared/components/Badge";
+import Badge from "@/shared/components/Badge";
 import DataProvenanceStrip from "@/shared/components/DataProvenanceStrip";
 import Input from "@/shared/components/Input";
 import PageShell from "@/shared/components/PageShell";
@@ -71,19 +71,6 @@ function formatLastUpdated(value: string | null) {
     hour: "numeric",
     minute: "2-digit",
   }).format(date);
-}
-
-function getStatusBadgeVariant(status: string): BadgeVariant {
-  switch (status) {
-    case "Above SRP":
-      return "error";
-    case "Below SRP":
-      return "success";
-    case "Compliant":
-      return "primary";
-    default:
-      return "neutral";
-  }
 }
 
 function mapCommoditiesToRows(commodities: PublicCommodityItem[]): CommodityRow[] {
@@ -275,20 +262,19 @@ export default function CommodityListPage() {
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Category</th>
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Price Range</th>
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">SRP</th>
-                    <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Compliance</th>
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Last Updated</th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-sm text-on-surface-variant">
+                      <td colSpan={5} className="py-12 text-center text-sm text-on-surface-variant">
                         Loading commodities...
                       </td>
                     </tr>
                   ) : tableRows.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-sm text-on-surface-variant">
+                      <td colSpan={5} className="py-12 text-center text-sm text-on-surface-variant">
                         No commodities found.
                       </td>
                     </tr>
@@ -305,12 +291,7 @@ export default function CommodityListPage() {
                               <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${row.iconBg}`}>
                                 <Icon className="text-base" />
                               </div>
-                              <div>
-                                <div className="text-sm font-semibold text-on-surface">{row.name}</div>
-                                <div className="text-[11px] text-outline">
-                                  {row.storeName !== "N/A" ? `${row.storeName} · ${row.municipality}` : "No recent store data"}
-                                </div>
-                              </div>
+                              <div className="text-sm font-semibold text-on-surface">{row.name}</div>
                             </div>
                           </td>
                           <td className="px-3 py-3">
@@ -318,9 +299,6 @@ export default function CommodityListPage() {
                           </td>
                           <td className="px-3 py-3 text-sm font-medium text-on-surface">{row.priceRangeLabel}</td>
                           <td className="px-3 py-3 text-sm text-outline">{row.srp}</td>
-                          <td className="px-3 py-3">
-                            <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge>
-                          </td>
                           <td className="px-3 py-3 text-xs text-on-surface-variant">{row.lastUpdated}</td>
                         </tr>
                       );
@@ -344,17 +322,14 @@ export default function CommodityListPage() {
                     key={row.id}
                     className="rounded-xl border border-outline-variant bg-surface-container-low p-4 transition-colors hover:bg-surface-container"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-3">
-                        <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${row.iconBg}`}>
-                          <Icon className="text-base" />
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-on-surface">{row.name}</p>
-                          <p className="mt-0.5 text-[11px] text-outline">{row.category}</p>
-                        </div>
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${row.iconBg}`}>
+                        <Icon className="text-base" />
                       </div>
-                      <Badge variant={getStatusBadgeVariant(row.status)}>{row.status}</Badge>
+                      <div>
+                        <p className="text-sm font-semibold text-on-surface">{row.name}</p>
+                        <p className="mt-0.5 text-[11px] text-outline">{row.category}</p>
+                      </div>
                     </div>
 
                     <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
@@ -368,8 +343,7 @@ export default function CommodityListPage() {
                       </div>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-between border-t border-outline-variant pt-2 text-[11px] text-on-surface-variant">
-                      <span>{row.storeName !== "N/A" ? `${row.storeName} · ${row.municipality}` : "No recent store data"}</span>
+                    <div className="mt-3 flex items-center justify-end border-t border-outline-variant pt-2 text-[11px] text-on-surface-variant">
                       <span>{row.lastUpdated}</span>
                     </div>
                   </div>

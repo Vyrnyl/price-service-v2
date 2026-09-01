@@ -27,7 +27,6 @@ export function useStoreRegistryState() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [municipalityFilter, setMunicipalityFilter] = useState("");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
-  const [quickFilter, setQuickFilter] = useState("");
   const { showToast } = useToast();
 
   useEffect(() => {
@@ -47,7 +46,6 @@ export function useStoreRegistryState() {
         search: debouncedSearch || undefined,
         municipality: municipalityFilter || undefined,
         status: statusFilter !== "All Statuses" ? statusFilter : undefined,
-        quickFilter: quickFilter && quickFilter !== "All" ? quickFilter : undefined,
       });
       setStores(response.data);
       setTotal(response.total);
@@ -65,7 +63,7 @@ export function useStoreRegistryState() {
     }
     void run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [page, debouncedSearch, municipalityFilter, statusFilter, quickFilter]);
+  }, [page, debouncedSearch, municipalityFilter, statusFilter]);
 
   const resetStoreForm = () => {
     setFormData({ name: "", location: "", lastVisited: "" });
@@ -192,11 +190,6 @@ export function useStoreRegistryState() {
     setExpandedStoreId(null);
   };
 
-  const handleQuickFilterChange = (chip: string) => {
-    setQuickFilter((current) => (current === chip ? "" : chip));
-    setPage(1);
-  };
-
   const setSearchTerm = (value: string) => {
     setSearchTermState(value);
   };
@@ -234,7 +227,6 @@ export function useStoreRegistryState() {
     setMunicipalityFilter: updateMunicipalityFilter,
     statusFilter,
     setStatusFilter: updateStatusFilter,
-    quickFilter,
     handleFormChange,
     handleOpenCreateForm,
     handleEditStore,
@@ -242,6 +234,5 @@ export function useStoreRegistryState() {
     handleCreateStore,
     handleToggleStoreDetails,
     handleClosePriceRecords,
-    handleQuickFilterChange,
   };
 }

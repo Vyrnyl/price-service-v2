@@ -22,7 +22,7 @@ export const storeRepository = {
     }),
 
   findAll: async (scope: Exclude<StoreScope, null>, query: ListStoresQuery) => {
-    const { page, pageSize, search, municipality, status, quickFilter } = query;
+    const { page, pageSize, search, municipality, status } = query;
     const { skip, take } = toSkipTake({ page, pageSize });
 
     const now = Date.now();
@@ -47,9 +47,6 @@ export const storeRepository = {
     }
     if (status) {
       conditions.push(storeStatusCondition(status, monitoredCutoff));
-    }
-    if (quickFilter === 'Monitored' || quickFilter === 'Pending') {
-      conditions.push(storeStatusCondition(quickFilter, monitoredCutoff));
     }
 
     const where: Prisma.StoreWhereInput = conditions.length ? { AND: conditions } : {};
