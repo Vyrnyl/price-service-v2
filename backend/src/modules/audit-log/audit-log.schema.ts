@@ -14,7 +14,6 @@ const auditActionEnum = z.enum([
 ]);
 
 export const listAuditLogsQuerySchema = paginationQuerySchema.extend({
-  search: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
   action: z.preprocess(emptyToUndefined, auditActionEnum.optional()),
   dateFrom: z.preprocess(emptyToUndefined, z.string().date().optional()),
   dateTo: z.preprocess(emptyToUndefined, z.string().date().optional()),

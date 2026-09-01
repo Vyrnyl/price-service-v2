@@ -25,11 +25,6 @@ function formatTimestamp(iso: string) {
   });
 }
 
-function formatTarget(targetId: string | null) {
-  if (!targetId) return "—";
-  return targetId.length > 13 ? `${targetId.slice(0, 8)}…${targetId.slice(-4)}` : targetId;
-}
-
 function getInitials(name: string) {
   return name
     .split(" ")
@@ -78,7 +73,6 @@ export default function AuditLogTable({
                     <th className="px-6 py-4 text-label-caps uppercase text-outline">Timestamp</th>
                     <th className="px-6 py-4 text-label-caps uppercase text-outline">Actor</th>
                     <th className="px-6 py-4 text-label-caps uppercase text-outline">Action</th>
-                    <th className="px-6 py-4 text-label-caps uppercase text-outline">Target</th>
                     <th className="px-6 py-4 text-right text-label-caps uppercase text-outline">Details</th>
                   </tr>
                 </thead>
@@ -103,9 +97,6 @@ export default function AuditLogTable({
                       </td>
                       <td className="px-6 py-4">
                         <Badge variant={ACTION_BADGE_VARIANT[entry.action]}>{ACTION_LABELS[entry.action]}</Badge>
-                      </td>
-                      <td className="whitespace-nowrap px-6 py-4 font-mono text-body-sm text-on-surface-variant" title={entry.targetId ?? undefined}>
-                        {formatTarget(entry.targetId)}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button

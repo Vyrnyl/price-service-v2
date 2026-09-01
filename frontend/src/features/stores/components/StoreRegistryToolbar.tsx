@@ -29,8 +29,8 @@ export function StoreRegistryToolbar({
 }: StoreRegistryToolbarProps) {
   return (
     <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
-      <div className="grid grid-cols-1 items-center gap-4 md:grid-cols-12">
-        <div className="md:col-span-6">
+      <div className="flex flex-col items-stretch gap-4 lg:flex-row lg:items-center">
+        <div className="grid flex-1 grid-cols-1 gap-4 sm:grid-cols-3">
           <Input
             icon={<MdSearch size={20} />}
             placeholder="Search store name, location, or officer..."
@@ -39,9 +39,7 @@ export function StoreRegistryToolbar({
             value={searchTerm}
             onChange={(event) => onSearchChange(event.target.value)}
           />
-        </div>
 
-        <div className="md:col-span-3">
           <Select
             value={municipalityFilter}
             onChange={(event) => onMunicipalityFilterChange(event.target.value)}
@@ -56,9 +54,7 @@ export function StoreRegistryToolbar({
               );
             })}
           </Select>
-        </div>
 
-        <div className="md:col-span-3">
           <Select
             value={statusFilter}
             onChange={(event) => onStatusFilterChange(event.target.value)}
@@ -71,15 +67,15 @@ export function StoreRegistryToolbar({
             ))}
           </Select>
         </div>
-      </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <span className="mr-2 whitespace-nowrap font-sans text-label-caps text-on-surface-variant">Quick Filter:</span>
-        {STATUS_CHIPS.map((chip) => (
-          <Chip key={chip} active={quickFilter === chip} onClick={() => onQuickFilterChange(chip)}>
-            {chip}
-          </Chip>
-        ))}
+        <div className="flex flex-wrap items-center gap-3 lg:flex-none lg:justify-end">
+          <span className="whitespace-nowrap font-sans text-label-caps text-on-surface-variant">Quick Filter:</span>
+          {STATUS_CHIPS.map((chip) => (
+            <Chip key={chip} active={quickFilter === chip} onClick={() => onQuickFilterChange(chip)}>
+              {chip}
+            </Chip>
+          ))}
+        </div>
       </div>
 
       <div className="mt-4 text-sm text-on-surface-variant">

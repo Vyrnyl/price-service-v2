@@ -11,6 +11,7 @@ import {
 import { createUser, getUsers, updateUser, updateUserStatus } from "../services/users.api";
 import { ApiError } from "../../../../shared/services/api";
 import { useToast } from "@/shared/components/Toast";
+import { useCurrentUser } from "@/shared/hooks/use-current-user";
 import PageShell from "@/shared/components/PageShell";
 import Pagination from "@/shared/components/Pagination";
 import type { CreateUserFormSchema, UpdateUserFormSchema } from "../schemas/users.schema";
@@ -38,6 +39,7 @@ export default function UsersManagementPage() {
   const [roleFilter, setRoleFilter] = useState<"ALL" | UserRole>("ALL");
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const { showToast } = useToast();
+  const currentUser = useCurrentUser();
 
   const totalUsers = userStats.total;
   const adminCount = userStats.admins;
@@ -204,6 +206,10 @@ export default function UsersManagementPage() {
   };
 
   const handleToggleActive = async (user: User) => {
+    if (currentUser && user.id === currentUser.id) {
+      return;
+    }
+
     try {
       const updatedUser = await updateUserStatus(user.id, !user.isActive);
       showToast(
@@ -297,6 +303,7 @@ export default function UsersManagementPage() {
             onToggleActive={handleToggleActive}
             getInitials={getInitials}
             getRoleClass={getRoleClass}
+            currentUserId={currentUser?.id}
           />
 
           {total > PAGE_SIZE ? (

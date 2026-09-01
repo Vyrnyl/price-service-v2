@@ -59,10 +59,9 @@ function getDateRangeError(startDate: string, endDate: string) {
 }
 
 function mapBackendReportToRecent(report: BackendReport): RecentReport {
-  const formattedDate = new Date(report.createdAt).toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
+  const formattedDate = new Date(report.createdAt).toLocaleString("en-PH", {
+    dateStyle: "medium",
+    timeStyle: "short",
   });
 
   const typeTitle = reportTypes.find((type) => type.backendType === report.type)?.title ?? report.type.replace(/_/g, " ");

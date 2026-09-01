@@ -31,7 +31,6 @@ type CommodityTableProps = {
   onSearchTermChange: (value: string) => void;
   onStatusFilterChange: (value: "ALL" | "Active" | "Inactive") => void;
   onPageChange: (page: number) => void;
-  onOpenUpdateSrp?: (commodityId: string) => void;
   onEditCommodity?: (commodity: Pick<CommodityItem, "id" | "name" | "category" | "status">) => void;
 };
 
@@ -46,10 +45,9 @@ export default function CommodityTable({
   onSearchTermChange,
   onStatusFilterChange,
   onPageChange,
-  onOpenUpdateSrp,
   onEditCommodity,
 }: CommodityTableProps) {
-  const showActions = Boolean(onOpenUpdateSrp || onEditCommodity);
+  const showActions = Boolean(onEditCommodity);
   const columnCount = showActions ? 6 : 5;
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -162,16 +160,6 @@ export default function CommodityTable({
                     <td className="py-4 text-sm text-on-surface-variant">{item.effectiveDate}</td>
                     <td className="py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
-                        {onOpenUpdateSrp ? (
-                          <button
-                            className="rounded-lg border border-outline-variant bg-surface px-3 py-2 text-xs font-semibold text-on-surface transition hover:border-primary hover:text-primary"
-                            type="button"
-                            title="Update SRP"
-                            onClick={() => onOpenUpdateSrp(item.id)}
-                          >
-                            Update SRP
-                          </button>
-                        ) : null}
                         {onEditCommodity ? (
                           <button
                             className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary"

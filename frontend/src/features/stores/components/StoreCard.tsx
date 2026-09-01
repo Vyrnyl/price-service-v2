@@ -8,6 +8,7 @@ export default function StoreCard({
   store,
   showAssignedOfficer,
   onEdit,
+  canEdit = false,
   isExpanded = false,
   onToggleDetails,
   children,
@@ -16,6 +17,7 @@ export default function StoreCard({
   store: Store;
   showAssignedOfficer: boolean;
   onEdit?: (store: Store) => void;
+  canEdit?: boolean;
   isExpanded?: boolean;
   onToggleDetails?: (store: Store) => void;
   children?: ReactNode;
@@ -59,14 +61,16 @@ export default function StoreCard({
             {showAssignedOfficer ? `Assigned Officer: ${store.user?.name ?? "Unassigned"}` : store.lastVisited ? "Last visit recorded" : "No visit data"}
           </span>
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => onEdit?.(store)}
-              className="inline-flex items-center justify-center rounded-full border border-outline-variant bg-surface p-2 text-on-surface transition-colors hover:bg-surface-container-high"
-              aria-label="Edit store"
-            >
-              <MdEdit size={14} />
-            </button>
+            {canEdit && (
+              <button
+                type="button"
+                onClick={() => onEdit?.(store)}
+                className="inline-flex items-center justify-center rounded-full border border-outline-variant bg-surface p-2 text-on-surface transition-colors hover:bg-surface-container-high"
+                aria-label="Edit store"
+              >
+                <MdEdit size={14} />
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onToggleDetails?.(store)}

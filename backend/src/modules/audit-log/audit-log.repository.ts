@@ -6,19 +6,11 @@ import { toSkipTake } from '../../shared/schema/pagination.schema';
 
 export const auditLogRepository = {
   findAll: async (query: ListAuditLogsQuery) => {
-    const { page, pageSize, search, action, dateFrom, dateTo } = query;
+    const { page, pageSize, action, dateFrom, dateTo } = query;
     const { skip, take } = toSkipTake({ page, pageSize });
 
     const where: Prisma.AuditLogWhereInput = {
       ...(action ? { action } : {}),
-      ...(search
-        ? {
-            OR: [
-              { user: { name: { contains: search, mode: 'insensitive' } } },
-              { user: { email: { contains: search, mode: 'insensitive' } } },
-            ],
-          }
-        : {}),
       ...(dateFrom || dateTo
         ? {
             createdAt: {

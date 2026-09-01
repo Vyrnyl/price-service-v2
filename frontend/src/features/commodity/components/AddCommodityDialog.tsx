@@ -47,7 +47,7 @@ export default function AddCommodityDialog({
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors, isSubmitting, isDirty },
     reset,
     setError,
     clearErrors,
@@ -90,7 +90,7 @@ export default function AddCommodityDialog({
       title={mode === "edit" ? "Edit Commodity" : "Add New Commodity"}
       description={
         mode === "edit"
-          ? "Update commodity details for monitoring and compliance tracking."
+          ? "Update commodity details, or record a new SRP effective from a given date."
           : "Register a new commodity for monitoring and compliance tracking."
       }
     >
@@ -127,40 +127,45 @@ export default function AddCommodityDialog({
           </Select>
         </FormGroup>
 
-        {mode === "create" ? (
-          <>
-            <FormGroup
-              label="SRP Price (PHP) — Optional"
-              htmlFor="srpPrice"
-              error={errors.srpPrice?.message}
-            >
-              <Input
-                id="srpPrice"
-                type="number"
-                step="0.01"
-                {...register("srpPrice")}
-                hasError={Boolean(errors.srpPrice)}
-                placeholder="e.g. 55.00"
-              />
-            </FormGroup>
+        <FormGroup
+          label={mode === "edit" ? "New SRP Price (PHP) — Optional" : "SRP Price (PHP) — Optional"}
+          htmlFor="srpPrice"
+          error={errors.srpPrice?.message}
+        >
+          <Input
+            id="srpPrice"
+            type="number"
+            step="0.01"
+            {...register("srpPrice")}
+            hasError={Boolean(errors.srpPrice)}
+            placeholder="e.g. 55.00"
+          />
+        </FormGroup>
 
-            <FormGroup
-              label="Effective Date — Optional"
-              htmlFor="srpEffectiveDate"
-              error={errors.srpEffectiveDate?.message}
-            >
-              <Input
-                id="srpEffectiveDate"
-                type="date"
-                {...register("srpEffectiveDate")}
-                hasError={Boolean(errors.srpEffectiveDate)}
-              />
-            </FormGroup>
-          </>
+        <FormGroup
+          label="Effective Date (required with SRP price)"
+          htmlFor="srpEffectiveDate"
+          error={errors.srpEffectiveDate?.message}
+        >
+          <Input
+            id="srpEffectiveDate"
+            type="date"
+            {...register("srpEffectiveDate")}
+            hasError={Boolean(errors.srpEffectiveDate)}
+          />
+        </FormGroup>
+
+        {mode === "edit" ? (
+          <p className="text-xs text-on-surface-variant sm:col-span-2">
+            SRP is historical — entering a price and date here adds a new SRP record effective from that date, it does not overwrite the current one.
+          </p>
         ) : null}
 
         <div className="flex flex-col gap-3 sm:col-span-2 sm:flex-row sm:justify-end">
-          <Button type="submit" disabled={submitLoading || isSubmitting}>
+          <Button
+            type="submit"
+            disabled={submitLoading || isSubmitting || (mode === "edit" && !isDirty)}
+          >
             {submitLoading || isSubmitting
               ? mode === "edit"
                 ? "Saving..."

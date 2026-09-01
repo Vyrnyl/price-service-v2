@@ -19,7 +19,6 @@ import type {
 } from "../types/price-record.types";
 
 const PAGE_SIZE = 5;
-const SEARCH_DEBOUNCE_MS = 300;
 
 function formatInputDateTime(value: string) {
   const date = new Date(value);
@@ -154,8 +153,6 @@ export default function PriceRecordsPage({
   canCreateRecord?: boolean;
   hideActions?: boolean;
 }) {
-  const [searchQuery, setSearchQuery] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [storeFilter, setStoreFilter] = useState("");
   const [commodityFilter, setCommodityFilter] = useState("");
   const [stores, setStores] = useState<StoreOption[]>([]);
@@ -194,18 +191,9 @@ export default function PriceRecordsPage({
     void loadOptions();
   }, []);
 
-  useEffect(() => {
-    const handle = setTimeout(() => {
-      setDebouncedSearch(searchQuery.trim());
-      setCurrentPage(1);
-    }, SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(handle);
-  }, [searchQuery]);
-
   const loadRecords = async (page: number) => {
     try {
       const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
-      if (debouncedSearch) params.set("search", debouncedSearch);
       if (storeFilter) params.set("storeId", storeFilter);
       if (commodityFilter) params.set("commodityId", commodityFilter);
 
@@ -226,7 +214,7 @@ export default function PriceRecordsPage({
     }
     void run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, debouncedSearch, storeFilter, commodityFilter]);
+  }, [currentPage, storeFilter, commodityFilter]);
 
   const records = useMemo(
     () => rawRecords.map((record) => mapBackendPriceRecord(record, commodities)),
@@ -366,10 +354,8 @@ export default function PriceRecordsPage({
 
           <div className="relative">
             <PriceRecordFilters
-              search={searchQuery}
               storeFilter={storeFilter}
               commodityFilter={commodityFilter}
-              onSearchChange={setSearchQuery}
               onStoreChange={(value) => {
                 setStoreFilter(value);
                 setCurrentPage(1);

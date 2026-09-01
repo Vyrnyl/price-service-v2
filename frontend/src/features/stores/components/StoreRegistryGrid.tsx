@@ -6,6 +6,7 @@ interface StoreRegistryGridProps {
   stores: Store[];
   showAssignedOfficer: boolean;
   onEdit: (store: Store) => void;
+  canEdit?: boolean;
   expandedStoreId: string | null;
   onToggleDetails: (store: Store) => void;
   emptyState?: ReactNode;
@@ -15,6 +16,7 @@ export function StoreRegistryGrid({
   stores,
   showAssignedOfficer,
   onEdit,
+  canEdit = false,
   expandedStoreId,
   onToggleDetails,
   emptyState,
@@ -35,6 +37,7 @@ export function StoreRegistryGrid({
           store={store}
           showAssignedOfficer={showAssignedOfficer}
           onEdit={onEdit}
+          canEdit={canEdit}
           isExpanded={expandedStoreId === store.id}
           onToggleDetails={() => void onToggleDetails(store)}
           compact

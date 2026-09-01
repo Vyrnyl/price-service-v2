@@ -11,11 +11,12 @@ type UsersTableProps = {
   onEdit: (user: User) => void;
   getInitials: (name: string) => string;
   getRoleClass: (role: UserRole) => string;
+  currentUserId?: string;
 };
 
 const PAGE_SIZE = 5;
 
-export default function UsersTable({ users, onToggleActive, onEdit, getInitials, getRoleClass }: UsersTableProps) {
+export default function UsersTable({ users, onToggleActive, onEdit, getInitials, getRoleClass, currentUserId }: UsersTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
@@ -43,7 +44,9 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/30">
-              {paginatedUsers.map((user) => (
+              {paginatedUsers.map((user) => {
+                const isSelf = user.id === currentUserId;
+                return (
                 <tr key={user.id} className="group transition-colors">
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
@@ -84,24 +87,28 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
                       </button>
                       <button
                         type="button"
-                        className="rounded-lg p-2 transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                        title={user.isActive ? "Deactivate user" : "Activate user"}
+                        disabled={isSelf}
+                        className="rounded-lg p-2 transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-transparent disabled:hover:text-inherit"
+                        title={isSelf ? "You cannot deactivate your own account" : user.isActive ? "Deactivate user" : "Activate user"}
                         onClick={() => onToggleActive(user)}
                       >
                         <span className="sr-only">{user.isActive ? "Deactivate user" : "Activate user"}</span>
-                        {user.isActive ? <MdOutlinePersonOff size={18} /> : <MdOutlinePerson2 size={18} />}
+                        {user.isActive ? <MdOutlinePerson2 size={18} /> : <MdOutlinePersonOff size={18} />}
                       </button>
                     </div>
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         </div>
       </div>
 
       <div className="space-y-3 p-3 md:hidden">
-        {paginatedUsers.map((user) => (
+        {paginatedUsers.map((user) => {
+          const isSelf = user.id === currentUserId;
+          return (
           <div key={user.id} className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
             <div className="flex items-start justify-between gap-3">
               <div className="flex items-center gap-3">
@@ -137,16 +144,18 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
               </button>
               <button
                 type="button"
-                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                title={user.isActive ? "Deactivate user" : "Activate user"}
+                disabled={isSelf}
+                className="rounded-lg border border-outline-variant bg-surface-container-lowest p-2.5 transition-colors hover:bg-error-container hover:text-on-error-container focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:bg-surface-container-lowest disabled:hover:text-inherit"
+                title={isSelf ? "You cannot deactivate your own account" : user.isActive ? "Deactivate user" : "Activate user"}
                 onClick={() => onToggleActive(user)}
               >
                 <span className="sr-only">{user.isActive ? "Deactivate user" : "Activate user"}</span>
-                {user.isActive ? <MdOutlinePersonOff size={18} /> : <MdOutlinePerson2 size={18} />}
+                {user.isActive ? <MdOutlinePerson2 size={18} /> : <MdOutlinePersonOff size={18} />}
               </button>
             </div>
           </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-6 py-4 sm:flex-row sm:items-center sm:justify-between">

@@ -116,6 +116,7 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
                 stores={stores}
                 showAssignedOfficer={showAssignedOfficer}
                 onEdit={handleEditStore}
+                canEdit={canCreateStore}
                 expandedStoreId={expandedStoreId}
                 onToggleDetails={handleToggleStoreDetails}
                 emptyState="No outlets match the current filters."

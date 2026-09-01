@@ -628,6 +628,75 @@ The drawer's top slot is a static "Navigation" heading. A signed-in user has no 
 
 ---
 
+## Phase 6 — Admin Panel Cleanup
+
+Scoped 2026-08-30 from a review pass across six admin-facing screens. Unlike Phase 5, none of these reverse an earlier decision — they trim, fix, or consolidate existing UI. Split into **3 session blocks** so no single session's diff spans unrelated pages; land and verify one block before starting the next.
+
+> **6.2's self-block guard is the one item with a real security angle**, not just polish: today an admin can deactivate their own account via the UI with zero guard, and the backend route has **no identity check at all** — only `authorize('ADMIN')`, which checks role, not whose row this is. Treat 6.2 as fixing a real gap, not a cosmetic swap, and guard both layers (frontend disables the control, backend rejects the call) per the ownership rule in [CLAUDE.md](../CLAUDE.md).
+
+> **6.7 (merge Update SRP into Edit) is the heaviest single item** — two dialogs, two schemas, two endpoints, and a semantic nuance (an "updated" SRP is actually a **new** historical SRP row, not an in-place edit) all need to converge into one form. It gets its own block (C) rather than sharing with Reports' one-line change.
+
+### Block A — Stores & Users
+
+#### 6.1 Stores: Remove Edit Button, Drop "Recently Updated," Align Filters in One Row
+
+The admin store registry is a card grid (`StoreRegistryGrid`/`StoreCard`), not a table — the edit affordance and quick filters live in different components than the other five pages in this phase.
+
+- **Files (edit)**: `StoreCard.tsx` (remove the Edit button block, lines ~62–69, keep the "Details" expand toggle), `stores.constants.ts` (`STATUS_CHIPS` drops `"Recently Updated"`), `StoreRegistryToolbar.tsx` (merge the `md:grid-cols-12` search/municipality/status row and the separate `mt-6 flex flex-wrap` Quick Filter row into one row)
+- **Watch**: `use-stores.ts`'s `handleQuickFilterChange` and `store.repository.ts`'s `quickFilter === 'Recently Updated'` branch (with its 7-day `recentCutoff`) become dead once the chip is removed — decide whether to delete them outright or leave the backend branch inert; per CLAUDE.md's "no unused code" convention, prefer deleting the chip, its schema enum value, and the repository branch together rather than leaving a reachable-only-by-direct-API dead path. The frontend `store-status.ts` duplicate-threshold comment referenced in scoping should be checked so it doesn't still assume 3 quick-filter states.
+- **Layout note**: chips (`Chip` component, variable width) and the fixed-width Search/Municipality/Status controls don't share a grid today — aligning them into one row will likely need either added grid columns sized for the remaining 2 chips ("All", "Monitored", "Pending") or a single flex row with defined `basis`/`min-w` per control, with horizontal scroll or wrap as the fallback at 768/480.
+- **Gate**: Feature Loop (visible UI change). Sign off the merged row at 1024/768/480 before wiring the backend deletion.
+- **Done gate**: no Edit button renders on any store card; Quick Filter shows only All/Monitored/Pending; all toolbar controls sit in one visual row at desktop width, with a defined (not broken) responsive fallback below 1024px.
+
+#### 6.2 Users: Prevent Self-Block, Swap the Block/Unblock Icon Logic
+
+- **Self-block guard (files edit)**: `UsersTable.tsx` (disable/hide the toggle for the row matching the signed-in user's id, both desktop `~85-93` and mobile `~138-146`), `UsersManagementPage.tsx` (`handleToggleActive` short-circuits on self), `user.service.ts`/`user.controller.ts` (`updateUser` rejects `isActive` changes where `req.params.id === req.user.userId`, independent of frontend — the backend currently has **zero** identity check, only `authorize('ADMIN')`)
+- **Obstacle**: no shared hook currently exposes the signed-in user's id to arbitrary client components — `TopAppBar` and `NavigationDrawer` each duplicate their own `useState`/`useEffect` around `getSessionUser()` (`shared/services/auth.ts`). Either duplicate that pattern a third time in `UsersManagementPage`, or extract a shared `useCurrentUser()` hook in `shared/` and migrate the two existing call sites onto it. **Recommend the shared hook** — this is the third call site, the threshold past which duplication becomes the wrong call.
+- **Icon swap (files edit)**: `UsersTable.tsx` — swap `user.isActive ? MdOutlinePersonOff : MdOutlinePerson2` to whatever "slash when inactive, no slash when active" resolves to (e.g. `user.isActive ? MdOutlinePerson2 : MdOutlinePersonOff` if `MdOutlinePersonOff` is the slashed icon — confirm the two icons' actual glyphs before wiring, since `MdOutlinePersonOff`'s name implies the slash). Update both desktop and mobile blocks and their `title`/`sr-only` text to stay accurate to the new icon-to-state mapping.
+- **Gate**: Feature Loop for the icon swap (visible), Refactor Gate-style backend check for the guard (no new screen, existing route hardened) — do the backend guard first since it's the actual security fix, then the frontend disable state, then the icon swap.
+- **Done gate**: an admin cannot deactivate their own account via the UI (control disabled/hidden on their own row) or via a direct API call (403); the active-user icon has no slash and the inactive-user icon has a slash, consistently on desktop and mobile.
+
+### Block B — Price Records & Audit Log
+
+#### 6.3 Price Records: Remove Search Filter, Adopt the Price-Trends Searchable Commodity Dropdown
+
+- **Files (edit)**: `PriceRecordFilters.tsx` (remove the Search `FormGroup`/`Input`, `~40-47`), `PriceRecordsPage.tsx` (drop `searchQuery`/`debouncedSearch` state and the `search` param sent to `GET /api/price-records`)
+- **Dropdown reuse — obstacle**: the source pattern (`PriceAnalysisHeader.tsx`, used by the public/admin/officer Price Trends page) selects **by commodity name (string)**; Price Records' commodity filter selects **by `commodityId`**. No generic combobox/searchable-select exists yet in `shared/components/` — this needs a **new shared component** (e.g. `shared/components/SearchableSelect.tsx`) generalized over `{ value, label }` options rather than raw strings, built from `PriceAnalysisHeader`'s button+search+scrollable-list+empty-state structure. Do not edit `PriceAnalysisHeader.tsx` in place — it's shared by the public page too; extract the pattern into `shared/`, then have **both** `PriceAnalysisHeader` and the new `PriceRecordFilters` commodity control consume it, so Price Trends doesn't regress and the two pages don't drift.
+- **Register the new component** in [ui-registry.md](ui-registry.md) once built, per CLAUDE.md.
+- **Gate**: Feature Loop (new shared component, visible UI change on two pages).
+- **Done gate**: Price Records has no Search input; its Commodity filter opens a searchable dropdown matching the Price Trends page's visual pattern exactly; selecting a commodity still filters by id server-side as before; the Price Trends page is visually and functionally unchanged after the extraction.
+
+#### 6.4 Audit Log: Remove Target Column, Remove Search Filter
+
+- **Files (edit)**: `AuditLogTable.tsx` (remove the Target `<th>` and its cell/`formatTarget` helper), `AuditLogFilters.tsx` (remove the actor name/email search input), `AuditLogPage.tsx` (drop the corresponding `searchTerm` state/debounce)
+- **Backend**: `audit-log.repository.ts`'s actor-name/email search branch becomes unused — decide whether to delete it or leave it (no schema change needed either way since `targetId` itself isn't being removed from the data model, only its column). Prefer deleting the dead branch per the no-unused-code convention, unless another consumer of that repository method needs it (check before deleting).
+- **Gate**: Refactor Gate-adjacent but is a **visible removal**, so treat as Feature Loop (quick sign-off, not a new screen).
+- **Done gate**: the audit log table has no Target column and no search input; date/action/actor filters still work; `colSpan`s on empty/loading rows updated to match the reduced column count (the same class of bug the Compliance-column removal on the public commodity list had to watch for).
+
+### Block C — Reports & Commodities
+
+#### 6.5 Reports: Show Date **and** Time on Recent Reports
+
+- **Files (edit)**: `ReportGenerationPage.tsx` — `mapBackendReportToRecent`'s `formattedDate` swaps `toLocaleDateString(...)` for a format that includes time, matching the existing convention elsewhere in the app (`AuditLogTable.tsx`'s `formatTimestamp` uses `toLocaleString(..., { dateStyle: "medium", timeStyle: "short" })` — reuse that exact options shape for consistency rather than inventing a third date-format convention).
+- **No backend change** — `BackendReport.createdAt` already carries full timestamp precision; this is a display-only fix.
+- **Gate**: Feature Loop (visible change), trivially small — safe to land in the same session as 6.6/6.7.
+- **Done gate**: each Recent Reports entry shows both the date and the time the report was generated, not date alone.
+
+#### 6.6 Commodities: Merge Update SRP into the Edit Form
+
+Today, create mode already shows optional SRP fields inline (5.2); edit mode shows none, and "Update SRP" is a fully separate dialog, schema, fetch, and endpoint. This makes edit mode structurally match what create mode already does.
+
+- **Files (edit)**: `AddCommodityDialog.tsx` (render the SRP fields in edit mode too, pre-filled from the commodity's latest SRP), `CommodityManagementPage.tsx` (`handleEditCommodity` becomes async — it must fetch full SRP data the way `openUpdateSrpDirect` does today, via `getCommodityById`, since the table row's `CommodityRow` only carries pre-formatted display strings, not raw SRP values; the save handler fires **two** calls on submit — `updateCommodity()` then `createSrp()` — sequentially, since a new SRP record needs the commodity to already exist), `commodity.schema.ts` (reconcile `createCommoditySchema`'s optional SRP fields with `UpdateSrpDialog`'s separate inline zod schema into one shared shape)
+- **Files (delete)**: `UpdateSrpDialog.tsx` and its trigger in `CommodityTable.tsx` (the standalone "Update SRP" button/`onOpenUpdateSrp` prop), once the merged Edit form covers the same capability
+- **Semantic note to carry into the UI copy**: "Update SRP" from this form is really **adding a new dated SRP record**, not editing the existing one in place (SRP rows are historical/effective-dated, and `createSrp` always inserts). Label the merged form's SRP section so a user doesn't expect it to mutate history — e.g. keep "Effective Date" visible and consider a hint that a new price takes effect from that date forward.
+- **RBAC unchanged**: SRP/commodity writes stay `OFFICER`-only (`canManage = userRole === "officer"` per 5.1) — admin continues to see the table read-only with no Edit trigger at all, so this merge only affects the officer-facing form.
+- **Gate**: Feature Loop. Sign off the merged form (with and without changing the SRP) before wiring the two-call submit.
+- **Done gate**: one form edits a commodity's name/category/status **and** optionally records a new SRP in a single submit; the standalone Update SRP dialog and its trigger no longer exist; an officer can still edit a commodity without touching its SRP at all (SRP fields stay optional in edit mode, same as create).
+
+**Phase 6 exit**: the store grid has no dead edit affordance and one aligned filter row with only real quick filters; an admin cannot lock themselves out and the block icon reads correctly at a glance; price records and audit log carry only filters that do real work, with price records' commodity filter matching the searchable pattern used elsewhere; report timestamps carry real precision; and commodity edit and SRP entry are one form instead of two.
+
+---
+
 ## 6. Recommended MVP Slice (if time-boxed)
 
 **R0 → R2.1 → R2.6 → R1.1 → R1.2**

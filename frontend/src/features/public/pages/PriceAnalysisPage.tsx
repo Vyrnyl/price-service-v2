@@ -150,8 +150,6 @@ export default function PriceAnalysisPage() {
   const [forecastPrice, setForecastPrice] = useState<number | null>(null);
   const [forecastConfidence, setForecastConfidence] = useState<number | null>(null);
   const [selectedCommodity, setSelectedCommodity] = useState("");
-  const [isCommodityOpen, setIsCommodityOpen] = useState(false);
-  const [commoditySearch, setCommoditySearch] = useState("");
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isForecastLoading, setIsForecastLoading] = useState(false);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
@@ -352,28 +350,13 @@ export default function PriceAnalysisPage() {
     };
   }, [selectedCommodityData?.id]);
 
-  const filteredCommodities = commodityOptions.filter((option) =>
-    option.toLowerCase().includes(commoditySearch.trim().toLowerCase()),
-  );
-
   return (
     <PageShell className="bg-surface-container-low">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-container-margin-mobile py-8 md:px-container-margin-desktop md:py-10">
         <PriceAnalysisHeader
           selectedCommodity={selectedCommodity}
-          isCommodityOpen={isCommodityOpen}
-          commoditySearch={commoditySearch}
-          filteredCommodities={filteredCommodities}
-          onToggleCommodity={() => {
-            setIsCommodityOpen((value) => !value);
-            setCommoditySearch("");
-          }}
-          onCommoditySearchChange={setCommoditySearch}
-          onSelectCommodity={(option) => {
-            setSelectedCommodity(option);
-            setIsCommodityOpen(false);
-            setCommoditySearch("");
-          }}
+          commodityOptions={commodityOptions}
+          onSelectCommodity={setSelectedCommodity}
         />
 
         <PriceAnalysisSummaryCards cards={summaryCards} />

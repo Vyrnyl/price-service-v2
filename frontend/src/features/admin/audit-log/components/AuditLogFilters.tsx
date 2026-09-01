@@ -1,12 +1,9 @@
 "use client";
 
-import { MdOutlineSearch } from "react-icons/md";
 import { ACTION_FILTER_OPTIONS } from "../constants/audit-log.constants";
 import type { AuditAction } from "../types/audit-log.types";
 
 type AuditLogFiltersProps = {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
   actionFilter: AuditAction | "ALL";
   onActionFilterChange: (value: AuditAction | "ALL") => void;
   dateFrom: string;
@@ -16,8 +13,6 @@ type AuditLogFiltersProps = {
 };
 
 export default function AuditLogFilters({
-  searchTerm,
-  onSearchChange,
   actionFilter,
   onActionFilterChange,
   dateFrom,
@@ -27,21 +22,7 @@ export default function AuditLogFilters({
 }: AuditLogFiltersProps) {
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="relative w-full lg:w-96">
-          <MdOutlineSearch
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-outline"
-            size={20}
-          />
-          <input
-            className="w-full rounded-xl border border-outline-variant bg-surface-container-low py-2.5 pl-10 pr-4 text-body-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            placeholder="Search by actor name or email..."
-            aria-label="Search audit log"
-            type="text"
-            value={searchTerm}
-            onChange={(event) => onSearchChange(event.target.value)}
-          />
-        </div>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-end">
         <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center lg:w-auto">
           <label className="flex items-center gap-2 text-body-sm text-on-surface-variant">
             From

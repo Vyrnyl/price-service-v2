@@ -71,6 +71,11 @@ export const userController = {
     const authUser = req.user as AuthUser | undefined;
     userIdParamSchema.parse(req.params);
     const validatedBody = updateUserSchema.parse(req.body);
+
+    if (authUser && authUser.userId === req.params.id && validatedBody.isActive === false) {
+      throw new AppError('You cannot deactivate your own account', 403);
+    }
+
     const user = await userService.updateUser(req.params.id, validatedBody);
 
     if (!user) {

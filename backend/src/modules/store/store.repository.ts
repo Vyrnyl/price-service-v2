@@ -4,9 +4,8 @@ import type { CreateStoreInput, ListStoresQuery, UpdateStoreInput } from './stor
 import type { StoreScope } from './store.scope';
 import { toSkipTake } from '../../shared/schema/pagination.schema';
 
-// Mirrors the thresholds in frontend/src/features/stores/utils/store-status.ts and use-stores.ts.
+// Mirrors the threshold in frontend/src/features/stores/utils/store-status.ts and use-stores.ts.
 const PENDING_THRESHOLD_DAYS = 30;
-const RECENTLY_UPDATED_WINDOW_DAYS = 7;
 const DAY_MS = 86400000;
 
 function storeStatusCondition(label: 'Monitored' | 'Pending', monitoredCutoff: Date): Prisma.StoreWhereInput {
@@ -28,7 +27,6 @@ export const storeRepository = {
 
     const now = Date.now();
     const monitoredCutoff = new Date(now - PENDING_THRESHOLD_DAYS * DAY_MS);
-    const recentCutoff = new Date(now - RECENTLY_UPDATED_WINDOW_DAYS * DAY_MS);
 
     const conditions: Prisma.StoreWhereInput[] = [];
 
@@ -50,9 +48,7 @@ export const storeRepository = {
     if (status) {
       conditions.push(storeStatusCondition(status, monitoredCutoff));
     }
-    if (quickFilter === 'Recently Updated') {
-      conditions.push({ lastVisited: { gt: recentCutoff } });
-    } else if (quickFilter === 'Monitored' || quickFilter === 'Pending') {
+    if (quickFilter === 'Monitored' || quickFilter === 'Pending') {
       conditions.push(storeStatusCondition(quickFilter, monitoredCutoff));
     }
 

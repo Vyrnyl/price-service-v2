@@ -9,7 +9,6 @@ import AuditLogDetailModal from "../components/AuditLogDetailModal";
 import type { AuditAction, AuditLogEntry } from "../types/audit-log.types";
 
 const PAGE_SIZE = 10;
-const SEARCH_DEBOUNCE_MS = 300;
 
 export default function AuditLogPage() {
   const [entries, setEntries] = useState<AuditLogEntry[]>([]);
@@ -17,20 +16,10 @@ export default function AuditLogPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [actionFilter, setActionFilter] = useState<AuditAction | "ALL">("ALL");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [selectedEntry, setSelectedEntry] = useState<AuditLogEntry | null>(null);
-
-  useEffect(() => {
-    const handle = setTimeout(() => {
-      setDebouncedSearch(searchTerm.trim());
-      setCurrentPage(1);
-    }, SEARCH_DEBOUNCE_MS);
-    return () => clearTimeout(handle);
-  }, [searchTerm]);
 
   useEffect(() => {
     async function loadAuditLogs() {
@@ -39,7 +28,6 @@ export default function AuditLogPage() {
         const response = await fetchAuditLogs({
           page: currentPage,
           pageSize: PAGE_SIZE,
-          search: debouncedSearch || undefined,
           action: actionFilter !== "ALL" ? actionFilter : undefined,
           dateFrom: dateFrom || undefined,
           dateTo: dateTo || undefined,
@@ -56,7 +44,7 @@ export default function AuditLogPage() {
     }
 
     void loadAuditLogs();
-  }, [currentPage, debouncedSearch, actionFilter, dateFrom, dateTo]);
+  }, [currentPage, actionFilter, dateFrom, dateTo]);
 
   return (
     <PageShell>
@@ -73,8 +61,6 @@ export default function AuditLogPage() {
           </div>
 
           <AuditLogFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
             actionFilter={actionFilter}
             onActionFilterChange={(value) => {
               setActionFilter(value);

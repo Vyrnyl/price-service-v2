@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import {
   MdAddCircle,
-  MdBakeryDining,
   MdEdit,
   MdKitchen,
+  MdLocalDining,
+  MdLocalGroceryStore,
   MdOutlineInventory2,
-  MdOutlineStorefront,
   MdOutlineTrendingUp,
   MdOutlineWarning,
 } from "react-icons/md";
@@ -15,13 +15,11 @@ import PageShell from "@/shared/components/PageShell";
 import AddCommodityDialog from "../components/AddCommodityDialog";
 import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
-import UpdateSrpDialog from "../components/UpdateSrpDialog";
 import {
   createCommodity,
   getCommodityById,
   getCommodities,
   updateCommodity,
-  type CommodityDetailsItem,
   type CommodityItem,
   type CreateCommodityPayload,
 } from "../services/commodity.api";
@@ -48,8 +46,8 @@ function mapCommodityToRow(item: CommodityItem, index: number) {
     srp: latestSrp ? `₱${latestSrp.price}` : "_",
     effectiveDate: latestSrp ? formatEffectiveDate(latestSrp.effectiveDate) : "_",
     statusClass: "border border-primary text-primary",
-    icon: index % 2 === 0 ? MdBakeryDining : MdOutlineStorefront,
-    iconBg: index % 2 === 0 ? "bg-primary-fixed text-primary" : "bg-secondary-container text-secondary",
+    icon: index % 2 === 0 ? MdLocalDining : MdLocalGroceryStore,
+    iconBg: "bg-primary-container/10 text-primary",
   };
 }
 
@@ -76,8 +74,6 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingCommodity, setEditingCommodity] = useState<CommodityItem | null>(null);
-  const [selectedCommodity, setSelectedCommodity] = useState<CommodityDetailsItem | null>(null);
-  const [updateSrpOpen, setUpdateSrpOpen] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
@@ -152,6 +148,13 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
           category: data.category,
           status: data.status,
         });
+        if (data.srpPrice && data.srpEffectiveDate) {
+          await createSrp({
+            commodityId: editingCommodity.id,
+            price: Number(data.srpPrice),
+            effectiveDate: data.srpEffectiveDate,
+          });
+        }
         setFormSuccess("Commodity updated successfully.");
         showToast("Commodity updated successfully.", "success");
         await loadCommodities(currentPage);
@@ -174,9 +177,6 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
 
       setFormOpen(false);
       setEditingCommodity(null);
-      if (selectedCommodity?.id === editingCommodity?.id) {
-        setSelectedCommodity(null);
-      }
     } catch (error: unknown) {
       if (error instanceof Error) {
         setFormError(error.message ?? "Unable to save commodity.");
@@ -189,77 +189,22 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     }
   };
 
-  const handleEditCommodity = (commodity: CommodityItem) => {
-    setEditingCommodity(commodity);
+  const handleEditCommodity = async (commodity: CommodityItem) => {
     setFormError(null);
     setFormSuccess(null);
-    setFormOpen(true);
-  };
-
-  const openUpdateSrpDirect = async (commodityId: string) => {
     setError(null);
-    setFormError(null);
-    setFormSuccess(null);
-    setIsLoading(true);
     try {
-      const commodity = await getCommodityById(commodityId);
-      setSelectedCommodity(commodity);
-      setUpdateSrpOpen(true);
+      const fullCommodity = await getCommodityById(commodity.id);
+      setEditingCommodity(fullCommodity);
+      setFormOpen(true);
     } catch {
       setError("Unable to load commodity details.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleCloseUpdateSrp = () => {
-    setUpdateSrpOpen(false);
-    setFormError(null);
-    setFormSuccess(null);
-  };
-
-  const handleCreateSrp = async (payload: { price: number; effectiveDate: string }) => {
-    if (!selectedCommodity) return;
-    setFormError(null);
-    setFormSuccess(null);
-    setSubmitLoading(true);
-
-    try {
-      await createSrp({
-        commodityId: selectedCommodity.id,
-        price: payload.price,
-        effectiveDate: payload.effectiveDate,
-      });
-
-      const refreshedCommodity = await getCommodityById(selectedCommodity.id);
-      setSelectedCommodity(refreshedCommodity);
-      setFormSuccess("SRP updated successfully.");
-      showToast("SRP updated successfully.", "success");
-      await loadCommodities(currentPage);
-      setUpdateSrpOpen(false);
-    } catch (error: unknown) {
-      if (error instanceof Error) {
-        setFormError(error.message ?? "Unable to update SRP.");
-      } else {
-        setFormError("Unable to update SRP.");
-      }
-      console.error("Failed to update SRP", error);
-    } finally {
-      setSubmitLoading(false);
     }
   };
 
   const totalListed = summaryStats.total;
   const activeCount = summaryStats.active;
   const categoriesCount = summaryStats.categories;
-
-  const selectedCommoditySrp = selectedCommodity?.srps?.[0];
-  const srpDefaultValues = selectedCommoditySrp
-    ? {
-        price: Number(selectedCommoditySrp.price),
-        effectiveDate: new Date(selectedCommoditySrp.effectiveDate).toISOString().slice(0, 10),
-      }
-    : undefined;
 
   const summaryCards = [
     {
@@ -318,17 +263,6 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
             }}
             onSubmit={handleSaveCommodity}
           />
-          <UpdateSrpDialog
-            key={`update-srp-${selectedCommodity?.id ?? "new"}-${selectedCommoditySrp?.id ?? ""}`}
-            open={updateSrpOpen}
-            commodityName={selectedCommodity?.name ?? null}
-            defaultValues={srpDefaultValues}
-            onClose={handleCloseUpdateSrp}
-            onSubmit={handleCreateSrp}
-            submitLoading={submitLoading}
-            formError={formError}
-            formSuccess={formSuccess}
-          />
           <div className="flex flex-col justify-between gap-4 md:flex-row md:items-end">
             <div>
               <h2 className="font-sans text-h1-desktop text-on-surface">
@@ -372,7 +306,6 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
                 setCurrentPage(1);
               }}
               onPageChange={setCurrentPage}
-              onOpenUpdateSrp={canManage ? openUpdateSrpDirect : undefined}
               onEditCommodity={canManage ? handleEditCommodity : undefined}
             />
           </div>
