@@ -58,18 +58,30 @@ function getDateRangeError(startDate: string, endDate: string) {
   return null;
 }
 
+function formatPeriod(period: string) {
+  const [start, end] = period.split(" to ").map((value) => new Date(value));
+  if (!start || !end || Number.isNaN(start.getTime()) || Number.isNaN(end.getTime())) {
+    return period;
+  }
+
+  const startLabel = start.toLocaleDateString("en-PH", { month: "short", day: "numeric" });
+  const endLabel = end.toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" });
+
+  return `${startLabel} – ${endLabel}`;
+}
+
 function mapBackendReportToRecent(report: BackendReport): RecentReport {
-  const formattedDate = new Date(report.createdAt).toLocaleString("en-PH", {
+  const formattedDate = new Date(report.createdAt).toLocaleDateString("en-PH", {
     dateStyle: "medium",
-    timeStyle: "short",
   });
 
   const typeTitle = reportTypes.find((type) => type.backendType === report.type)?.title ?? report.type.replace(/_/g, " ");
+  const fileFormat = report.filename.toLowerCase().endsWith(".pdf") ? "PDF" : "Excel";
 
   return {
     id: report.id,
-    name: `${typeTitle} · ${report.period}`,
-    meta: formattedDate,
+    name: report.filterLabel ? `${typeTitle} · ${report.filterLabel}` : typeTitle,
+    meta: `${formatPeriod(report.period)} · Generated ${formattedDate} · ${fileFormat}`,
     status: "Ready",
     statusClass: "bg-secondary-fixed text-on-secondary-fixed",
     statusIcon: MdDownload,

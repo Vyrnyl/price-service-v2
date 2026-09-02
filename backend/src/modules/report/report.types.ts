@@ -4,4 +4,5 @@ export type CreateReportWithFileInput = CreateReportInput & {
   filename: string;
   contentType: string;
   fileContent: Buffer;
+  filterLabel: string | null;
 };

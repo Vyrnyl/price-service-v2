@@ -1257,9 +1257,17 @@ export async function generateReportFile(
     ? await generatePdf(payload, rows, summary, generatedBy)
     : await generateExcel(payload, rows, summary, generatedBy);
 
+  const filters = describeFilters(payload, rows);
+  const filterLabel = payload.storeId
+    ? filters.store
+    : payload.commodityGroup && payload.commodityGroup !== 'ALL'
+      ? filters.commodityGroup
+      : null;
+
   return {
     filename,
     contentType: contentTypeForFormat(payload.format),
     fileContent,
+    filterLabel,
   };
 }

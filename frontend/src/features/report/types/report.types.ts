@@ -45,6 +45,7 @@ export type BackendReport = {
   id: string;
   type: ReportTypeEnum;
   period: string;
+  filterLabel: string | null;
   filename: string;
   createdAt: string;
   user: BackendReportUser;

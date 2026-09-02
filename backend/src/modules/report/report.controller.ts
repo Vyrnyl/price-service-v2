@@ -34,6 +34,7 @@ export const reportController = {
       filename: generated.filename,
       contentType: generated.contentType,
       fileContent: generated.fileContent,
+      filterLabel: generated.filterLabel,
     };
 
     const report = await reportService.createReport(reportPayload, authUser.userId);

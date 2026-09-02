@@ -101,6 +101,7 @@ model Report {
   type        ReportType
   generatedBy String     @db.Uuid
   period      String
+  filterLabel String?
   filename    String
   contentType String
   fileContent Bytes

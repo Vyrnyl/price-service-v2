@@ -11,6 +11,7 @@ const reportSummarySelect = {
   type: true,
   generatedBy: true,
   period: true,
+  filterLabel: true,
   filename: true,
   contentType: true,
   createdAt: true,

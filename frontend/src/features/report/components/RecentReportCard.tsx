@@ -12,10 +12,10 @@ export default function RecentReportCard({ report }: { report: RecentReport }) {
     <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-5 data-card-shadow">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="min-w-0">
-          <p className="truncate text-lg font-semibold text-on-surface">{report.name}</p>
+          <p className="text-lg font-semibold text-on-surface">{report.name}</p>
           <p className="mt-1 text-body-sm text-on-surface-variant">{report.meta}</p>
         </div>
-        <span className={`inline-flex items-center gap-2 rounded-full px-3 py-1 text-label-caps font-semibold ${report.statusClass}`}>
+        <span className={`inline-flex shrink-0 items-center gap-2 self-start rounded-full px-3 py-1 text-label-caps font-semibold ${report.statusClass}`}>
           <StatusIcon size={14} />
           {report.status}
         </span>
