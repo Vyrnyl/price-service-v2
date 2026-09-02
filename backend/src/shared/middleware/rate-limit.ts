@@ -2,8 +2,8 @@ import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 import AppError from '../utils/AppError';
 
 export const loginRateLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  limit: 5,
+  windowMs: 60 * 1000,
+  limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
   keyGenerator: (req) => {
@@ -11,6 +11,6 @@ export const loginRateLimiter = rateLimit({
     return `${ipKeyGenerator(req.ip ?? 'unknown-ip')}:${email}`;
   },
   handler: (_req, _res, next) => {
-    next(new AppError('Too many login attempts. Please try again in 15 minutes.', 429));
+    next(new AppError('Too many login attempts. Please try again in 1 minute.', 429));
   },
 });
