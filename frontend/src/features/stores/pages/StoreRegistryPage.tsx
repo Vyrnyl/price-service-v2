@@ -30,8 +30,6 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
     storeRecordsLoading,
     searchTerm,
     setSearchTerm,
-    municipalityFilter,
-    setMunicipalityFilter,
     statusFilter,
     setStatusFilter,
     handleFormChange,
@@ -49,10 +47,6 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
 
   const handleSearchChange = (value: string) => {
     setSearchTerm(value);
-  };
-
-  const handleMunicipalityFilterChange = (value: string) => {
-    setMunicipalityFilter(value);
   };
 
   const handleStatusFilterChange = (value: string) => {
@@ -87,8 +81,6 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
           <StoreRegistryToolbar
             searchTerm={searchTerm}
             onSearchChange={handleSearchChange}
-            municipalityFilter={municipalityFilter}
-            onMunicipalityFilterChange={handleMunicipalityFilterChange}
             statusFilter={statusFilter}
             onStatusFilterChange={handleStatusFilterChange}
             storeCount={total}
