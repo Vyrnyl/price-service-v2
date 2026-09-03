@@ -3,10 +3,12 @@
 import { useMemo, useState } from "react";
 import { MdOutlineEdit, MdOutlinePersonOff, MdOutlinePerson2 } from "react-icons/md";
 import Pagination from "@/shared/components/Pagination";
+import Skeleton from "@/shared/components/Skeleton";
 import type { User, UserRole } from "../types/users.types";
 
 type UsersTableProps = {
   users: User[];
+  isLoading?: boolean;
   onToggleActive: (user: User) => void;
   onEdit: (user: User) => void;
   getInitials: (name: string) => string;
@@ -16,7 +18,7 @@ type UsersTableProps = {
 
 const PAGE_SIZE = 5;
 
-export default function UsersTable({ users, onToggleActive, onEdit, getInitials, getRoleClass, currentUserId }: UsersTableProps) {
+export default function UsersTable({ users, isLoading = false, onToggleActive, onEdit, getInitials, getRoleClass, currentUserId }: UsersTableProps) {
   const [currentPage, setCurrentPage] = useState(1);
 
   const totalPages = Math.max(1, Math.ceil(users.length / PAGE_SIZE));
@@ -44,7 +46,33 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/30">
-              {paginatedUsers.map((user) => {
+              {isLoading ? (
+                Array.from({ length: 5 }, (_, index) => index).map((row) => (
+                  <tr key={row}>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <Skeleton className="h-10 w-10 rounded-full" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-32" />
+                          <Skeleton className="h-3 w-40" />
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                    </td>
+                    <td className="px-6 py-4">
+                      <Skeleton className="h-4 w-16" />
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                        <Skeleton className="h-8 w-8 rounded-lg" />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              ) : paginatedUsers.map((user) => {
                 const isSelf = user.id === currentUserId;
                 return (
                 <tr key={user.id} className="group transition-colors">
@@ -106,7 +134,26 @@ export default function UsersTable({ users, onToggleActive, onEdit, getInitials,
       </div>
 
       <div className="space-y-3 p-3 md:hidden">
-        {paginatedUsers.map((user) => {
+        {isLoading
+          ? Array.from({ length: 5 }, (_, index) => index).map((row) => (
+              <div key={row} className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <Skeleton className="h-10 w-10 rounded-full" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-28" />
+                      <Skeleton className="h-3 w-32" />
+                    </div>
+                  </div>
+                  <Skeleton className="h-5 w-16 rounded-full" />
+                </div>
+                <div className="mt-4 flex items-center justify-end gap-2">
+                  <Skeleton className="h-9 w-9 rounded-lg" />
+                  <Skeleton className="h-9 w-9 rounded-lg" />
+                </div>
+              </div>
+            ))
+          : paginatedUsers.map((user) => {
           const isSelf = user.id === currentUserId;
           return (
           <div key={user.id} className="rounded-xl border border-outline-variant bg-surface-container-low p-4">

@@ -12,6 +12,7 @@ import {
   MdOutlineWarning,
 } from "react-icons/md";
 import PageShell from "@/shared/components/PageShell";
+import { SkeletonStatCard } from "@/shared/components/Skeleton";
 import AddCommodityDialog from "../components/AddCommodityDialog";
 import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
@@ -71,6 +72,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [commodityRows, setCommodityRows] = useState<CommodityRow[]>([]);
   const [total, setTotal] = useState(0);
   const [summaryStats, setSummaryStats] = useState({ total: 0, active: 0, categories: 0 });
+  const [statsLoading, setStatsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
@@ -119,6 +121,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
 
   const loadStats = async () => {
     try {
+      setStatsLoading(true);
       const allCommodities = await fetchAllPages<CommodityItem>("/api/commodities");
       setSummaryStats({
         total: allCommodities.length,
@@ -127,6 +130,8 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
       });
     } catch {
       // Summary stats are non-critical; leave the previous values in place.
+    } finally {
+      setStatsLoading(false);
     }
   };
 
@@ -290,7 +295,15 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
             ) : null}
           </div>
 
-          <CommoditySummaryCards cards={summaryCards} />
+          {statsLoading ? (
+            <section className="flex flex-wrap gap-6">
+              {summaryCards.map((stat) => (
+                <SkeletonStatCard key={stat.label} />
+              ))}
+            </section>
+          ) : (
+            <CommoditySummaryCards cards={summaryCards} />
+          )}
 
           <div className="flex flex-col gap-6 xl:flex-row">
             <CommodityTable

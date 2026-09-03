@@ -13,6 +13,7 @@ import { SrpVsActualChart } from "@/shared/components/charts/SrpVsActualChart";
 import { fetchDashboardAnalytics } from "@/shared/services/dashboard.service";
 import type { DashboardAnalytics } from "@/shared/types/dashboard.types";
 import PageShell from "@/shared/components/PageShell";
+import Skeleton, { SkeletonStatCard } from "@/shared/components/Skeleton";
 
 type DashboardStat = {
   label: string;
@@ -108,8 +109,10 @@ function formatRelativeTime(value: string) {
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState<DashboardStat[]>(initialStats);
+  const [statsLoading, setStatsLoading] = useState(true);
   const [activityItems, setActivityItems] = useState<ActivityItem[]>([]);
   const [recentStores, setRecentStores] = useState<RecentStoreRow[]>([]);
+  const [recentLoading, setRecentLoading] = useState(true);
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(true);
   const [analyticsError, setAnalyticsError] = useState<string | null>(null);
@@ -135,6 +138,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadDashboardStats() {
       try {
+        setStatsLoading(true);
         const [commodityResponse, storeResponse, userResponse] = await Promise.all([
           apiFetch<{ status: string; data: unknown[]; total: number }>('/api/commodities?pageSize=1'),
           apiFetch<{ status: string; data: unknown[]; total: number }>('/api/stores?pageSize=1'),
@@ -174,6 +178,8 @@ export default function AdminDashboardPage() {
         ]);
       } catch (error) {
         console.error("Failed to load dashboard stats", error);
+      } finally {
+        setStatsLoading(false);
       }
     }
 
@@ -183,6 +189,7 @@ export default function AdminDashboardPage() {
   useEffect(() => {
     async function loadActivityAndRecentStores() {
       try {
+        setRecentLoading(true);
         type StoreListItem = { id: string; name: string; location?: string; createdAt?: string; user?: { name?: string } };
 
         // Stores are fetched once here and reused for both the activity feed and the
@@ -241,6 +248,8 @@ export default function AdminDashboardPage() {
         setRecentStores(recentStoreRows);
       } catch (error) {
         console.error("Failed to load activity feed and recent stores", error);
+      } finally {
+        setRecentLoading(false);
       }
     }
 
@@ -267,37 +276,39 @@ export default function AdminDashboardPage() {
           </div>
 
           <section className="flex flex-wrap gap-6">
-            {stats.map((stat) => (
-              <div
-                key={stat.label}
-                className="flex min-w-52.5 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow"
-              >
-                <div className="mb-4 flex items-start justify-between gap-3">
-                  <div className={`rounded-xl p-2 ${stat.iconBg}`}>
-                    <stat.icon className={stat.iconColor} size={24} />
-                  </div>
-                  {stat.meta ? (
-                    <span
-                      className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
-                        stat.metaStyle ?? "bg-primary/5 text-primary"
+            {statsLoading
+              ? stats.map((stat) => <SkeletonStatCard key={stat.label} />)
+              : stats.map((stat) => (
+                  <div
+                    key={stat.label}
+                    className="flex min-w-52.5 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow"
+                  >
+                    <div className="mb-4 flex items-start justify-between gap-3">
+                      <div className={`rounded-xl p-2 ${stat.iconBg}`}>
+                        <stat.icon className={stat.iconColor} size={24} />
+                      </div>
+                      {stat.meta ? (
+                        <span
+                          className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
+                            stat.metaStyle ?? "bg-primary/5 text-primary"
+                          }`}
+                        >
+                          {stat.meta}
+                        </span>
+                      ) : null}
+                    </div>
+                    <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
+                      {stat.label}
+                    </p>
+                    <h3
+                      className={`text-[32px] font-bold leading-none ${
+                        stat.valueColor ?? "text-on-surface"
                       }`}
                     >
-                      {stat.meta}
-                    </span>
-                  ) : null}
-                </div>
-                <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
-                  {stat.label}
-                </p>
-                <h3
-                  className={`text-[32px] font-bold leading-none ${
-                    stat.valueColor ?? "text-on-surface"
-                  }`}
-                >
-                  {stat.value}
-                </h3>
-              </div>
-            ))}
+                      {stat.value}
+                    </h3>
+                  </div>
+                ))}
           </section>
 
           <section className="space-y-6">
@@ -329,28 +340,40 @@ export default function AdminDashboardPage() {
                 </h4>
               </div>
               <div className="flex-1 space-y-6">
-                {activityItems.map((item) => (
-                  <div key={item.id} className="flex items-start gap-4">
-                    <div
-                      className={`mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${item.iconStyle}`}
-                    >
-                      <item.icon size={18} />
-                    </div>
-                    <div>
-                      <p className="text-body-sm text-on-surface">
-                        <span className="font-semibold">{item.title}</span> {item.description}
-                      </p>
-                      <div className="mt-1 flex items-center gap-2">
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-outline">
-                          {item.time}
-                        </span>
-                        {item.change ? (
-                          <span className="text-xs font-bold text-primary">{item.change}</span>
-                        ) : null}
+                {recentLoading ? (
+                  Array.from({ length: 5 }, (_, index) => index).map((row) => (
+                    <div key={row} className="flex items-start gap-4">
+                      <Skeleton className="h-9 w-9 shrink-0 rounded-full" />
+                      <div className="flex-1 space-y-2">
+                        <Skeleton className="h-4 w-3/4" />
+                        <Skeleton className="h-3 w-1/3" />
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))
+                ) : (
+                  activityItems.map((item) => (
+                    <div key={item.id} className="flex items-start gap-4">
+                      <div
+                        className={`mt-1 flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${item.iconStyle}`}
+                      >
+                        <item.icon size={18} />
+                      </div>
+                      <div>
+                        <p className="text-body-sm text-on-surface">
+                          <span className="font-semibold">{item.title}</span> {item.description}
+                        </p>
+                        <div className="mt-1 flex items-center gap-2">
+                          <span className="text-[10px] font-semibold uppercase tracking-wider text-outline">
+                            {item.time}
+                          </span>
+                          {item.change ? (
+                            <span className="text-xs font-bold text-primary">{item.change}</span>
+                          ) : null}
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
 
@@ -370,20 +393,37 @@ export default function AdminDashboardPage() {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-outline-variant/20">
-                    {recentStores.map((row) => (
-                      <tr key={row.id}>
-                        <td className="py-4">
-                          <div className="flex flex-col">
-                            <span className="font-semibold text-on-surface">{row.name}</span>
-                            <span className="text-sm text-on-surface-variant">{row.location}</span>
-                          </div>
-                        </td>
-                        <td className="py-4 text-sm text-on-surface">{row.officerName}</td>
-                        <td className="py-4 text-sm text-on-surface-variant">
-                          {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '—'}
-                        </td>
-                      </tr>
-                    ))}
+                    {recentLoading
+                      ? Array.from({ length: 5 }, (_, index) => index).map((row) => (
+                          <tr key={row}>
+                            <td className="py-4">
+                              <div className="flex flex-col gap-2">
+                                <Skeleton className="h-4 w-32" />
+                                <Skeleton className="h-3 w-20" />
+                              </div>
+                            </td>
+                            <td className="py-4">
+                              <Skeleton className="h-4 w-24" />
+                            </td>
+                            <td className="py-4">
+                              <Skeleton className="h-4 w-20" />
+                            </td>
+                          </tr>
+                        ))
+                      : recentStores.map((row) => (
+                          <tr key={row.id}>
+                            <td className="py-4">
+                              <div className="flex flex-col">
+                                <span className="font-semibold text-on-surface">{row.name}</span>
+                                <span className="text-sm text-on-surface-variant">{row.location}</span>
+                              </div>
+                            </td>
+                            <td className="py-4 text-sm text-on-surface">{row.officerName}</td>
+                            <td className="py-4 text-sm text-on-surface-variant">
+                              {row.createdAt ? new Date(row.createdAt).toLocaleDateString() : '—'}
+                            </td>
+                          </tr>
+                        ))}
                   </tbody>
                 </table>
               </div>

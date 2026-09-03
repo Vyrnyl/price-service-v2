@@ -26,6 +26,7 @@ const SEARCH_DEBOUNCE_MS = 300;
 
 export default function UsersManagementPage() {
   const [users, setUsers] = useState<User[]>([]);
+  const [usersLoading, setUsersLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [userStats, setUserStats] = useState({ total: 0, admins: 0, officers: 0, active: 0 });
@@ -91,6 +92,7 @@ export default function UsersManagementPage() {
 
   const loadUsers = async (targetPage: number) => {
     try {
+      setUsersLoading(true);
       const response = await getUsers({
         page: targetPage,
         pageSize: PAGE_SIZE,
@@ -102,6 +104,8 @@ export default function UsersManagementPage() {
       setTotal(response.total);
     } catch (error) {
       console.error("Failed to load users", error);
+    } finally {
+      setUsersLoading(false);
     }
   };
 
@@ -299,6 +303,7 @@ export default function UsersManagementPage() {
 
           <UsersTable
             users={users}
+            isLoading={usersLoading}
             onEdit={handleEditUser}
             onToggleActive={handleToggleActive}
             getInitials={getInitials}

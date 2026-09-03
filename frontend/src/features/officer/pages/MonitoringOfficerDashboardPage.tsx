@@ -9,6 +9,7 @@ import { SrpVsActualChart } from "@/shared/components/charts/SrpVsActualChart";
 import { fetchDashboardAnalytics } from "@/shared/services/dashboard.service";
 import type { DashboardAnalytics } from "@/shared/types/dashboard.types";
 import PageShell from "@/shared/components/PageShell";
+import Skeleton, { SkeletonStatCard } from "@/shared/components/Skeleton";
 
 const stats = [
   {
@@ -38,6 +39,7 @@ export default function MonitoringOfficerDashboardPage() {
   const [totalCommodities, setTotalCommodities] = useState(0);
   const [totalStores, setTotalStores] = useState(0);
   const [totalPriceRecords, setTotalPriceRecords] = useState(0);
+  const [countsLoading, setCountsLoading] = useState(true);
   const [latestStores, setLatestStores] = useState<Array<{ id: string; name: string; location: string; createdAt: string }>>([]);
   const [latestPriceRecords, setLatestPriceRecords] = useState<Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>>([]);
   const [analytics, setAnalytics] = useState<DashboardAnalytics | null>(null);
@@ -65,6 +67,7 @@ export default function MonitoringOfficerDashboardPage() {
   useEffect(() => {
     async function loadDashboardCounts() {
       try {
+        setCountsLoading(true);
         const [commoditiesResponse, storesData, priceRecordsResponse] = await Promise.all([
           apiFetch<{ status: string; data: unknown[]; total: number }>("/api/commodities?pageSize=1"),
           fetchAllPages<{ id: string; name: string; location: string; createdAt: string }>("/api/stores"),
@@ -82,6 +85,8 @@ export default function MonitoringOfficerDashboardPage() {
         setLatestPriceRecords(sortedPriceRecords.slice(0, 3));
       } catch (error) {
         console.error("Failed to load dashboard counts", error);
+      } finally {
+        setCountsLoading(false);
       }
     }
 
@@ -104,37 +109,39 @@ export default function MonitoringOfficerDashboardPage() {
           </div>
 
           <section className="flex flex-wrap gap-6">
-            {stats.map((stat) => {
-              const Icon = stat.icon;
-              const value =
-                stat.valueKey === "commodities"
-                  ? totalCommodities
-                  : stat.valueKey === "stores"
-                  ? totalStores
-                  : totalPriceRecords;
+            {countsLoading
+              ? stats.map((stat) => <SkeletonStatCard key={stat.label} />)
+              : stats.map((stat) => {
+                  const Icon = stat.icon;
+                  const value =
+                    stat.valueKey === "commodities"
+                      ? totalCommodities
+                      : stat.valueKey === "stores"
+                      ? totalStores
+                      : totalPriceRecords;
 
-              return (
-                <div
-                  key={stat.label}
-                  className="flex min-w-48 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow"
-                >
-                  <div className="mb-3 flex items-start justify-between gap-3">
-                    <span className={`rounded-xl p-2 ${stat.bg}`}>
-                      <Icon className={stat.tone} size={20} />
-                    </span>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline">
-                      Total
-                    </span>
-                  </div>
-                  <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
-                    {stat.label}
-                  </p>
-                  <h3 className="text-[28px] font-bold leading-none text-on-surface">
-                    {value}
-                  </h3>
-                </div>
-              );
-            })}
+                  return (
+                    <div
+                      key={stat.label}
+                      className="flex min-w-48 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow"
+                    >
+                      <div className="mb-3 flex items-start justify-between gap-3">
+                        <span className={`rounded-xl p-2 ${stat.bg}`}>
+                          <Icon className={stat.tone} size={20} />
+                        </span>
+                        <span className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline">
+                          Total
+                        </span>
+                      </div>
+                      <p className="mb-1 font-sans text-label-caps text-on-surface-variant">
+                        {stat.label}
+                      </p>
+                      <h3 className="text-[28px] font-bold leading-none text-on-surface">
+                        {value}
+                      </h3>
+                    </div>
+                  );
+                })}
           </section>
 
           <section className="space-y-6">
@@ -174,7 +181,15 @@ export default function MonitoringOfficerDashboardPage() {
                   Added Stores
                 </p>
                 <div className="space-y-3">
-                  {latestStores.length > 0 ? (
+                  {countsLoading ? (
+                    Array.from({ length: 3 }, (_, index) => index).map((row) => (
+                      <div key={row} className="space-y-2 rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-3 w-1/4" />
+                      </div>
+                    ))
+                  ) : latestStores.length > 0 ? (
                     latestStores.map((store) => (
                       <div key={store.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
                         <p className="font-semibold text-on-surface">{store.name}</p>
@@ -193,7 +208,15 @@ export default function MonitoringOfficerDashboardPage() {
                   Added Price Records
                 </p>
                 <div className="space-y-3">
-                  {latestPriceRecords.length > 0 ? (
+                  {countsLoading ? (
+                    Array.from({ length: 3 }, (_, index) => index).map((row) => (
+                      <div key={row} className="space-y-2 rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
+                        <Skeleton className="h-4 w-2/3" />
+                        <Skeleton className="h-3 w-1/2" />
+                        <Skeleton className="h-3 w-1/4" />
+                      </div>
+                    ))
+                  ) : latestPriceRecords.length > 0 ? (
                     latestPriceRecords.map((record) => (
                       <div key={record.id} className="rounded-xl bg-surface-container-lowest p-3 data-card-shadow">
                         <p className="font-semibold text-on-surface">{record.commodity.name}</p>

@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { PriceRecordsTable, type PriceRecord } from "@/features/price-record";
 import Modal from "@/shared/components/Modal";
 import Pagination from "@/shared/components/Pagination";
+import { SkeletonTableRows } from "@/shared/components/Skeleton";
 
 function getStatusLabel(status: string | undefined, price: number, srpPrice: number | null) {
   if (Number.isFinite(price) && srpPrice != null) {
@@ -68,10 +69,8 @@ export function StorePriceRecordsModal({ storeId, storeName, records, loading, o
       maxWidth="max-w-4xl"
     >
         {loading ? (
-          <div className="space-y-2 rounded-xl border border-outline-variant bg-surface-container-lowest p-3">
-            {Array.from({ length: 5 }, (_, index) => index).map((row) => (
-              <div key={row} className="h-10 animate-pulse rounded-lg bg-surface-container" />
-            ))}
+          <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-3">
+            <SkeletonTableRows rows={5} className="p-0" />
           </div>
         ) : normalizedRecords.length > 0 ? (
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:p-3">

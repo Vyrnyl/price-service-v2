@@ -8,6 +8,7 @@ import { useToast } from "@/shared/components/Toast";
 import PageShell from "@/shared/components/PageShell";
 import Modal from "@/shared/components/Modal";
 import Pagination from "@/shared/components/Pagination";
+import { SkeletonTableRows } from "@/shared/components/Skeleton";
 import PriceRecordForm from "../components/PriceRecordForm";
 import PriceRecordFilters from "../components/PriceRecordFilters";
 import PriceRecordsTable from "../components/PriceRecordsTable";
@@ -158,6 +159,7 @@ export default function PriceRecordsPage({
   const [stores, setStores] = useState<StoreOption[]>([]);
   const [commodities, setCommodities] = useState<CommodityOption[]>([]);
   const [rawRecords, setRawRecords] = useState<BackendPriceRecord[]>([]);
+  const [recordsLoading, setRecordsLoading] = useState(true);
   const [total, setTotal] = useState(0);
   const [formOpen, setFormOpen] = useState(false);
   const [editingRecord, setEditingRecord] = useState<PriceRecord | null>(null);
@@ -193,6 +195,7 @@ export default function PriceRecordsPage({
 
   const loadRecords = async (page: number) => {
     try {
+      setRecordsLoading(true);
       const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
       if (storeFilter) params.set("storeId", storeFilter);
       if (commodityFilter) params.set("commodityId", commodityFilter);
@@ -205,6 +208,8 @@ export default function PriceRecordsPage({
       setTotal(response.total);
     } catch (error) {
       console.error("Unable to load price record data", error);
+    } finally {
+      setRecordsLoading(false);
     }
   };
 
@@ -397,12 +402,16 @@ export default function PriceRecordsPage({
           ) : null}
 
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:p-3">
-            <PriceRecordsTable
-              records={records}
-              onEdit={handleEditRecord}
-              hideActions={hideActions}
-              hideOfficerColumn
-            />
+            {recordsLoading ? (
+              <SkeletonTableRows rows={PAGE_SIZE} />
+            ) : (
+              <PriceRecordsTable
+                records={records}
+                onEdit={handleEditRecord}
+                hideActions={hideActions}
+                hideOfficerColumn
+              />
+            )}
             {total > PAGE_SIZE ? (
               <div className="mt-3 flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                 <p className="text-[11px] text-on-surface-variant sm:text-sm">

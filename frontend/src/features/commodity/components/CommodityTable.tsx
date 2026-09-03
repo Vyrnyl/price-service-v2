@@ -3,6 +3,7 @@
 import { MdEdit, MdSearch } from "react-icons/md";
 import type { ComponentType } from "react";
 import Pagination from "@/shared/components/Pagination";
+import Skeleton from "@/shared/components/Skeleton";
 import type { CommodityItem } from "../services/commodity.api";
 import type { CommodityStatus } from "../commodity.schema";
 
@@ -117,11 +118,33 @@ export default function CommodityTable({
           </thead>
           <tbody className="divide-y divide-outline-variant/20">
             {isLoading ? (
-              <tr>
-                <td colSpan={columnCount} className="py-12 text-center text-sm text-on-surface-variant">
-                  Loading commodities...
-                </td>
-              </tr>
+              Array.from({ length: 5 }, (_, index) => index).map((row) => (
+                <tr key={row}>
+                  <td className="py-4">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-9 w-9 rounded-lg" />
+                      <Skeleton className="h-4 w-32" />
+                    </div>
+                  </td>
+                  <td className="py-4">
+                    <Skeleton className="h-4 w-20" />
+                  </td>
+                  <td className="py-4">
+                    <Skeleton className="h-5 w-16 rounded-full" />
+                  </td>
+                  <td className="py-4">
+                    <Skeleton className="h-4 w-16" />
+                  </td>
+                  <td className="py-4">
+                    <Skeleton className="h-4 w-20" />
+                  </td>
+                  {showActions ? (
+                    <td className="py-4 text-right">
+                      <Skeleton className="ml-auto h-8 w-8 rounded-lg" />
+                    </td>
+                  ) : null}
+                </tr>
+              ))
             ) : error ? (
               <tr>
                 <td colSpan={columnCount} className="py-12 text-center text-sm text-error">{error}</td>

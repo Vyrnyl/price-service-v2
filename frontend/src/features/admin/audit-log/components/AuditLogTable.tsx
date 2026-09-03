@@ -3,6 +3,7 @@
 import { MdOutlineVisibility } from "react-icons/md";
 import Badge from "@/shared/components/Badge";
 import Pagination from "@/shared/components/Pagination";
+import { SkeletonTableRows } from "@/shared/components/Skeleton";
 import { ACTION_BADGE_VARIANT, ACTION_LABELS } from "../constants/audit-log.constants";
 import type { AuditLogEntry } from "../types/audit-log.types";
 
@@ -54,11 +55,7 @@ export default function AuditLogTable({
       {error ? (
         <p className="flex h-40 items-center justify-center px-6 text-body-sm text-error">{error}</p>
       ) : isLoading ? (
-        <div className="space-y-3 p-6">
-          {Array.from({ length: 5 }, (_, index) => index).map((row) => (
-            <div key={row} className="h-12 animate-pulse rounded-lg bg-surface-container" />
-          ))}
-        </div>
+        <SkeletonTableRows rows={5} />
       ) : entries.length === 0 ? (
         <p className="flex h-40 items-center justify-center px-6 text-center text-body-sm text-on-surface-variant">
           No audit activity found for the current filters.

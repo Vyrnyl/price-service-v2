@@ -2,6 +2,7 @@
 
 import PageShell from "@/shared/components/PageShell";
 import Pagination from "@/shared/components/Pagination";
+import { SkeletonStoreCard } from "@/shared/components/Skeleton";
 import { CreateStoreDialog } from "../components/CreateStoreDialog";
 import { StoreRegistryHeader } from "../components/StoreRegistryHeader";
 import { StoreRegistryToolbar } from "../components/StoreRegistryToolbar";
@@ -87,8 +88,10 @@ export default function StoreRegistryPage({ showAssignedOfficer = true, canCreat
           />
 
           {isLoading ? (
-            <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-8 text-center text-body-sm text-on-surface-variant">
-              Loading stores...
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-3 auto-rows-fr">
+              {Array.from({ length: 6 }, (_, index) => index).map((row) => (
+                <SkeletonStoreCard key={row} />
+              ))}
             </div>
           ) : error ? (
             <div className="rounded-xl border border-error bg-error-container p-8 text-center text-body-sm text-on-error-container">
