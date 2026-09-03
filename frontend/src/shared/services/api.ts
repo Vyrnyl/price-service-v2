@@ -71,3 +71,44 @@ export async function apiFetch<T>(path: string, options: ApiRequestOptions = {})
 
   return data as T;
 }
+
+interface PaginatedApiResponse<T> {
+  status: string;
+  data: T[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/**
+ * Reference-data lists (commodities, stores, ...) are capped at the backend's
+ * MAX_PAGE_SIZE per request (a deliberate DoS-prevention ceiling — see
+ * pagination.schema.ts). Once a table's row count exceeds that ceiling, a
+ * single page silently stops being "effectively everything". This walks
+ * every page so dropdown/filter data sources stay complete regardless of
+ * how large the underlying table grows.
+ */
+export async function fetchAllPages<T>(
+  basePath: string,
+  options: ApiRequestOptions = {},
+  pageSize = 100,
+): Promise<T[]> {
+  const separator = basePath.includes("?") ? "&" : "?";
+  const results: T[] = [];
+  let page = 1;
+
+  while (true) {
+    const response = await apiFetch<PaginatedApiResponse<T>>(
+      `${basePath}${separator}page=${page}&pageSize=${pageSize}`,
+      options,
+    );
+    results.push(...response.data);
+
+    if (results.length >= response.total || response.data.length === 0) {
+      break;
+    }
+    page += 1;
+  }
+
+  return results;
+}

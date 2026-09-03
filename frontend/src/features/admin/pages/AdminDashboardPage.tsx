@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type ComponentType } from "react";
-import { apiFetch } from "../../../shared/services/api";
+import { apiFetch, fetchAllPages } from "../../../shared/services/api";
 import { MdOutlineInventory2, MdOutlineTrendingUp, MdOutlineStorefront } from "react-icons/md";
 import { FiUsers } from "react-icons/fi";
 import { IoFilterOutline } from "react-icons/io5";
@@ -181,16 +181,21 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
-    async function loadActivityFeed() {
+    async function loadActivityAndRecentStores() {
       try {
-        const [storesResponse, commoditiesResponse, priceRecordsResponse] = await Promise.all([
-          apiFetch<{ status: string; data: Array<{ id: string; name: string; location?: string; createdAt?: string }> }>("/api/stores?pageSize=100"),
-          apiFetch<{ status: string; data: Array<{ id: string; name: string; createdAt?: string }> }>("/api/commodities?pageSize=100"),
+        type StoreListItem = { id: string; name: string; location?: string; createdAt?: string; user?: { name?: string } };
+
+        // Stores are fetched once here and reused for both the activity feed and the
+        // "Recently Added Stores" table — these used to be two separate effects that
+        // each walked the full store list independently, doubling the request count.
+        const storesData = await fetchAllPages<StoreListItem>("/api/stores");
+        const [commoditiesData, priceRecordsResponse] = await Promise.all([
+          fetchAllPages<{ id: string; name: string; createdAt?: string }>("/api/commodities"),
           apiFetch<{ status: string; data: Array<{ id: string; commodity?: { name?: string }; store?: { name?: string }; price?: number | string; createdAt?: string; dateAndTime?: string }> }>("/api/price-records?pageSize=20"),
         ]);
 
         const nextItems: ActivityItem[] = [
-          ...storesResponse.data.map((store) => ({
+          ...storesData.map((store) => ({
             id: `store-${store.id}`,
             icon: MdOutlineStorefront,
             iconStyle: "bg-secondary-container text-on-secondary-container",
@@ -199,7 +204,7 @@ export default function AdminDashboardPage() {
             time: formatRelativeTime(store.createdAt ?? new Date().toISOString()),
             timestamp: store.createdAt ?? new Date().toISOString(),
           })),
-          ...commoditiesResponse.data.map((commodity) => ({
+          ...commoditiesData.map((commodity) => ({
             id: `commodity-${commodity.id}`,
             icon: MdOutlineInventory2,
             iconStyle: "bg-secondary-container text-on-secondary-container",
@@ -221,20 +226,8 @@ export default function AdminDashboardPage() {
         ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
 
         setActivityItems(nextItems.slice(0, 5));
-      } catch (error) {
-        console.error("Failed to load activity feed", error);
-      }
-    }
 
-    void loadActivityFeed();
-  }, []);
-
-  useEffect(() => {
-    async function loadRecentStores() {
-      try {
-        const storesResponse = await apiFetch<{ status: string; data: Array<{ id: string; name: string; location?: string; createdAt?: string; user?: { name?: string } }> }>('/api/stores?pageSize=100');
-
-        const rows = storesResponse.data
+        const recentStoreRows = [...storesData]
           .map((store) => ({
             id: store.id,
             name: store.name,
@@ -245,13 +238,13 @@ export default function AdminDashboardPage() {
           .sort((a, b) => new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime())
           .slice(0, 5);
 
-        setRecentStores(rows);
+        setRecentStores(recentStoreRows);
       } catch (error) {
-        console.error('Failed to load recent stores', error);
+        console.error("Failed to load activity feed and recent stores", error);
       }
     }
 
-    void loadRecentStores();
+    void loadActivityAndRecentStores();
   }, []);
 
   return (

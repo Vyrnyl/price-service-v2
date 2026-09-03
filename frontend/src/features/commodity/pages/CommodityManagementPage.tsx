@@ -23,6 +23,7 @@ import {
   type CommodityItem,
   type CreateCommodityPayload,
 } from "../services/commodity.api";
+import { fetchAllPages } from "@/shared/services/api";
 import { createSrp } from "../services/srp.api";
 import type { CreateCommodityFormSchema } from "../commodity.schema";
 import type { UserRole } from "@/shared/services/auth";
@@ -118,11 +119,11 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
 
   const loadStats = async () => {
     try {
-      const response = await getCommodities({ pageSize: 100 });
+      const allCommodities = await fetchAllPages<CommodityItem>("/api/commodities");
       setSummaryStats({
-        total: response.total,
-        active: response.data.filter((item) => item.status === "Active").length,
-        categories: new Set(response.data.map((item) => item.category)).size,
+        total: allCommodities.length,
+        active: allCommodities.filter((item) => item.status === "Active").length,
+        categories: new Set(allCommodities.map((item) => item.category)).size,
       });
     } catch {
       // Summary stats are non-critical; leave the previous values in place.

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { MdInventory2, MdNotificationsActive, MdSearch, MdStore, MdTrendingUp } from "react-icons/md";
-import { apiFetch } from "@/shared/services/api";
+import { apiFetch, fetchAllPages } from "@/shared/services/api";
 import { PriceTrendLineChart } from "@/shared/components/charts/PriceTrendLineChart";
 import { CommodityComparisonChart } from "@/shared/components/charts/CommodityComparisonChart";
 import { SrpVsActualChart } from "@/shared/components/charts/SrpVsActualChart";
@@ -65,17 +65,17 @@ export default function MonitoringOfficerDashboardPage() {
   useEffect(() => {
     async function loadDashboardCounts() {
       try {
-        const [commoditiesResponse, storesResponse, priceRecordsResponse] = await Promise.all([
+        const [commoditiesResponse, storesData, priceRecordsResponse] = await Promise.all([
           apiFetch<{ status: string; data: unknown[]; total: number }>("/api/commodities?pageSize=1"),
-          apiFetch<{ status: string; data: Array<{ id: string; name: string; location: string; createdAt: string }>; total: number }>("/api/stores?pageSize=100"),
+          fetchAllPages<{ id: string; name: string; location: string; createdAt: string }>("/api/stores"),
           apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>; total: number }>("/api/price-records"),
         ]);
 
         setTotalCommodities(commoditiesResponse.total);
-        setTotalStores(storesResponse.total);
+        setTotalStores(storesData.length);
         setTotalPriceRecords(priceRecordsResponse.total);
 
-        const sortedStores = [...storesResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
+        const sortedStores = [...storesData].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         setLatestStores(sortedStores.slice(0, 3));
 
         const sortedPriceRecords = [...priceRecordsResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));

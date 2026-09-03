@@ -1,5 +1,5 @@
 import type { StoreFormData, Store } from "../types/stores.types";
-import { apiFetch } from "@/shared/services/api";
+import { apiFetch, fetchAllPages } from "@/shared/services/api";
 import type { CommodityOption, PriceRecord } from "@/features/price-record/types/price-record.types";
 
 export interface BackendPriceRecord {
@@ -154,7 +154,8 @@ export async function fetchStorePriceRecords(storeId: string) {
 }
 
 export async function fetchCommodities() {
-  return apiFetch<{ status: string; data: CommodityOption[] }>('/api/commodities?pageSize=100');
+  const data = await fetchAllPages<CommodityOption>('/api/commodities');
+  return { status: 'success', data };
 }
 
 export async function saveStore(formData: StoreFormData, storeId?: string) {

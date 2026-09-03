@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { MdAdd } from "react-icons/md";
-import { apiFetch } from "@/shared/services/api";
+import { apiFetch, fetchAllPages } from "@/shared/services/api";
 import type { PaginatedResponse } from "@/shared/types/pagination";
 import { useToast } from "@/shared/components/Toast";
 import PageShell from "@/shared/components/PageShell";
@@ -171,18 +171,18 @@ export default function PriceRecordsPage({
   const { showToast } = useToast();
 
   // Reference data for the form/filter dropdowns — commodities and stores are
-  // bounded registry data (well under the pagination ceiling), so one page at
-  // the ceiling size is effectively "all" without a separate unpaginated endpoint.
+  // registry data that can exceed the backend's per-request pagination ceiling,
+  // so every page is walked rather than assuming one page is "all".
   useEffect(() => {
     const loadOptions = async () => {
       try {
-        const [storeResponse, commodityResponse] = await Promise.all([
-          apiFetch<{ status: string; data: StoreOption[] }>("/api/stores?pageSize=100"),
-          apiFetch<{ status: string; data: CommodityOption[] }>("/api/commodities?pageSize=100"),
+        const [storeData, commodityData] = await Promise.all([
+          fetchAllPages<StoreOption>("/api/stores"),
+          fetchAllPages<CommodityOption>("/api/commodities"),
         ]);
 
-        setStores(storeResponse.data);
-        setCommodities(commodityResponse.data);
+        setStores(storeData);
+        setCommodities(commodityData);
       } catch (error) {
         console.error("Unable to load store/commodity options", error);
       }

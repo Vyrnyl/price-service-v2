@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { MdDownload } from "react-icons/md";
-import { apiFetch } from "@/shared/services/api";
+import { fetchAllPages } from "@/shared/services/api";
 import { useToast } from "@/shared/components/Toast";
 import PageShell from "@/shared/components/PageShell";
 import { reportTypes, exportFormats } from "../mocks/report.mock";
@@ -151,8 +151,8 @@ export default function ReportGenerationPage() {
     const loadStores = async () => {
       try {
         setStoresLoading(true);
-        const response = await apiFetch<{ status: string; data: StoreOption[] }>("/api/stores?pageSize=100");
-        setStores(response.data);
+        const data = await fetchAllPages<StoreOption>("/api/stores");
+        setStores(data);
       } catch (err) {
         console.error("Unable to load stores", err);
       } finally {
@@ -166,10 +166,8 @@ export default function ReportGenerationPage() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const response = await apiFetch<{ status: string; data: Array<{ category: string }> }>(
-          "/api/commodities?pageSize=100",
-        );
-        const unique = Array.from(new Set(response.data.map((item) => item.category))).sort();
+        const data = await fetchAllPages<{ category: string }>("/api/commodities");
+        const unique = Array.from(new Set(data.map((item) => item.category))).sort();
         setCategories([
           DEFAULT_CATEGORIES[0],
           ...unique.map((category) => ({ value: category, label: category })),
