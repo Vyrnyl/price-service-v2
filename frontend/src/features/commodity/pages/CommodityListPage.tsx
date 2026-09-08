@@ -206,7 +206,7 @@ export default function CommodityListPage() {
             onChange={(event) => setSearchTerm(event.target.value)}
           />
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <SearchableSelect
               value={categoryFilter}
               onChange={setCategoryFilter}
@@ -228,18 +228,6 @@ export default function CommodityListPage() {
               {statuses.map((status) => (
                 <option key={status} value={status}>
                   {status === "All" ? "All statuses" : status}
-                </option>
-              ))}
-            </Select>
-
-            <Select
-              value={municipalityFilter}
-              onChange={(event) => setMunicipalityFilter(event.target.value)}
-              aria-label="Filter by municipality"
-            >
-              {municipalities.map((municipality) => (
-                <option key={municipality} value={municipality}>
-                  {municipality === "All" ? "All municipalities" : municipality}
                 </option>
               ))}
             </Select>
