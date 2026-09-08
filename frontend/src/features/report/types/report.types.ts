@@ -56,5 +56,5 @@ export type CreateReportPayload = {
   period: string;
   format: 'PDF' | 'EXCEL';
   commodityGroup?: string;
-  storeId?: string;
+  storeIds?: string[];
 };

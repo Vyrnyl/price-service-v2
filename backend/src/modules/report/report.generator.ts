@@ -23,7 +23,7 @@ import type { AuthUser } from '../../shared/types/express';
 export type ReportGeneratorPayload = CreateReportInput;
 
 type ReportRecord = Prisma.PriceRecordGetPayload<{
-  include: { commodity: true; store: true; user: true };
+  include: { commodity: { include: { category: true } }; store: true; user: true };
 }>;
 
 const REPORT_TYPE_LABELS: Record<ReportTypeEnum, string> = {
@@ -77,26 +77,30 @@ function mapCommodityGroupFilter(group?: string): Prisma.PriceRecordWhereInput |
     commodity: {
       is: {
         category: {
-          equals: group,
-          mode: 'insensitive',
+          is: {
+            name: {
+              equals: group,
+              mode: 'insensitive',
+            },
+          },
         },
       },
     },
   } as Prisma.PriceRecordWhereInput;
 }
 
-function mapStoreFilter(storeId?: string): Prisma.PriceRecordWhereInput | undefined {
-  if (!storeId) {
+function mapStoreFilter(storeIds?: string[]): Prisma.PriceRecordWhereInput | undefined {
+  if (!storeIds || storeIds.length === 0) {
     return undefined;
   }
 
-  return { storeId } as Prisma.PriceRecordWhereInput;
+  return { storeId: { in: storeIds } } as Prisma.PriceRecordWhereInput;
 }
 
 async function loadReportRecords(
   period: string,
   commodityGroup?: string,
-  storeId?: string,
+  storeIds?: string[],
   authUser?: AuthUser,
 ) {
   const { startDate, endDate } = parsePeriod(period);
@@ -108,11 +112,11 @@ async function loadReportRecords(
         lte: endDate,
       },
       ...mapCommodityGroupFilter(commodityGroup),
-      ...mapStoreFilter(storeId),
+      ...mapStoreFilter(storeIds),
       ...resolveReportRecordScope(authUser),
     },
     include: {
-      commodity: true,
+      commodity: { include: { category: true } },
       store: true,
       user: true,
     },
@@ -242,7 +246,7 @@ function buildReportRows(records: ReportRecord[], srps: SrpLookupEntry[]): Repor
       location: record.store?.location ?? 'Unknown location',
       commodityId: record.commodityId,
       commodity: record.commodity?.name ?? 'Unknown commodity',
-      category: record.commodity?.category ?? 'Uncategorised',
+      category: record.commodity?.category?.name ?? 'Uncategorised',
       price,
       srp,
       // Rounded so the cell holds 0.77 rather than 0.7700000000000031 — the
@@ -256,9 +260,7 @@ function buildReportRows(records: ReportRecord[], srps: SrpLookupEntry[]): Repor
 }
 
 function describeFilters(payload: ReportGeneratorPayload, rows: ReportRow[]) {
-  const storeName = payload.storeId
-    ? rows[0]?.store ?? 'Selected store'
-    : 'All stores';
+  const storeName = describeStoreFilter(payload.storeIds, rows);
 
   return {
     commodityGroup:
@@ -267,6 +269,35 @@ function describeFilters(payload: ReportGeneratorPayload, rows: ReportRow[]) {
         : payload.commodityGroup,
     store: storeName,
   };
+}
+
+/**
+ * Names the selected stores from the rows themselves rather than re-querying —
+ * `rows` was already filtered to exactly these stores, so their distinct names
+ * (in the order first seen) are the real answer. Falls back to a generic label
+ * when the filter matched a store with no records in the period, since there's
+ * nothing in `rows` to name it from.
+ */
+export function describeStoreFilter(storeIds: string[] | undefined, rows: ReportRow[]): string {
+  if (!storeIds || storeIds.length === 0) {
+    return 'All stores';
+  }
+
+  const names = Array.from(new Set(rows.map((row) => row.store)));
+
+  if (names.length === 0) {
+    return storeIds.length === 1 ? 'Selected store' : `${storeIds.length} selected stores`;
+  }
+
+  if (names.length === 1) {
+    return names[0]!;
+  }
+
+  const MAX_NAMES_SHOWN = 2;
+  const shown = names.slice(0, MAX_NAMES_SHOWN).join(', ');
+  const remaining = names.length - MAX_NAMES_SHOWN;
+
+  return remaining > 0 ? `${names.length} stores: ${shown} +${remaining} more` : `${names.length} stores: ${shown}`;
 }
 
 /* ------------------------------------------------------------------ *
@@ -555,6 +586,7 @@ function drawDocumentHeader(
   ];
 
   doc.fontSize(8);
+  const metaValueWidth = CONTENT_WIDTH / 2 - 82;
   meta.forEach(([label, value], index) => {
     const column = index % 2;
     const row = Math.floor(index / 2);
@@ -564,10 +596,13 @@ function drawDocumentHeader(
     doc.font('Helvetica-Bold').fillColor(COLORS.mutedText);
     doc.text(`${label}:`, x, lineY, { width: 70, lineBreak: false });
     doc.font('Helvetica').fillColor(COLORS.bodyText);
-    doc.text(value, x + 72, lineY, {
-      width: CONTENT_WIDTH / 2 - 82,
+    // `ellipsis: true` alone doesn't reliably suppress wrapping (same PDFKit
+    // quirk `fitText` was built for below) — measure and truncate up front so
+    // a long value (e.g. a multi-store filter label) can't overflow into the
+    // next meta row instead of being cut off in place.
+    doc.text(fitText(doc, value, metaValueWidth), x + 72, lineY, {
+      width: metaValueWidth,
       lineBreak: false,
-      ellipsis: true,
     });
   });
 
@@ -1243,7 +1278,7 @@ export async function generateReportFile(
   const records = await loadReportRecords(
     payload.period,
     payload.commodityGroup,
-    payload.storeId,
+    payload.storeIds,
     authUser,
   );
 
@@ -1258,7 +1293,7 @@ export async function generateReportFile(
     : await generateExcel(payload, rows, summary, generatedBy);
 
   const filters = describeFilters(payload, rows);
-  const filterLabel = payload.storeId
+  const filterLabel = payload.storeIds && payload.storeIds.length > 0
     ? filters.store
     : payload.commodityGroup && payload.commodityGroup !== 'ALL'
       ? filters.commodityGroup

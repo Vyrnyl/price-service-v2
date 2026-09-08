@@ -5,6 +5,8 @@ import { MdDownload } from "react-icons/md";
 import { fetchAllPages } from "@/shared/services/api";
 import { useToast } from "@/shared/components/Toast";
 import PageShell from "@/shared/components/PageShell";
+import Chip from "@/shared/components/Chip";
+import Skeleton from "@/shared/components/Skeleton";
 import { reportTypes, exportFormats } from "../mocks/report.mock";
 import ExportFormatButton from "../components/ExportFormatButton";
 import RecentReportCard from "../components/RecentReportCard";
@@ -105,7 +107,7 @@ export default function ReportGenerationPage() {
   const [commodityGroup, setCommodityGroup] = useState(DEFAULT_CATEGORIES[0].value);
   const [stores, setStores] = useState<StoreOption[]>([]);
   const [storesLoading, setStoresLoading] = useState(false);
-  const [selectedStoreId, setSelectedStoreId] = useState("");
+  const [selectedStoreIds, setSelectedStoreIds] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -119,7 +121,7 @@ export default function ReportGenerationPage() {
   const isDailyCompliance = selectedReportType.id === "daily-compliance";
 
   const rangeError = useMemo(() => getDateRangeError(startDate, endDate), [startDate, endDate]);
-  const isGenerateDisabled = (!isDailyCompliance && (!startDate || !endDate)) || Boolean(rangeError) || (isStoreMonitoring && !selectedStoreId);
+  const isGenerateDisabled = (!isDailyCompliance && (!startDate || !endDate)) || Boolean(rangeError) || (isStoreMonitoring && selectedStoreIds.length === 0);
 
   const period = useMemo(() => {
     if (!startDate || !endDate) {
@@ -166,8 +168,10 @@ export default function ReportGenerationPage() {
   useEffect(() => {
     const loadCategories = async () => {
       try {
-        const data = await fetchAllPages<{ category: string }>("/api/commodities");
-        const unique = Array.from(new Set(data.map((item) => item.category))).sort();
+        const data = await fetchAllPages<{ category: { name: string } | null }>("/api/commodities");
+        const unique = Array.from(
+          new Set(data.map((item) => item.category?.name).filter((name): name is string => Boolean(name))),
+        ).sort();
         setCategories([
           DEFAULT_CATEGORIES[0],
           ...unique.map((category) => ({ value: category, label: category })),
@@ -188,13 +192,21 @@ export default function ReportGenerationPage() {
       const today = new Date().toISOString().slice(0, 10);
       setStartDate(today);
       setEndDate(today);
-      setSelectedStoreId("");
+      setSelectedStoreIds([]);
       return;
     }
 
     setStartDate("");
     setEndDate("");
-    setSelectedStoreId("");
+    setSelectedStoreIds([]);
+  };
+
+  const toggleStoreSelection = (storeId: string) => {
+    setSelectedStoreIds((current) =>
+      current.includes(storeId)
+        ? current.filter((id) => id !== storeId)
+        : [...current, storeId],
+    );
   };
 
   const handleStartDateChange = (value: string) => {
@@ -239,7 +251,7 @@ export default function ReportGenerationPage() {
       period,
       format,
       commodityGroup: commodityGroup === "ALL" ? undefined : commodityGroup,
-      ...(isStoreMonitoring && selectedStoreId ? { storeId: selectedStoreId } : {}),
+      ...(isStoreMonitoring && selectedStoreIds.length > 0 ? { storeIds: selectedStoreIds } : {}),
     };
 
     try {
@@ -333,21 +345,47 @@ export default function ReportGenerationPage() {
                   ) : null}
 
                   {isStoreMonitoring ? (
-                    <div className="flex flex-col gap-2 min-w-0">
-                      <label className="font-sans text-label-caps text-on-surface-variant">Store</label>
-                      <select
-                        className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm"
-                        value={selectedStoreId}
-                        onChange={(event) => setSelectedStoreId(event.target.value)}
-                        disabled={storesLoading}
-                      >
-                        <option value="">{storesLoading ? "Loading stores..." : "Select a store"}</option>
-                        {stores.map((store) => (
-                          <option key={store.id} value={store.id}>
-                            {store.name} • {store.location}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="flex flex-col gap-2 min-w-0 md:col-span-2">
+                      <div className="flex items-center justify-between">
+                        <label className="font-sans text-label-caps text-on-surface-variant">
+                          Store{selectedStoreIds.length > 0 ? ` (${selectedStoreIds.length} selected)` : ""}
+                        </label>
+                        {selectedStoreIds.length > 0 ? (
+                          <button
+                            type="button"
+                            className="text-body-xs font-semibold text-primary hover:opacity-80"
+                            onClick={() => setSelectedStoreIds([])}
+                          >
+                            Clear
+                          </button>
+                        ) : null}
+                      </div>
+                      {storesLoading ? (
+                        <div className="flex flex-wrap gap-2">
+                          {[0, 1, 2].map((index) => (
+                            <Skeleton key={index} className="h-8 w-32 rounded-full" />
+                          ))}
+                        </div>
+                      ) : stores.length === 0 ? (
+                        <p className="rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm text-on-surface-variant">
+                          No stores available.
+                        </p>
+                      ) : (
+                        <div className="flex flex-wrap gap-2 rounded-xl border border-outline-variant bg-surface-container-lowest p-3">
+                          {stores.map((store) => (
+                            <Chip
+                              key={store.id}
+                              active={selectedStoreIds.includes(store.id)}
+                              onClick={() => toggleStoreSelection(store.id)}
+                            >
+                              {store.name} • {store.location}
+                            </Chip>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-sm text-on-surface-variant">
+                        Select one or more stores to compare.
+                      </p>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2 min-w-0">
@@ -414,6 +452,7 @@ export default function ReportGenerationPage() {
                         setSelectedReportTypeId(defaultTypeId);
                         setSelectedExportFormat(defaultFormatLabel);
                         setCommodityGroup(DEFAULT_CATEGORIES[0].value);
+                        setSelectedStoreIds([]);
                         setError(null);
                         setSuccessMessage("All recent reports have been cleared.");
                         showToast("All recent reports have been cleared.", "success");

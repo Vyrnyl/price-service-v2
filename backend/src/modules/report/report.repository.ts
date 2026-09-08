@@ -23,7 +23,7 @@ const reportSummarySelect = {
 
 export const reportRepository = {
   create: (data: CreateReportWithFileInput, userId: string) => {
-    const { format, commodityGroup, storeId, ...rest } = data;
+    const { format, commodityGroup, storeIds, ...rest } = data;
 
     return prisma.report.create({
       data: {
@@ -83,7 +83,7 @@ export const reportRepository = {
   // officer's UUID could still rename or delete it. No match raises Prisma
   // P2025, which `errorHandler` already maps to 404.
   update: (id: string, data: UpdateReportInput, authUser?: AuthUser) => {
-    const { format, commodityGroup, storeId, ...rest } = data;
+    const { format, commodityGroup, storeIds, ...rest } = data;
     const scope = resolveReportScope(authUser);
     const updateData: Prisma.ReportUpdateInput = {
       ...rest,
