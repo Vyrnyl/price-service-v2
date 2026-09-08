@@ -1,6 +1,7 @@
 import { Router, Request, Response } from 'express';
 import userRoutes from '../modules/user';
 import commodityRoutes from '../modules/commodity';
+import categoryRoutes from '../modules/category';
 import srpRoutes from '../modules/srp';
 import priceRecordRoutes from '../modules/price-record';
 import reportRoutes from '../modules/report';
@@ -17,6 +18,7 @@ router.get('/', (_req: Request, res: Response) => {
 
 router.use('/users', userRoutes);
 router.use('/commodities', commodityRoutes);
+router.use('/categories', categoryRoutes);
 router.use('/srps', srpRoutes);
 router.use('/price-records', priceRecordRoutes);
 router.use('/reports', reportRoutes);

@@ -3,7 +3,7 @@ import type { Prisma } from '@prisma/client';
 import type { CreateCommodityInput, ListCommoditiesQuery, UpdateCommodityInput } from './commodity.schema';
 import { toSkipTake } from '../../shared/schema/pagination.schema';
 
-const srpInclude = {
+const commodityInclude = {
   srps: {
     orderBy: [
       { effectiveDate: 'desc' as const },
@@ -11,6 +11,7 @@ const srpInclude = {
     ],
     take: 1,
   },
+  category: true,
 };
 
 export const commodityRepository = {
@@ -24,7 +25,7 @@ export const commodityRepository = {
           ? { srps: { create: [{ price: srpPrice, effectiveDate: srpEffectiveDate }] } }
           : {}),
       },
-      include: srpInclude,
+      include: commodityInclude,
     });
   },
 
@@ -38,7 +39,7 @@ export const commodityRepository = {
         ? {
             OR: [
               { name: { contains: search, mode: 'insensitive' } },
-              { category: { contains: search, mode: 'insensitive' } },
+              { category: { name: { contains: search, mode: 'insensitive' } } },
             ],
           }
         : {}),
@@ -47,7 +48,7 @@ export const commodityRepository = {
     const [data, total] = await prisma.$transaction([
       prisma.commodity.findMany({
         where,
-        include: srpInclude,
+        include: commodityInclude,
         orderBy: { name: 'asc' },
         skip,
         take,
@@ -61,7 +62,13 @@ export const commodityRepository = {
   findById: (id: string) =>
     prisma.commodity.findUnique({
       where: { id },
-      include: srpInclude,
+      include: commodityInclude,
+    }),
+
+  findByNameCaseInsensitive: (name: string) =>
+    prisma.commodity.findFirst({
+      where: { name: { equals: name, mode: 'insensitive' } },
+      select: { id: true, name: true },
     }),
 
   update: (id: string, data: UpdateCommodityInput) =>

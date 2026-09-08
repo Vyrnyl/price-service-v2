@@ -12,13 +12,19 @@ import {
   commodityStatusOptions,
   type CreateCommodityFormSchema,
 } from "../commodity.schema";
+import { getMaxSrpEffectiveDateString } from "@/shared/utils/srp-effective-date";
 
 const statusOptions = commodityStatusOptions;
+
+export type CategoryOption = { id: string; name: string };
 
 type AddCommodityDialogProps = {
   open: boolean;
   mode?: "create" | "edit";
   defaultValues?: CreateCommodityFormSchema;
+  categoryOptions: CategoryOption[];
+  categoryOptionsLoading?: boolean;
+  nameError?: string | null;
   formError: string | null;
   formSuccess: string | null;
   submitLoading: boolean;
@@ -28,7 +34,7 @@ type AddCommodityDialogProps = {
 
 const emptyFormValues: CreateCommodityFormSchema = {
   name: "",
-  category: "",
+  categoryId: "",
   status: "Active",
   srpPrice: "",
   srpEffectiveDate: "",
@@ -38,6 +44,9 @@ export default function AddCommodityDialog({
   open,
   mode = "create",
   defaultValues,
+  categoryOptions,
+  categoryOptionsLoading = false,
+  nameError,
   formError,
   formSuccess,
   submitLoading,
@@ -96,25 +105,33 @@ export default function AddCommodityDialog({
     >
       <form className="mx-auto grid w-full max-w-xl gap-4 sm:grid-cols-2" onSubmit={handleFormSubmit}>
         <div className="sm:col-span-2">
-          <FormGroup label="Commodity Name" htmlFor="name" error={errors.name?.message}>
+          <FormGroup label="Commodity Name" htmlFor="name" error={errors.name?.message ?? nameError ?? undefined}>
             <Input
               id="name"
               type="text"
               {...register("name")}
-              hasError={Boolean(errors.name)}
-              placeholder="Coconut Oil"
+              hasError={Boolean(errors.name) || Boolean(nameError)}
+              placeholder="AG"
             />
           </FormGroup>
         </div>
 
-        <FormGroup label="Category" htmlFor="category" error={errors.category?.message}>
-          <Input
-            id="category"
-            type="text"
-            {...register("category")}
-            hasError={Boolean(errors.category)}
-            placeholder="Food Staples"
-          />
+        <FormGroup label="Category" htmlFor="categoryId" error={errors.categoryId?.message}>
+          <Select
+            id="categoryId"
+            {...register("categoryId")}
+            hasError={Boolean(errors.categoryId)}
+            disabled={categoryOptionsLoading}
+          >
+            <option value="">
+              {categoryOptionsLoading ? "Loading categories..." : "Select category"}
+            </option>
+            {categoryOptions.map((option) => (
+              <option key={option.id} value={option.id}>
+                {option.name}
+              </option>
+            ))}
+          </Select>
         </FormGroup>
 
         <FormGroup label="Status" htmlFor="status" error={errors.status?.message}>
@@ -150,6 +167,7 @@ export default function AddCommodityDialog({
           <Input
             id="srpEffectiveDate"
             type="date"
+            max={getMaxSrpEffectiveDateString()}
             {...register("srpEffectiveDate")}
             hasError={Boolean(errors.srpEffectiveDate)}
           />

@@ -4,9 +4,9 @@ import { passwordUtils } from "../src/shared/utils/password.utils";
 const SEED_PASSWORD = "Password123!";
 
 const COMMODITIES: Array<{ name: string; category: string; srp: number }> = [
-  { name: "Well-milled Rice", category: "Grain", srp: 45 },
-  { name: "Refined Sugar", category: "Sugar", srp: 90 },
-  { name: "Cooking Oil (1L)", category: "Oil", srp: 95 },
+  { name: "Wed Sugar", category: "Sugar", srp: 90 },
+  { name: "Cooking Oell-milled Rice", category: "Grain", srp: 45 },
+  { name: "Refinil (1L)", category: "Oil", srp: 95 },
   { name: "Red Onion", category: "Vegetable", srp: 120 },
   { name: "Garlic", category: "Vegetable", srp: 150 },
   { name: "Chicken Egg (per piece)", category: "Poultry", srp: 8 },
@@ -397,13 +397,31 @@ async function main() {
 
   console.log(`Users ready: ${admin.email} / ${officer.email} (password: ${SEED_PASSWORD})`);
 
+  // Category is a real reference table as of Phase 7.6 — upsert by name so
+  // re-running the seed against a DB that already has some categories doesn't
+  // duplicate them, then resolve every spec's category string to its id.
+  const categoryIdByName = new Map<string, string>();
+  const resolveCategoryId = async (name: string) => {
+    const cached = categoryIdByName.get(name);
+    if (cached) return cached;
+
+    const category = await prisma.category.upsert({
+      where: { name },
+      create: { name },
+      update: {},
+    });
+    categoryIdByName.set(name, category.id);
+    return category.id;
+  };
+
   const srpEffectiveDate = new Date();
   srpEffectiveDate.setDate(srpEffectiveDate.getDate() - (DAYS_OF_HISTORY + 10));
 
   const commodities = [];
   for (const spec of COMMODITIES) {
+    const categoryId = await resolveCategoryId(spec.category);
     const commodity = await prisma.commodity.create({
-      data: { name: spec.name, category: spec.category, status: "Active" },
+      data: { name: spec.name, categoryId, status: "Active" },
     });
     await prisma.sRP.create({
       data: {
@@ -419,8 +437,9 @@ async function main() {
   let dtiWithSrpCount = 0;
   const dtiHistorySample = [];
   for (const spec of DTI_COMMODITIES_WITH_SRP) {
+    const categoryId = await resolveCategoryId(spec.category);
     const commodity = await prisma.commodity.create({
-      data: { name: spec.name, category: spec.category, status: "Active" },
+      data: { name: spec.name, categoryId, status: "Active" },
     });
     await prisma.sRP.create({
       data: {
@@ -438,8 +457,9 @@ async function main() {
 
   let dtiNoSrpCount = 0;
   for (const spec of DTI_COMMODITIES_NO_SRP) {
+    const categoryId = await resolveCategoryId(spec.category);
     await prisma.commodity.create({
-      data: { name: spec.name, category: spec.category, status: "Active" },
+      data: { name: spec.name, categoryId, status: "Active" },
     });
     dtiNoSrpCount += 1;
   }

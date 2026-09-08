@@ -32,7 +32,7 @@ type CommodityTableProps = {
   onSearchTermChange: (value: string) => void;
   onStatusFilterChange: (value: "ALL" | "Active" | "Inactive") => void;
   onPageChange: (page: number) => void;
-  onEditCommodity?: (commodity: Pick<CommodityItem, "id" | "name" | "category" | "status">) => void;
+  onEditCommodity?: (commodity: Pick<CommodityItem, "id">) => void;
 };
 
 export default function CommodityTable({
@@ -188,14 +188,7 @@ export default function CommodityTable({
                             className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary"
                             type="button"
                             title="Edit commodity"
-                            onClick={() =>
-                              onEditCommodity({
-                                id: item.id,
-                                name: item.name,
-                                category: item.category,
-                                status: item.status,
-                              })
-                            }
+                            onClick={() => onEditCommodity({ id: item.id })}
                           >
                             <span className="sr-only">Edit commodity</span>
                             <MdEdit size={18} />

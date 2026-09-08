@@ -1,4 +1,9 @@
 import { z } from "zod";
+import {
+  SRP_EFFECTIVE_DATE_MAX_DAYS_AHEAD,
+  getMaxSrpEffectiveDateString,
+  isSrpEffectiveDateWithinWindow,
+} from "@/shared/utils/srp-effective-date";
 
 export const commodityStatusEnum = z.enum(["Active", "Inactive"]);
 export const commodityStatusOptions = commodityStatusEnum.options;
@@ -7,7 +12,7 @@ export type CommodityStatus = z.infer<typeof commodityStatusEnum>;
 export const createCommoditySchema = z
   .object({
     name: z.string().trim().min(1, "Commodity name is required"),
-    category: z.string().trim().min(1, "Category is required"),
+    categoryId: z.string().trim().min(1, "Category is required"),
     status: commodityStatusEnum,
     srpPrice: z.string().trim().optional().default(""),
     srpEffectiveDate: z.string().trim().optional().default(""),
@@ -19,6 +24,11 @@ export const createCommoditySchema = z
   .refine((data) => !data.srpPrice || Number(data.srpPrice) > 0, {
     message: "Price must be greater than 0",
     path: ["srpPrice"],
+  })
+  .refine((data) => isSrpEffectiveDateWithinWindow(data.srpEffectiveDate), {
+    error: () =>
+      `Effective date cannot be more than ${SRP_EFFECTIVE_DATE_MAX_DAYS_AHEAD} days ahead (latest: ${getMaxSrpEffectiveDateString()})`,
+    path: ["srpEffectiveDate"],
   });
 
 export type CreateCommodityFormSchema = z.infer<typeof createCommoditySchema>;

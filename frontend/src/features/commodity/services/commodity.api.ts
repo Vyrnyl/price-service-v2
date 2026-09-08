@@ -2,11 +2,16 @@ import { apiFetch } from "../../../shared/services/api";
 import type { CommodityStatus } from "../commodity.schema";
 import type { SrpItem } from "./srp.api";
 
+export interface CommodityCategory {
+  id: string;
+  name: string;
+}
+
 export interface CommodityItem {
   id: string;
   name: string;
   status: CommodityStatus;
-  category: string;
+  category: CommodityCategory;
   srps?: SrpItem[];
 }
 
@@ -92,7 +97,7 @@ export interface CommodityCreateResponse {
 
 export interface CreateCommodityPayload {
   name: string;
-  category: string;
+  categoryId: string;
   status: CommodityStatus;
   srpPrice?: number;
   srpEffectiveDate?: string;

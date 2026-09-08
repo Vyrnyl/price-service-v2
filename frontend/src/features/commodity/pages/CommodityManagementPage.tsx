@@ -13,7 +13,7 @@ import {
 } from "react-icons/md";
 import PageShell from "@/shared/components/PageShell";
 import { SkeletonStatCard } from "@/shared/components/Skeleton";
-import AddCommodityDialog from "../components/AddCommodityDialog";
+import AddCommodityDialog, { type CategoryOption } from "../components/AddCommodityDialog";
 import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
 import {
@@ -24,7 +24,8 @@ import {
   type CommodityItem,
   type CreateCommodityPayload,
 } from "../services/commodity.api";
-import { fetchAllPages } from "@/shared/services/api";
+import { getCategories } from "@/features/category/services/category.api";
+import { ApiError, fetchAllPages } from "@/shared/services/api";
 import { createSrp } from "../services/srp.api";
 import type { CreateCommodityFormSchema } from "../commodity.schema";
 import type { UserRole } from "@/shared/services/auth";
@@ -43,7 +44,7 @@ function mapCommodityToRow(item: CommodityItem, index: number) {
   return {
     id: item.id,
     name: item.name,
-    category: item.category,
+    category: item.category.name,
     status: item.status,
     srp: latestSrp ? `₱${latestSrp.price}` : "_",
     effectiveDate: latestSrp ? formatEffectiveDate(latestSrp.effectiveDate) : "_",
@@ -78,12 +79,15 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [formOpen, setFormOpen] = useState(false);
   const [editingCommodity, setEditingCommodity] = useState<CommodityItem | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [nameError, setNameError] = useState<string | null>(null);
   const [formSuccess, setFormSuccess] = useState<string | null>(null);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "Active" | "Inactive">("ALL");
   const [currentPage, setCurrentPage] = useState(1);
+  const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+  const [categoryOptionsLoading, setCategoryOptionsLoading] = useState(true);
   const { showToast } = useToast();
 
   const loadCommodities = async (page: number) => {
@@ -126,7 +130,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
       setSummaryStats({
         total: allCommodities.length,
         active: allCommodities.filter((item) => item.status === "Active").length,
-        categories: new Set(allCommodities.map((item) => item.category)).size,
+        categories: new Set(allCommodities.map((item) => item.category.id)).size,
       });
     } catch {
       // Summary stats are non-critical; leave the previous values in place.
@@ -142,8 +146,25 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     void run();
   }, []);
 
+  useEffect(() => {
+    async function run() {
+      try {
+        setCategoryOptionsLoading(true);
+        const categories = await getCategories();
+        setCategoryOptions(categories.map(({ id, name }) => ({ id, name })));
+      } catch {
+        // Category options are non-critical to page load; the dropdown just
+        // stays empty and the form's own validation catches an unset category.
+      } finally {
+        setCategoryOptionsLoading(false);
+      }
+    }
+    void run();
+  }, []);
+
   const handleSaveCommodity = async (data: CreateCommodityFormSchema) => {
     setFormError(null);
+    setNameError(null);
     setFormSuccess(null);
     setSubmitLoading(true);
 
@@ -151,7 +172,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
       if (editingCommodity) {
         await updateCommodity(editingCommodity.id, {
           name: data.name,
-          category: data.category,
+          categoryId: data.categoryId,
           status: data.status,
         });
         if (data.srpPrice && data.srpEffectiveDate) {
@@ -167,7 +188,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
       } else {
         const payload: CreateCommodityPayload = {
           name: data.name,
-          category: data.category,
+          categoryId: data.categoryId,
           status: data.status,
           ...(data.srpPrice && data.srpEffectiveDate
             ? { srpPrice: Number(data.srpPrice), srpEffectiveDate: data.srpEffectiveDate }
@@ -184,7 +205,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
       setFormOpen(false);
       setEditingCommodity(null);
     } catch (error: unknown) {
-      if (error instanceof Error) {
+      if (error instanceof ApiError && error.status === 409) {
+        setNameError(error.message);
+      } else if (error instanceof Error) {
         setFormError(error.message ?? "Unable to save commodity.");
       } else {
         setFormError("Unable to save commodity.");
@@ -195,8 +218,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     }
   };
 
-  const handleEditCommodity = async (commodity: CommodityItem) => {
+  const handleEditCommodity = async (commodity: Pick<CommodityItem, "id">) => {
     setFormError(null);
+    setNameError(null);
     setFormSuccess(null);
     setError(null);
     try {
@@ -251,19 +275,23 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
               editingCommodity
                 ? {
                     name: editingCommodity.name,
-                    category: editingCommodity.category,
+                    categoryId: editingCommodity.category.id,
                     status: editingCommodity.status,
                     srpPrice: "",
                     srpEffectiveDate: "",
                   }
                 : undefined
             }
+            categoryOptions={categoryOptions}
+            categoryOptionsLoading={categoryOptionsLoading}
+            nameError={nameError}
             formError={formError}
             formSuccess={formSuccess}
             submitLoading={submitLoading}
             onClose={() => {
               setFormOpen(false);
               setFormError(null);
+              setNameError(null);
               setFormSuccess(null);
               setEditingCommodity(null);
             }}
@@ -285,6 +313,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
                   setEditingCommodity(null);
                   setFormOpen(true);
                   setFormError(null);
+                  setNameError(null);
                   setFormSuccess(null);
                 }}
                 className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
