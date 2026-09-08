@@ -209,10 +209,11 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
         setNameError(error.message);
       } else if (error instanceof Error) {
         setFormError(error.message ?? "Unable to save commodity.");
+        console.error("Failed to save commodity", error);
       } else {
         setFormError("Unable to save commodity.");
+        console.error("Failed to save commodity", error);
       }
-      console.error("Failed to save commodity", error);
     } finally {
       setSubmitLoading(false);
     }
