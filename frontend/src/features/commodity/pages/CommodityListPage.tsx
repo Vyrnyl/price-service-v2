@@ -9,6 +9,7 @@ import Input from "@/shared/components/Input";
 import PageShell from "@/shared/components/PageShell";
 import Pagination from "@/shared/components/Pagination";
 import Select from "@/shared/components/Select";
+import SearchableSelect from "@/shared/components/SearchableSelect";
 import { getPublicCommodities, type PublicCommodityItem, type PublicPriceRange } from "../services/commodity.api";
 
 interface CommodityRow {
@@ -206,17 +207,18 @@ export default function CommodityListPage() {
           />
 
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <Select
+            <SearchableSelect
               value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
+              onChange={setCategoryFilter}
+              options={categories.map((category) => ({
+                value: category,
+                label: category === "All" ? "All categories" : category,
+              }))}
+              placeholder="All categories"
+              searchPlaceholder="Search category"
+              emptyLabel="No categories found."
               aria-label="Filter by category"
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category === "All" ? "All categories" : category}
-                </option>
-              ))}
-            </Select>
+            />
 
             <Select
               value={statusFilter}
