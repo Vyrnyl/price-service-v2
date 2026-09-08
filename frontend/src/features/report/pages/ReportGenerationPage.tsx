@@ -7,6 +7,7 @@ import { useToast } from "@/shared/components/Toast";
 import PageShell from "@/shared/components/PageShell";
 import Chip from "@/shared/components/Chip";
 import Skeleton from "@/shared/components/Skeleton";
+import SearchableSelect from "@/shared/components/SearchableSelect";
 import { reportTypes, exportFormats } from "../mocks/report.mock";
 import ExportFormatButton from "../components/ExportFormatButton";
 import RecentReportCard from "../components/RecentReportCard";
@@ -390,17 +391,15 @@ export default function ReportGenerationPage() {
                   ) : (
                     <div className="flex flex-col gap-2 min-w-0">
                       <label className="font-sans text-label-caps text-on-surface-variant">Category list</label>
-                      <select
-                        className="w-full rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm"
+                      <SearchableSelect
                         value={commodityGroup}
-                        onChange={(event) => setCommodityGroup(event.target.value)}
-                      >
-                        {categories.map((category) => (
-                          <option key={category.value} value={category.value}>
-                            {category.label}
-                          </option>
-                        ))}
-                      </select>
+                        onChange={setCommodityGroup}
+                        options={categories.map((category) => ({ value: category.value, label: category.label }))}
+                        placeholder="All Categories"
+                        searchPlaceholder="Search category"
+                        emptyLabel="No categories found."
+                        aria-label="Filter by category"
+                      />
                     </div>
                   )}
                 </div>
