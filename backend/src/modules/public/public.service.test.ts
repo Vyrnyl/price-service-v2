@@ -76,7 +76,7 @@ test('buildPublicCommodityDto: one compliant store and one overpricing store rea
   const commodity = {
     id: 'commodity-1',
     name: 'Rice',
-    category: 'Grains',
+    category: { name: 'Grains' },
     status: 'ACTIVE',
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     srps: [{ price: 50, effectiveDate: new Date('2026-01-01'), createdAt: new Date('2026-01-01') }],
@@ -121,7 +121,7 @@ test('buildPublicCommodityDto: a store reporting twice only counts once toward t
   const commodity = {
     id: 'commodity-2',
     name: 'Galunggong',
-    category: 'Fish',
+    category: { name: 'Fish' },
     status: 'ACTIVE',
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     srps: [{ price: 90, effectiveDate: new Date('2026-01-01'), createdAt: new Date('2026-01-01') }],
@@ -144,7 +144,7 @@ test('buildPublicCommodityDto handles a commodity with no price history yet', ()
   const commodity = {
     id: 'commodity-3',
     name: 'Sugar',
-    category: 'Staples',
+    category: { name: 'Staples' },
     status: 'ACTIVE',
     createdAt: new Date('2026-02-01T00:00:00.000Z'),
     srps: [],

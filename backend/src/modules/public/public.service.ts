@@ -21,7 +21,7 @@ interface RawSrp {
 interface RawCommodity {
   id: string;
   name: string;
-  category: string;
+  category: { name: string };
   status: string;
   createdAt: Date;
   srps: RawSrp[];
@@ -206,7 +206,7 @@ export function buildPublicCommodityDto(commodity: RawCommodity): PublicCommodit
   return {
     id: commodity.id,
     name: commodity.name,
-    category: commodity.category,
+    category: commodity.category.name,
     status: commodity.status,
     currentPrice,
     srpPrice,

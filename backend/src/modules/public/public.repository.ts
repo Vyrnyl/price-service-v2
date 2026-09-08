@@ -4,6 +4,7 @@ export const publicRepository = {
   findCommoditiesForPublic: (windowStart: Date) => prisma.commodity.findMany({
     orderBy: { createdAt: 'desc' },
     include: {
+      category: true,
       srps: {
         orderBy: [
           { effectiveDate: 'desc' },
