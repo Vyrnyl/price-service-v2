@@ -215,7 +215,7 @@ export default function NavigationDrawer({
             Loading navigation...
           </div>
         ) : (
-          <nav className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
+          <nav className="scrollbar-none flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
             {links.map((item) => {
             const Icon = item.icon;
             const isActive = activePath === item.href;
