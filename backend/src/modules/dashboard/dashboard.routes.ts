@@ -6,5 +6,6 @@ import { dashboardController } from './dashboard.controller';
 const router = Router();
 
 router.get('/analytics', authorize('ADMIN', 'OFFICER'), asyncHandler(dashboardController.getAnalytics));
+router.get('/store-violations', authorize('ADMIN', 'OFFICER'), asyncHandler(dashboardController.getStoreViolations));
 
 export default router;

@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { MdKeyboardArrowDown, MdSearch } from "react-icons/md";
+import Skeleton from "./Skeleton";
 
 export interface SearchableSelectOption {
   value: string;
@@ -14,6 +15,9 @@ interface SearchableSelectProps {
   searchPlaceholder?: string;
   emptyLabel?: string;
   clearLabel?: string;
+  isLoading?: boolean;
+  id?: string;
+  hasError?: boolean;
   "aria-label"?: string;
 }
 
@@ -25,6 +29,9 @@ export default function SearchableSelect({
   searchPlaceholder = "Search...",
   emptyLabel = "No matches found.",
   clearLabel,
+  isLoading = false,
+  id,
+  hasError = false,
   "aria-label": ariaLabel,
 }: SearchableSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
@@ -53,11 +60,14 @@ export default function SearchableSelect({
   return (
     <div className="relative" ref={containerRef}>
       <button
+        id={id}
         type="button"
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={isOpen}
-        className="flex w-full items-center justify-between rounded-lg border border-outline-variant bg-surface px-4 py-3 text-left text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
+        className={`flex w-full items-center justify-between rounded-lg border bg-surface px-4 py-3 text-left text-body-sm text-on-surface outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20 ${
+          hasError ? "border-error focus:border-error focus:ring-error/20" : "border-outline-variant"
+        }`}
         onClick={() => {
           setIsOpen((current) => !current);
           setSearch("");
@@ -84,42 +94,52 @@ export default function SearchableSelect({
             />
           </div>
           <div className="max-h-52 overflow-y-auto">
-            {clearLabel && !search.trim() ? (
-              <button
-                type="button"
-                className={`flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors ${
-                  value === ""
-                    ? "bg-primary/10 text-primary"
-                    : "text-on-surface-variant hover:bg-surface-container-high"
-                }`}
-                onClick={() => {
-                  onChange("");
-                  setIsOpen(false);
-                }}
-              >
-                {clearLabel}
-              </button>
-            ) : null}
-            {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors ${
-                    value === option.value
-                      ? "bg-primary/10 text-primary"
-                      : "text-on-surface hover:bg-surface-container-high"
-                  }`}
-                  onClick={() => {
-                    onChange(option.value);
-                    setIsOpen(false);
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))
+            {isLoading ? (
+              <div className="space-y-2 p-1" role="status" aria-label="Loading options">
+                <Skeleton className="h-9" />
+                <Skeleton className="h-9" />
+                <Skeleton className="h-9" />
+              </div>
             ) : (
-              <p className="px-3 py-2 text-sm text-on-surface-variant">{emptyLabel}</p>
+              <>
+                {clearLabel && !search.trim() ? (
+                  <button
+                    type="button"
+                    className={`flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                      value === ""
+                        ? "bg-primary/10 text-primary"
+                        : "text-on-surface-variant hover:bg-surface-container-high"
+                    }`}
+                    onClick={() => {
+                      onChange("");
+                      setIsOpen(false);
+                    }}
+                  >
+                    {clearLabel}
+                  </button>
+                ) : null}
+                {filteredOptions.length > 0 ? (
+                  filteredOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                        value === option.value
+                          ? "bg-primary/10 text-primary"
+                          : "text-on-surface hover:bg-surface-container-high"
+                      }`}
+                      onClick={() => {
+                        onChange(option.value);
+                        setIsOpen(false);
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))
+                ) : (
+                  <p className="px-3 py-2 text-sm text-on-surface-variant">{emptyLabel}</p>
+                )}
+              </>
             )}
           </div>
         </div>

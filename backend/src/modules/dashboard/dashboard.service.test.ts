@@ -4,8 +4,10 @@ import {
   buildCommodityComparison,
   buildPriceTrend,
   buildSrpVsActual,
+  buildStoreViolations,
   DASHBOARD_CHART_LIMIT,
   type PriceRecordForAnalytics,
+  type PriceRecordWithStoreForAnalytics,
 } from './dashboard.service';
 import type { CommodityComparisonPoint } from './dashboard.types';
 
@@ -21,6 +23,14 @@ function record(
     price: { toNumber: () => price } as PriceRecordForAnalytics['price'],
     dateAndTime: new Date(dateAndTime),
   };
+}
+
+function storeRecord(
+  storeId: string,
+  storeName: string,
+  status: PriceRecordWithStoreForAnalytics['status'],
+): PriceRecordWithStoreForAnalytics {
+  return { storeId, store: { name: storeName }, status };
 }
 
 test('buildPriceTrend averages prices per day and sorts chronologically', () => {
@@ -117,4 +127,57 @@ test('buildSrpVsActual ranks across the whole set before any cap is applied', ()
 
   assert.equal(ranked[0].commodityId, 'c39');
   assert.equal(ranked.slice(0, DASHBOARD_CHART_LIMIT).length, DASHBOARD_CHART_LIMIT);
+});
+
+test('buildStoreViolations counts OVERPRICE records per store, worst first', () => {
+  const records = [
+    storeRecord('s1', 'Good Store', 'COMPLIANT'),
+    storeRecord('s1', 'Good Store', 'COMPLIANT'),
+    storeRecord('s1', 'Good Store', 'OVERPRICE'),
+    storeRecord('s2', 'Bad Store', 'OVERPRICE'),
+    storeRecord('s2', 'Bad Store', 'OVERPRICE'),
+    storeRecord('s2', 'Bad Store', 'UNDERPRICE'),
+  ];
+
+  const result = buildStoreViolations(records);
+
+  assert.deepEqual(result.map((r) => r.storeId), ['s2', 's1']);
+  assert.equal(result[0].violationCount, 2);
+  assert.equal(result[0].totalRecords, 3);
+  assert.equal(result[0].violationRate, 66.7);
+  assert.equal(result[1].violationCount, 1);
+});
+
+test('buildStoreViolations returns an empty array when there are no records', () => {
+  assert.deepEqual(buildStoreViolations([]), []);
+});
+
+test('buildStoreViolations still lists a fully compliant store at 0 violations', () => {
+  const records = [storeRecord('s1', 'Perfect Store', 'COMPLIANT'), storeRecord('s1', 'Perfect Store', 'COMPLIANT')];
+
+  const result = buildStoreViolations(records);
+
+  assert.equal(result.length, 1);
+  assert.equal(result[0].violationCount, 0);
+  assert.equal(result[0].violationRate, 0);
+});
+
+test('buildStoreViolations ignores records with no store attached', () => {
+  const records: PriceRecordWithStoreForAnalytics[] = [
+    { storeId: null, store: null, status: 'OVERPRICE' },
+    storeRecord('s1', 'Store A', 'OVERPRICE'),
+  ];
+
+  const result = buildStoreViolations(records);
+
+  assert.equal(result.length, 1);
+  assert.equal(result[0].storeId, 's1');
+});
+
+test('buildStoreViolations falls back to "Unknown store" when the store relation is missing', () => {
+  const records: PriceRecordWithStoreForAnalytics[] = [{ storeId: 's1', store: null, status: 'OVERPRICE' }];
+
+  const result = buildStoreViolations(records);
+
+  assert.equal(result[0].storeName, 'Unknown store');
 });

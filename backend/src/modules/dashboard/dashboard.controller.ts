@@ -9,4 +9,11 @@ export const dashboardController = {
 
     res.json({ status: 'success', data: analytics });
   },
+
+  getStoreViolations: async (req: Request, res: Response) => {
+    const authUser = req.user as AuthUser | undefined;
+    const violations = await dashboardService.getStoreViolations(authUser);
+
+    res.json({ status: 'success', data: violations });
+  },
 };

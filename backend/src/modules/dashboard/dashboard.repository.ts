@@ -33,4 +33,19 @@ export const dashboardRepository = {
       select: { commodityId: true, price: true },
     });
   },
+
+  findRecentPriceRecordsWithStore: (authUser?: AuthUser) => {
+    const scope = resolveDashboardScope(authUser);
+    const since = new Date();
+    since.setDate(since.getDate() - TREND_WINDOW_DAYS);
+
+    return prisma.priceRecord.findMany({
+      where: { ...scope, dateAndTime: { gte: since }, storeId: { not: null } },
+      select: {
+        storeId: true,
+        status: true,
+        store: { select: { name: true } },
+      },
+    });
+  },
 };

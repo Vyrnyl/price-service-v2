@@ -4,6 +4,7 @@ import { type FormEvent } from "react";
 import FormGroup from "@/shared/components/FormGroup";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
+import SearchableSelect from "@/shared/components/SearchableSelect";
 import Button from "@/shared/components/Button";
 import type {
   CommodityOption,
@@ -14,6 +15,7 @@ import type {
 interface PriceRecordFormProps {
   stores: StoreOption[];
   commodities: CommodityOption[];
+  commodityOptionsLoading?: boolean;
   formError: string | null;
   formErrors: Partial<Record<keyof CreatePriceRecordPayload, string>>;
   submitLoading: boolean;
@@ -27,6 +29,7 @@ interface PriceRecordFormProps {
 export default function PriceRecordForm({
   stores,
   commodities,
+  commodityOptionsLoading = false,
   formError,
   formErrors,
   submitLoading,
@@ -57,20 +60,18 @@ export default function PriceRecordForm({
           </FormGroup>
 
           <FormGroup label="Commodity" htmlFor="record-commodity" error={formErrors.commodityId}>
-            <Select
+            <SearchableSelect
               id="record-commodity"
               value={newRecord.commodityId}
-              onChange={(event) => onChange("commodityId", event.target.value)}
+              onChange={(value) => onChange("commodityId", value)}
+              options={commodities.map((commodity) => ({ value: commodity.id, label: commodity.name }))}
+              placeholder="Select commodity"
+              searchPlaceholder="Search commodity"
+              emptyLabel="No commodities found."
+              isLoading={commodityOptionsLoading}
               hasError={Boolean(formErrors.commodityId)}
-              className="max-h-48 overflow-y-auto"
-            >
-              <option value="">Select commodity</option>
-              {commodities.map((commodity) => (
-                <option key={commodity.id} value={commodity.id}>
-                  {commodity.name}
-                </option>
-              ))}
-            </Select>
+              aria-label="Commodity"
+            />
           </FormGroup>
         </div>
 

@@ -5,10 +5,15 @@ import type {
   DashboardAnalytics,
   PriceTrendPoint,
   SrpVsActualPoint,
+  StoreViolationPoint,
 } from './dashboard.types';
 
 export type PriceRecordForAnalytics = Awaited<
   ReturnType<typeof dashboardRepository.findRecentPriceRecords>
+>[number];
+
+export type PriceRecordWithStoreForAnalytics = Awaited<
+  ReturnType<typeof dashboardRepository.findRecentPriceRecordsWithStore>
 >[number];
 
 /**
@@ -84,6 +89,44 @@ export function buildSrpVsActual(
     .sort((a, b) => b.actualAverage - b.srp - (a.actualAverage - a.srp));
 }
 
+/**
+ * Counts each store's SRP violations over the trailing window, worst-first.
+ * Reuses `PriceRecord.status`, computed at write time by D-8's range-based
+ * compliance rule — this does not re-derive compliance from price vs. SRP, so
+ * it can't drift into a second, averaging-based definition of "non-compliant".
+ * Ranks the full set before `DASHBOARD_CHART_LIMIT` trims it, same discipline
+ * as `buildSrpVsActual`, so a store with few total records but many violations
+ * can't be cut before the sort has a chance to surface it.
+ */
+export function buildStoreViolations(records: PriceRecordWithStoreForAnalytics[]): StoreViolationPoint[] {
+  const totalsByStore = new Map<string, { name: string; violations: number; total: number }>();
+
+  for (const record of records) {
+    if (!record.storeId) continue;
+
+    const bucket = totalsByStore.get(record.storeId) ?? {
+      name: record.store?.name ?? 'Unknown store',
+      violations: 0,
+      total: 0,
+    };
+    bucket.total += 1;
+    if (record.status === 'OVERPRICE') {
+      bucket.violations += 1;
+    }
+    totalsByStore.set(record.storeId, bucket);
+  }
+
+  return [...totalsByStore.entries()]
+    .map(([storeId, bucket]) => ({
+      storeId,
+      storeName: bucket.name,
+      violationCount: bucket.violations,
+      totalRecords: bucket.total,
+      violationRate: Math.round((bucket.violations / bucket.total) * 1000) / 10,
+    }))
+    .sort((a, b) => b.violationCount - a.violationCount);
+}
+
 export const dashboardService = {
   getAnalytics: async (authUser?: AuthUser): Promise<DashboardAnalytics> => {
     const records = await dashboardRepository.findRecentPriceRecords(authUser);
@@ -111,5 +154,13 @@ export const dashboardService = {
       commodityComparison: commodityComparison.slice(0, DASHBOARD_CHART_LIMIT),
       srpVsActual: srpVsActual.slice(0, DASHBOARD_CHART_LIMIT),
     };
+  },
+
+  // Returns the full ranked list, not capped to DASHBOARD_CHART_LIMIT — this
+  // feeds a dedicated table on its own screen, not a fixed-height dashboard
+  // card, so it can show every store. The chart on that screen caps itself.
+  getStoreViolations: async (authUser?: AuthUser): Promise<StoreViolationPoint[]> => {
+    const records = await dashboardRepository.findRecentPriceRecordsWithStore(authUser);
+    return buildStoreViolations(records);
   },
 };

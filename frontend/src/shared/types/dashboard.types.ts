@@ -21,3 +21,11 @@ export type DashboardAnalytics = {
   commodityComparison: CommodityComparisonPoint[];
   srpVsActual: SrpVsActualPoint[];
 };
+
+export type StoreViolationPoint = {
+  storeId: string;
+  storeName: string;
+  violationCount: number;
+  totalRecords: number;
+  violationRate: number;
+};

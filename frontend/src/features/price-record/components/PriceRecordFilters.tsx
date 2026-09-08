@@ -10,6 +10,7 @@ interface PriceRecordFiltersProps {
   onCommodityChange: (value: string) => void;
   stores: StoreOption[];
   commodities: CommodityOption[];
+  commodityOptionsLoading?: boolean;
 }
 
 export default function PriceRecordFilters({
@@ -19,6 +20,7 @@ export default function PriceRecordFilters({
   onCommodityChange,
   stores,
   commodities,
+  commodityOptionsLoading = false,
 }: PriceRecordFiltersProps) {
   return (
     <div className="grid gap-3 rounded-xl border border-outline-variant bg-surface-container-lowest p-4 data-card-shadow">
@@ -52,6 +54,7 @@ export default function PriceRecordFilters({
               searchPlaceholder="Search commodity"
               emptyLabel="No commodities found."
               clearLabel="All commodities"
+              isLoading={commodityOptionsLoading}
               aria-label="Filter by commodity"
             />
           </FormGroup>

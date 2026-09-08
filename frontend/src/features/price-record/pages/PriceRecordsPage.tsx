@@ -158,6 +158,7 @@ export default function PriceRecordsPage({
   const [commodityFilter, setCommodityFilter] = useState("");
   const [stores, setStores] = useState<StoreOption[]>([]);
   const [commodities, setCommodities] = useState<CommodityOption[]>([]);
+  const [optionsLoading, setOptionsLoading] = useState(true);
   const [rawRecords, setRawRecords] = useState<BackendPriceRecord[]>([]);
   const [recordsLoading, setRecordsLoading] = useState(true);
   const [total, setTotal] = useState(0);
@@ -178,6 +179,7 @@ export default function PriceRecordsPage({
   useEffect(() => {
     const loadOptions = async () => {
       try {
+        setOptionsLoading(true);
         const [storeData, commodityData] = await Promise.all([
           fetchAllPages<StoreOption>("/api/stores"),
           fetchAllPages<CommodityOption>("/api/commodities"),
@@ -187,6 +189,8 @@ export default function PriceRecordsPage({
         setCommodities(commodityData);
       } catch (error) {
         console.error("Unable to load store/commodity options", error);
+      } finally {
+        setOptionsLoading(false);
       }
     };
 
@@ -371,6 +375,7 @@ export default function PriceRecordsPage({
               }}
               stores={stores}
               commodities={commodities}
+              commodityOptionsLoading={optionsLoading}
             />
           </div>
 
@@ -389,6 +394,7 @@ export default function PriceRecordsPage({
               <PriceRecordForm
                 stores={stores}
                 commodities={commodities}
+                commodityOptionsLoading={optionsLoading}
                 formError={formError}
                 formErrors={formErrors}
                 submitLoading={submitLoading}
