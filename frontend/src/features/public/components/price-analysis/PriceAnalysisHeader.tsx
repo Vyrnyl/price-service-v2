@@ -4,12 +4,14 @@ import SearchableSelect from "@/shared/components/SearchableSelect";
 type PriceAnalysisHeaderProps = {
   selectedCommodity: string;
   commodityOptions: string[];
+  commodityOptionsLoading?: boolean;
   onSelectCommodity: (value: string) => void;
 };
 
 export function PriceAnalysisHeader({
   selectedCommodity,
   commodityOptions,
+  commodityOptionsLoading = false,
   onSelectCommodity,
 }: PriceAnalysisHeaderProps) {
   return (
@@ -35,6 +37,7 @@ export function PriceAnalysisHeader({
           placeholder="Select commodity"
           searchPlaceholder="Search commodity"
           emptyLabel="No commodities found."
+          isLoading={commodityOptionsLoading}
           aria-label="Select commodity"
         />
       </div>

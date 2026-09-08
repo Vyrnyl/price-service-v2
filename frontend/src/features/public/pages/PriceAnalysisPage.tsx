@@ -21,9 +21,97 @@ import { PriceAnalysisHeader } from "../components/price-analysis/PriceAnalysisH
 import { PriceAnalysisSummaryCards } from "../components/price-analysis/PriceAnalysisSummaryCards";
 import { PriceTrendPanel } from "../components/price-analysis/PriceTrendPanel";
 
-const rangeOptions = ["Week", "Month"] as const;
+type RangeKey = "Week" | "Month" | "3M" | "6M" | "1Y" | "Custom";
 
-type RangeKey = (typeof rangeOptions)[number];
+type RangeDescriptor = {
+  key: RangeKey;
+  label: string;
+  /** Rolling window length in days. `null` for "Custom", which uses explicit start/end dates instead. */
+  days: number | null;
+  title: string;
+  projection: string;
+};
+
+const RANGE_DESCRIPTORS: Record<RangeKey, RangeDescriptor> = {
+  Week: {
+    key: "Week",
+    label: "Week",
+    days: 7,
+    title: "Last 7 Days",
+    projection: "Recent weekly movement based on the latest available observations",
+  },
+  Month: {
+    key: "Month",
+    label: "Month",
+    days: 30,
+    title: "Last 30 Days",
+    projection: "Recent monthly movement based on the available price history",
+  },
+  "3M": {
+    key: "3M",
+    label: "3M",
+    days: 90,
+    title: "Last 3 Months",
+    projection: "Movement over the last quarter based on the available price history",
+  },
+  "6M": {
+    key: "6M",
+    label: "6M",
+    days: 182,
+    title: "Last 6 Months",
+    projection: "Movement over the last half-year based on the available price history",
+  },
+  "1Y": {
+    key: "1Y",
+    label: "1Y",
+    days: 365,
+    title: "Last 12 Months",
+    projection: "Movement over the last year based on the available price history",
+  },
+  Custom: {
+    key: "Custom",
+    label: "Custom",
+    days: null,
+    title: "Custom Range",
+    projection: "Movement across the selected date range",
+  },
+};
+
+const rangeOptions = Object.values(RANGE_DESCRIPTORS).map((descriptor) => descriptor.key);
+const rangeLabels: Record<RangeKey, string> = Object.fromEntries(
+  Object.values(RANGE_DESCRIPTORS).map((descriptor) => [descriptor.key, descriptor.label]),
+) as Record<RangeKey, string>;
+
+/**
+ * Chart.js silently drops alternating axis labels once point count gets high
+ * (found 2026-09-03 on the dashboard bar charts) and a 1-year window is ~12x
+ * today's widest range, so the trend line is downsampled to at most this many
+ * points rather than rendering one point per price record.
+ */
+const MAX_TREND_POINTS = 60;
+
+interface WindowedRecord {
+  price: number | null;
+  dateAndTime: string | null;
+}
+
+function downsampleRecords(chronological: WindowedRecord[], maxPoints: number): WindowedRecord[] {
+  if (chronological.length <= maxPoints) {
+    return chronological;
+  }
+
+  const bucketSize = Math.ceil(chronological.length / maxPoints);
+  const buckets: WindowedRecord[] = [];
+  for (let start = 0; start < chronological.length; start += bucketSize) {
+    const bucket = chronological.slice(start, start + bucketSize);
+    const prices = bucket.map((record) => record.price).filter((price): price is number => price != null);
+    buckets.push({
+      price: prices.length > 0 ? prices.reduce((total, price) => total + price, 0) / prices.length : null,
+      dateAndTime: bucket[bucket.length - 1]!.dateAndTime,
+    });
+  }
+  return buckets;
+}
 
 function buildTrendPath(values: number[], width = 1000, height = 320, padding = 40) {
   if (values.length === 0) {
@@ -57,16 +145,11 @@ function formatTrendLabel(date: string | null | undefined, index: number) {
   return `P${index + 1}`;
 }
 
-interface WindowedRecord {
-  price: number | null;
-  dateAndTime: string | null;
-}
-
 /**
  * `records` must already be filtered to the real calendar window the caller wants
- * (last 7 or 30 days) — this only shapes them for display, it doesn't decide the window.
- * That split is what makes "Last 7 Days" actually contain seven days of data instead of
- * a fixed point count mislabeled with a range name (B-32).
+ * — this only shapes them for display, it doesn't decide the window. That split is
+ * what makes "Last 7 Days" actually contain seven days of data instead of a fixed
+ * point count mislabeled with a range name (B-32).
  */
 function buildTrendInsight({
   activeRange,
@@ -77,7 +160,8 @@ function buildTrendInsight({
   records: WindowedRecord[];
   forecastConfidence: number | null;
 }) {
-  const chronological = [...records].reverse();
+  const descriptor = RANGE_DESCRIPTORS[activeRange];
+  const chronological = downsampleRecords([...records].reverse(), MAX_TREND_POINTS);
   const values = chronological
     .map((record) => record.price)
     .filter((price): price is number => price != null);
@@ -92,13 +176,11 @@ function buildTrendInsight({
         : "Low";
 
   return {
-    title: activeRange === "Week" ? "Last 7 Days" : "Last 30 Days",
+    title: descriptor.title,
     price: formatCurrency(latestPrice),
     change: changeValue == null ? "No data" : formatChange(changeValue),
     confidence: confidenceLabel,
-    projection: activeRange === "Week"
-      ? "Recent weekly movement based on the latest available observations"
-      : "Recent monthly movement based on the available price history",
+    projection: descriptor.projection,
     path: buildTrendPath(values),
     labels: chronological.map((record, index) => formatTrendLabel(record.dateAndTime, index)),
   };
@@ -143,9 +225,39 @@ function filterRecordsWithinRealWindow<T extends { dateAndTime: string | null }>
   });
 }
 
+function filterRecordsWithinDateRange<T extends { dateAndTime: string | null }>(
+  records: T[],
+  startDate: string,
+  endDate: string,
+): T[] {
+  const start = new Date(startDate).getTime();
+  const end = new Date(endDate).getTime();
+  if (Number.isNaN(start) || Number.isNaN(end)) return [];
+
+  const inclusiveEnd = end + 24 * 60 * 60 * 1000 - 1;
+  return records.filter((record) => {
+    if (!record.dateAndTime) return false;
+    const recordDate = new Date(record.dateAndTime).getTime();
+    return !Number.isNaN(recordDate) && recordDate >= start && recordDate <= inclusiveEnd;
+  });
+}
+
+function getTodayDateString(): string {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function getDefaultCustomStartDate(): string {
+  const date = new Date();
+  date.setDate(date.getDate() - 30);
+  return date.toISOString().slice(0, 10);
+}
+
 export default function PriceAnalysisPage() {
   const [activeRange, setActiveRange] = useState<RangeKey>("Week");
+  const [customStartDate, setCustomStartDate] = useState<string>(getDefaultCustomStartDate());
+  const [customEndDate, setCustomEndDate] = useState<string>(getTodayDateString());
   const [commodityOptions, setCommodityOptions] = useState<string[]>([]);
+  const [commodityOptionsLoading, setCommodityOptionsLoading] = useState(true);
   const [commodities, setCommodities] = useState<PublicCommodityItem[]>([]);
   const [forecastPrice, setForecastPrice] = useState<number | null>(null);
   const [forecastConfidence, setForecastConfidence] = useState<number | null>(null);
@@ -177,7 +289,11 @@ export default function PriceAnalysisPage() {
     ? thirtyDayValues[0]! - thirtyDayValues[thirtyDayValues.length - 1]!
     : null;
 
-  const windowedRecords = filterRecordsWithinRealWindow(allRecords, activeRange === "Week" ? 7 : 30).map((record) => ({
+  const rangeDescriptor = RANGE_DESCRIPTORS[activeRange];
+  const recordsInRange = rangeDescriptor.days != null
+    ? filterRecordsWithinRealWindow(allRecords, rangeDescriptor.days)
+    : filterRecordsWithinDateRange(allRecords, customStartDate, customEndDate);
+  const windowedRecords = recordsInRange.map((record) => ({
     price: record.price != null ? Number(record.price) : null,
     dateAndTime: record.dateAndTime,
   }));
@@ -266,12 +382,13 @@ export default function PriceAnalysisPage() {
       accent: "text-error",
     },
   ];
-
+  
   useEffect(() => {
     let isMounted = true;
 
     const loadCommodities = async () => {
       try {
+        setCommodityOptionsLoading(true);
         const fetchedCommodities = await getPublicCommodities();
         const fetchedCommodityNames = Array.from(
           new Set(
@@ -293,6 +410,8 @@ export default function PriceAnalysisPage() {
         });
       } catch (error) {
         console.error("Unable to load commodities", error);
+      } finally {
+        if (isMounted) setCommodityOptionsLoading(false);
       }
     };
 
@@ -356,6 +475,7 @@ export default function PriceAnalysisPage() {
         <PriceAnalysisHeader
           selectedCommodity={selectedCommodity}
           commodityOptions={commodityOptions}
+          commodityOptionsLoading={commodityOptionsLoading}
           onSelectCommodity={setSelectedCommodity}
         />
 
@@ -366,10 +486,21 @@ export default function PriceAnalysisPage() {
             activeInsight={activeInsight}
             activeRange={activeRange}
             rangeOptions={rangeOptions}
+            rangeLabels={rangeLabels}
             points={trendPoints}
             selectedPointIndex={selectedPointIndex}
+            customStartDate={customStartDate}
+            customEndDate={customEndDate}
             onRangeChange={(range) => {
               setActiveRange(range);
+              setSelectedPointIndex(null);
+            }}
+            onCustomStartDateChange={(value) => {
+              setCustomStartDate(value);
+              setSelectedPointIndex(null);
+            }}
+            onCustomEndDateChange={(value) => {
+              setCustomEndDate(value);
               setSelectedPointIndex(null);
             }}
             onPointSelect={setSelectedPointIndex}

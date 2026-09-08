@@ -10,8 +10,9 @@ import {
   Tooltip,
 } from "chart.js";
 import { Line } from "react-chartjs-2";
+import Input from "@/shared/components/Input";
 
-type PriceRange = "Week" | "Month";
+type PriceRange = "Week" | "Month" | "3M" | "6M" | "1Y" | "Custom";
 
 export type TrendPoint = {
   date: string | null;
@@ -34,9 +35,14 @@ type PriceTrendPanelProps = {
   activeInsight: PriceInsight;
   activeRange: PriceRange;
   rangeOptions: readonly PriceRange[];
+  rangeLabels: Record<PriceRange, string>;
   points: TrendPoint[];
   selectedPointIndex: number | null;
+  customStartDate: string;
+  customEndDate: string;
   onRangeChange: (range: PriceRange) => void;
+  onCustomStartDateChange: (value: string) => void;
+  onCustomEndDateChange: (value: string) => void;
   onPointSelect: (index: number) => void;
 };
 
@@ -80,9 +86,14 @@ export function PriceTrendPanel({
   activeInsight,
   activeRange,
   rangeOptions,
+  rangeLabels,
   points,
   selectedPointIndex,
+  customStartDate,
+  customEndDate,
   onRangeChange,
+  onCustomStartDateChange,
+  onCustomEndDateChange,
   onPointSelect,
 }: PriceTrendPanelProps) {
   const [isCompactScreen, setIsCompactScreen] = useState(false);
@@ -244,6 +255,7 @@ export function PriceTrendPanel({
           {rangeOptions.map((range) => (
             <button
               key={range}
+              type="button"
               className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-all ${
                 activeRange === range
                   ? "bg-primary text-on-primary shadow-sm"
@@ -251,11 +263,37 @@ export function PriceTrendPanel({
               }`}
               onClick={() => onRangeChange(range)}
             >
-              {range}
+              {rangeLabels[range]}
             </button>
           ))}
         </div>
       </div>
+
+      {activeRange === "Custom" ? (
+        <div className="mb-5 flex flex-col gap-2 rounded-xl border border-outline-variant/70 bg-surface-container p-3 sm:flex-row sm:items-center sm:gap-3">
+          <label className="flex flex-1 items-center gap-2 text-sm text-on-surface-variant">
+            From
+            <Input
+              type="date"
+              max={customEndDate}
+              value={customStartDate}
+              onChange={(event) => onCustomStartDateChange(event.target.value)}
+              aria-label="Custom range start date"
+            />
+          </label>
+          <label className="flex flex-1 items-center gap-2 text-sm text-on-surface-variant">
+            To
+            <Input
+              type="date"
+              min={customStartDate}
+              max={new Date().toISOString().slice(0, 10)}
+              value={customEndDate}
+              onChange={(event) => onCustomEndDateChange(event.target.value)}
+              aria-label="Custom range end date"
+            />
+          </label>
+        </div>
+      ) : null}
 
       <div className="overflow-hidden rounded-xl border border-outline-variant/70 bg-surface-container p-3 shadow-inner sm:p-4">
         <div className="relative h-60 sm:h-70 md:h-80 lg:h-90">
@@ -269,23 +307,33 @@ export function PriceTrendPanel({
             <Line data={chartData} options={chartOptions} />
           </div>
 
-          <div className="mt-3 w-full rounded-xl border border-outline-variant/70 bg-surface-container-lowest p-3 data-card-shadow sm:absolute sm:inset-x-3 sm:bottom-3 sm:mt-0 sm:w-auto sm:max-w-56 md:left-[60%] md:right-auto md:top-4 md:bottom-auto md:max-w-60">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline">Selected point</p>
-            <p className="text-lg font-semibold text-on-surface sm:text-xl">{selectedPoint ? formatCurrency(selectedPoint.price) : activeInsight.price}</p>
-            <p className="text-sm text-success">{selectedDateLabel}</p>
-          </div>
+          {points.length === 0 ? (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <p className="rounded-xl border border-outline-variant/70 bg-surface-container-lowest px-4 py-2 text-sm text-on-surface-variant shadow-sm">
+                No price records in this range.
+              </p>
+            </div>
+          ) : (
+            <div className="mt-3 w-full rounded-xl border border-outline-variant/70 bg-surface-container-lowest p-3 data-card-shadow sm:absolute sm:inset-x-3 sm:bottom-3 sm:mt-0 sm:w-auto sm:max-w-56 md:left-[60%] md:right-auto md:top-4 md:bottom-auto md:max-w-60">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline">Selected point</p>
+              <p className="text-lg font-semibold text-on-surface sm:text-xl">{selectedPoint ? formatCurrency(selectedPoint.price) : activeInsight.price}</p>
+              <p className="text-sm text-success">{selectedDateLabel}</p>
+            </div>
+          )}
         </div>
 
-        <div className="mt-4 flex flex-wrap gap-2">
-          {activeInsight.labels.map((label) => (
-            <span
-              key={label}
-              className="rounded-full bg-surface-container-high px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant"
-            >
-              {label}
-            </span>
-          ))}
-        </div>
+        {activeInsight.labels.length <= 31 ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {activeInsight.labels.map((label, index) => (
+              <span
+                key={`${label}-${index}`}
+                className="rounded-full bg-surface-container-high px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.24em] text-on-surface-variant"
+              >
+                {label}
+              </span>
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   );
