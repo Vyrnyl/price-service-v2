@@ -193,7 +193,7 @@ export default function NavigationDrawer({
           isOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        <div className="mb-4">
+        <div className="mb-4 shrink-0">
           {sessionUser ? (
             <div className="mx-6 mt-16 flex items-center gap-3 rounded-xl border border-outline-variant p-3">
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary-fixed text-lg font-bold text-primary">
@@ -215,7 +215,7 @@ export default function NavigationDrawer({
             Loading navigation...
           </div>
         ) : (
-          <nav className="flex flex-col gap-2">
+          <nav className="flex min-h-0 flex-1 flex-col gap-2 overflow-y-auto">
             {links.map((item) => {
             const Icon = item.icon;
             const isActive = activePath === item.href;
