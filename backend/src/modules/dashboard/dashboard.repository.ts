@@ -34,13 +34,22 @@ export const dashboardRepository = {
     });
   },
 
-  findRecentPriceRecordsWithStore: (authUser?: AuthUser) => {
+  findRecentPriceRecordsWithStore: (authUser?: AuthUser, range?: { startDate?: Date; endDate?: Date }) => {
     const scope = resolveDashboardScope(authUser);
-    const since = new Date();
-    since.setDate(since.getDate() - TREND_WINDOW_DAYS);
+
+    let since = range?.startDate;
+    if (!since) {
+      since = new Date();
+      since.setDate(since.getDate() - TREND_WINDOW_DAYS);
+    }
+
+    const dateAndTime: { gte: Date; lte?: Date } = { gte: since };
+    if (range?.endDate) {
+      dateAndTime.lte = range.endDate;
+    }
 
     return prisma.priceRecord.findMany({
-      where: { ...scope, dateAndTime: { gte: since }, storeId: { not: null } },
+      where: { ...scope, dateAndTime, storeId: { not: null } },
       select: {
         storeId: true,
         status: true,

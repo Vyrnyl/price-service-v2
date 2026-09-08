@@ -9,9 +9,19 @@ export async function fetchDashboardAnalytics(): Promise<DashboardAnalytics> {
   return response.data;
 }
 
-export async function fetchStoreViolations(): Promise<StoreViolationPoint[]> {
+export interface StoreViolationsRange {
+  startDate?: string;
+  endDate?: string;
+}
+
+export async function fetchStoreViolations(range?: StoreViolationsRange): Promise<StoreViolationPoint[]> {
+  const query = new URLSearchParams();
+  if (range?.startDate) query.set("startDate", range.startDate);
+  if (range?.endDate) query.set("endDate", range.endDate);
+
+  const queryString = query.toString();
   const response = await apiFetch<{ status: string; data: StoreViolationPoint[] }>(
-    "/api/dashboard/store-violations",
+    queryString ? `/api/dashboard/store-violations?${queryString}` : "/api/dashboard/store-violations",
   );
 
   return response.data;

@@ -17,9 +17,16 @@ type StoreViolationsChartProps = {
   points: StoreViolationPoint[];
   isLoading?: boolean;
   error?: string | null;
+  /** e.g. "over the last 30 days" — mirrors the active range picked on the page. */
+  rangeDescription?: string;
 };
 
-export function StoreViolationsChart({ points, isLoading, error }: StoreViolationsChartProps) {
+export function StoreViolationsChart({
+  points,
+  isLoading,
+  error,
+  rangeDescription = "over the last 30 days",
+}: StoreViolationsChartProps) {
   const errorColor = readToken("--color-error", "#ba1a1a");
   const successColor = readToken("--color-success", "#2e7d32");
   const surfaceLowest = readToken("--color-surface-container-lowest", "#ffffff");
@@ -85,8 +92,8 @@ export function StoreViolationsChart({ points, isLoading, error }: StoreViolatio
         <h4 className="font-sans text-h3-desktop text-on-surface">Violations by Store</h4>
         <p className="text-body-sm text-on-surface-variant">
           {points.length > CHART_STORE_LIMIT
-            ? `The ${CHART_STORE_LIMIT} stores with the most SRP violations over the last 30 days.`
-            : "Number of price records recorded above SRP over the last 30 days, per store."}
+            ? `The ${CHART_STORE_LIMIT} stores with the most SRP violations ${rangeDescription}.`
+            : `Number of price records recorded above SRP ${rangeDescription}, per store.`}
         </p>
       </div>
 
@@ -96,7 +103,7 @@ export function StoreViolationsChart({ points, isLoading, error }: StoreViolatio
         <div className="h-72 animate-pulse rounded-xl bg-surface-container" />
       ) : charted.length === 0 ? (
         <p className="flex h-72 items-center justify-center text-body-sm text-on-surface-variant">
-          No price records with a store attached in the last 30 days.
+          No price records with a store attached {rangeDescription}.
         </p>
       ) : (
         <div className="relative h-72">

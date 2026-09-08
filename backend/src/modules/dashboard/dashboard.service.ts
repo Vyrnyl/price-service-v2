@@ -159,8 +159,13 @@ export const dashboardService = {
   // Returns the full ranked list, not capped to DASHBOARD_CHART_LIMIT — this
   // feeds a dedicated table on its own screen, not a fixed-height dashboard
   // card, so it can show every store. The chart on that screen caps itself.
-  getStoreViolations: async (authUser?: AuthUser): Promise<StoreViolationPoint[]> => {
-    const records = await dashboardRepository.findRecentPriceRecordsWithStore(authUser);
+  // Defaults to the trailing 30-day window (dashboard.repository's
+  // TREND_WINDOW_DAYS) when no range is given, same as before this had a filter.
+  getStoreViolations: async (
+    authUser?: AuthUser,
+    range?: { startDate?: Date; endDate?: Date },
+  ): Promise<StoreViolationPoint[]> => {
+    const records = await dashboardRepository.findRecentPriceRecordsWithStore(authUser, range);
     return buildStoreViolations(records);
   },
 };
