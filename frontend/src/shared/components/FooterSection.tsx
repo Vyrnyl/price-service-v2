@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MdOpenInNew } from "react-icons/md";
+import Logo from "@/shared/components/Logo";
 
 export default function FooterSection() {
   const currentYear = new Date().getFullYear();
@@ -7,7 +8,10 @@ export default function FooterSection() {
   return (
     <footer className="flex w-full lg:ml-72 lg:max-w-[calc(100%-18rem)] flex-col items-center justify-between gap-stack-md border-t border-outline-variant bg-surface-container-highest px-container-margin-mobile py-stack-lg md:flex-row md:px-container-margin-desktop">
       <div className="flex flex-col gap-2 text-center md:text-left">
-        <h2 className="font-sans text-h3-desktop font-bold text-on-surface">PresyoSerbisyo</h2>
+        <div className="flex items-center justify-center gap-2.5 md:justify-start">
+          <Logo className="shrink-0" size={24} />
+          <h2 className="font-sans text-h3-desktop font-bold text-on-surface">PresyoSerbisyo</h2>
+        </div>
         <p className="font-sans text-body-sm text-on-surface-variant">
           © {currentYear} DTI Catanduanes. Government of the Philippines.
         </p>

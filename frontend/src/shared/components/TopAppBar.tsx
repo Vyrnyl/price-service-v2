@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { MdOutlineAnalytics, MdMenu, MdClose } from "react-icons/md";
+import { MdMenu, MdClose } from "react-icons/md";
 import { LuLogIn } from "react-icons/lu";
 import { useEffect, useState } from "react";
 import { getSessionUser, type SessionUser } from "@/shared/services/auth";
+import Logo from "@/shared/components/Logo";
 
 export default function TopAppBar({
   activePath,
@@ -48,7 +49,7 @@ export default function TopAppBar({
           href="/"
           className="flex min-w-0 items-center gap-3 rounded-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
         >
-          <MdOutlineAnalytics className="shrink-0 text-primary" size={28} />
+          <Logo className="shrink-0" size={28} />
           <h1 className="truncate font-sans text-h2-desktop font-bold text-primary">
             PresyoSerbisyo
           </h1>

@@ -10,6 +10,7 @@ import Alert from "@/shared/components/Alert";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import FormGroup from "@/shared/components/FormGroup";
+import Logo from "@/shared/components/Logo";
 import { useToast } from "@/shared/components/Toast";
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -36,6 +37,33 @@ export default function ComponentGalleryPage() {
           Every shared UI primitive in every variant — the reference for Phase 1.1.
         </p>
       </div>
+
+      <Section title="Logo">
+        <div className="flex flex-wrap items-end gap-8">
+          <div className="flex flex-col items-center gap-2">
+            <Logo size={56} />
+            <span className="font-sans text-body-sm text-on-surface-variant">primary</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <div className="rounded-xl bg-primary p-3">
+              <Logo size={56} variant="inverse" />
+            </div>
+            <span className="font-sans text-body-sm text-on-surface-variant">inverse</span>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <Logo size={56} variant="mono" className="text-on-surface" />
+            <span className="font-sans text-body-sm text-on-surface-variant">mono</span>
+          </div>
+          <div className="flex items-end gap-4">
+            {[16, 24, 32, 48].map((size) => (
+              <div key={size} className="flex flex-col items-center gap-2">
+                <Logo size={size} />
+                <span className="font-sans text-body-sm text-on-surface-variant">{size}px</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </Section>
 
       <Section title="Buttons">
         <div className="flex flex-wrap items-center gap-3">
