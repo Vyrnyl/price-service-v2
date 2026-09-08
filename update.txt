@@ -1,0 +1,22 @@
+Stale Dashboard or still showing dashboard after logging out.
+
+All commodities dropdown loading state.
+
+Should visualize what stores that don't follow the srp and other details.
+
+COMMODITIES
+Add category dropdown - means also have to add new page for category CRUD.
+Unique commodity constraints(can't add with the exactly the same with existing name).
+The effective date should only be within and not past more than 1 week.
+Change the "Coconut Oil" placeholder to "AG".
+
+PRICE RECORDS
+Make the commodity dropdown the same as other commodity dropdown with search bar.
+
+PRICE TRENDS
+Forecast Method - Simplify and convert into simple terms on how forecasting works, not too deep words.
+Filter should also have specific date range(date picker), 3, 6 months, and 1 year
+
+
+REPORTS
+Can select multiple stores to compare their prices.

@@ -727,6 +727,157 @@ None.
 
 ---
 
+## 7a. Phase 7 — Post-Launch Revisions
+
+Scoped 2026-09-07 from `update.txt`, a post-launch review pass on the live-deployed app. Like Phases 5 and 6 these are **requested changes to behaviour that already meets its Definition of Done**, not audit gaps — with one exception: **7.1 is a real session-hygiene bug**, not polish.
+
+Twelve raised items, split into **3 session-sized tickets**. Land and verify one ticket before starting the next; each is independently shippable.
+
+> **Ticket B is the heavy one.** It carries a Prisma migration, a new backend module, and a new admin page. It is deliberately isolated so a failed migration cannot block the unrelated polish in A and C.
+
+> **One item is intentionally split across tickets.** "Commodities: add category dropdown" (B) and "Price Records: searchable commodity dropdown" (A) sound alike but share no code — the first needs a new reference domain that does not exist yet, the second reuses the `SearchableSelect` that Phase 6.3 already built. Do not wait on B to do A.
+
+### Ticket A — Session Hygiene, Loading States & Dropdown Reuse
+
+Five small, independent items across four surfaces. No schema change, no new module. Start here — it is the lowest-risk ticket and clears the one genuine bug.
+
+#### 7.1 Stale Dashboard After Logout *(bug, not polish)*
+
+Signing out leaves the protected dashboard reachable — visible on back-navigation, or still painted after the redirect.
+
+- **Root cause (confirmed)**: `handleLogout` in `NavigationDrawer.tsx` (~`147-158`) clears the cookie server-side and then calls **`router.push("/login")`**. `router.push` does not evict the Next.js App Router **client-side route cache**, so the previously-rendered protected RSC payload survives the navigation and is re-served on back.
+- **Files (edit)**: `shared/components/NavigationDrawer.tsx` — call `router.replace("/login")` **and** `router.refresh()` after clearing session state, so the cached RSC payload is invalidated and the history entry is not restorable.
+- **Watch**: fixing only the client cache is insufficient if the cookie clear ever fails — `logoutFromServer()` already has a `catch` that toasts and *continues* to sign out locally, which is correct; keep it. Verify the middleware/route guard genuinely rejects a request whose cookie is gone, rather than relying on the client redirect alone. **Both layers must hold** — client cache eviction is UX, the server guard is the actual security boundary.
+- **Gate**: Refactor Gate (§5a) — no new screen. Verify live: sign out, then press the browser Back button; then re-request the protected URL directly with the cookie cleared.
+- **Done gate**: after logout, Back does not render the dashboard, a direct URL request redirects to `/login`, and no protected data is briefly painted before the redirect.
+
+#### 7.2 Commodities Dropdown Loading State
+
+The "All commodities" dropdown renders with no loading affordance while its options are in flight, reading as an empty or broken list.
+
+- **Files (edit)**: `shared/components/SearchableSelect.tsx` (accept an `isLoading` prop rendering the shared `Skeleton` inside the option list, distinct from the existing empty state), plus its call sites that fetch asynchronously.
+- **Watch**: **"loading" and "genuinely empty" must render differently** — that distinction is the whole point of the item; CLAUDE.md's "every screen needs loading, empty, and error states" applies to the popover, not just the page. `SearchableSelect` is shared by `PriceRecordFilters` and `PriceAnalysisHeader`, so the prop must be **optional** and default to today's behaviour, or both call sites regress.
+- **Gate**: Feature Loop (visible change).
+- **Done gate**: an in-flight dropdown shows a loading state, a resolved-but-empty one shows the empty state, and neither call site regresses.
+
+#### 7.3 Price Records Form: Searchable Commodity Dropdown
+
+The *filter* already uses `SearchableSelect` (built in 6.3); the **entry form** does not.
+
+- **Files (edit)**: `features/price-record/components/PriceRecordForm.tsx` (~`59-64`) — replace the plain `Select` with `SearchableSelect`.
+- **Watch**: the form control is **`FormGroup`-wrapped and validated** (`formErrors.commodityId`), unlike the filter. `SearchableSelect` must accept and render the error state and stay label-associated (`htmlFor`/`id`) — the accessibility fix from B-52 must not be dropped on the way through. It also reads `event.target.value` from a native select today; the value-change signature will differ.
+- **Gate**: Feature Loop.
+- **Done gate**: the entry form's commodity control searches, submits the right `commodityId`, shows its validation error, and remains keyboard- and screen-reader-accessible.
+
+#### 7.4 Forecast Method — Plain-Language Rewrite
+
+`ForecastMethodPanel.tsx` explains forecasting as "an ARIMA model that studies recent trends, seasonality, and short-term shifts" — jargon for a public transparency surface.
+
+- **Files (edit)**: `features/public/components/price-analysis/ForecastMethodPanel.tsx` — copy only.
+- **Watch**: **copy must stay true to what the system actually does.** Simplifying must not become overclaiming: it is a projection from recent recorded prices, not a guarantee. Keep the three-row breakdown structure; rewrite the labels and values in everyday terms. This panel is public-facing, so the same care that kept fabricated DTI contact details out of the app applies to how confident the forecast is made to sound.
+- **Gate**: Feature Loop (visible change) — needs a read-through sign-off, not just a render check.
+- **Done gate**: no unexplained modelling jargon remains, and the description is still an accurate account of the forecast.
+
+#### 7.5 "Coconut Oil" Placeholder to "AG"
+
+- **Files (edit)**: `features/commodity/components/AddCommodityDialog.tsx:105` — `placeholder="Coconut Oil"` becomes `"AG"`.
+- **Note**: one-line change, folded here rather than given its own ticket. Confirm with the reviewer that "AG" is the intended literal placeholder text and not shorthand for something longer.
+- **Gate**: Refactor Gate.
+- **Done gate**: the field's placeholder reads "AG".
+
+**Ticket A exit**: logout leaves nothing stale, async dropdowns show they are loading, both Price Records commodity controls search, and the forecast panel reads plainly.
+
+### Ticket B — Commodity Category as Real Reference Data
+
+The heaviest ticket: a migration, a new backend module, a new admin page, and two form changes. **This closes B-8's `category` half.** Do not start it mid-session — it wants a clean run.
+
+> **This is the item the Phase 5 "Category should be dropdown" revision was deferred *to*.** Phase 5 skipped it because the price entry form has no Category field; the only category input in the app is on the Add Commodity form. That is the field this ticket converts.
+
+#### 7.6 Category CRUD + Constrained `Commodity.category` — ● Done (2026-09-07)
+
+`Commodity.category` is `String` in `prisma/schema.prisma:44` and `z.string().trim().min(1)` in `commodity.schema.ts:10` — unconstrained free text, so two spellings of one category silently coexist. Categories become a real table with an admin CRUD page, and the commodity form's free-text input becomes a dropdown.
+
+- **Contract (new)**: `GET/POST/PUT/DELETE /api/v1/categories`, RBAC on writes per the ownership decision below
+- **Files (new, backend)**: `modules/category/` — full module shape (controller · service · repository · routes · schema · types · index), plus a Prisma migration adding `Category` and repointing `Commodity.category` at it
+- **Files (new, frontend)**: an admin Category management page and its feature folder — a sibling `features/category/`, per the "feature folders are domains" convention
+- **Files (edit)**: `AddCommodityDialog.tsx` (free-text input becomes a dropdown), `commodity.schema.ts` both sides, `NavigationDrawer.tsx` (nav entry), `prisma/seed.ts`
+- **Data migration — queried live Neon 2026-09-07: 135 commodities, 19 distinct raw category strings.** Backfill plan, settled with the user: merge the near-duplicate pair ("Bottled Water-Distilled" [10] / "Bottled Water Distilled" [2], no hyphen) into the more common hyphenated spelling, and title-case the stray lowercase "drinks" → "Drinks" — yields **18 clean `Category` rows**. Migration order: create table, backfill+merge distinct values, add nullable FK, populate every `Commodity.categoryId` from the merge mapping, *then* constrain to non-null. Deploy is live — this runs against real data.
+- **Deletion semantics — settled 2026-09-07: block, not reassign.** Deleting a category with any commodity still referencing it returns a clean 409 ("N commodities still use this category"), same pattern as B-53's RESTRICT→409 fix. No reassignment flow, no fallback "Uncategorized" bucket.
+- **Ownership — settled 2026-09-07: OFFICER.** Confirmed with the user — Category CRUD follows commodity writes to OFFICER, matching the 5.1 role swap (Category is a sub-resource of Commodity). ADMIN keeps read-only. Apply RBAC at the route **and** verify live over HTTP — route RBAC still has no test coverage.
+- **Gate**: Feature Loop, full six steps — this is a net-new page, so UI plus mock data plus visual sign-off come **before** the migration is written.
+- **Done gate**: the owning role creates, edits, and deletes a category; the Add Commodity form offers only existing categories; every pre-existing commodity still shows its original category after migration; deleting an in-use category behaves as decided, not as a 500.
+
+#### 7.7 Unique Commodity Name Constraint — ● Done (2026-09-07)
+
+Two commodities can be created with byte-identical names today — `Commodity.name` has no `@unique`.
+
+- **Files (edit)**: `prisma/schema.prisma` (plus migration), `commodity.service.ts` (translate the constraint violation into a clean 409/422, not a 500), `commodity.schema.ts` and `AddCommodityDialog.tsx` (surface the error on the field)
+- **Live-data check, queried 2026-09-07: 2 real exact-duplicate pairs, 0 case-only variants.** Both pairs carry genuinely independent price history (3–5 real `PriceRecord`s and forecasts each, different SRPs) — not junk to dedupe. **Settled with the user: rename to disambiguate**, not merge — the newer row of each pair gets a `" (2)"` suffix appended to its name, keeping both rows' independent price history and SRPs untouched. Applied before the constraint goes on.
+- **Case sensitivity — settled 2026-09-07: case-insensitive.** "Rice"/"rice"/"RICE" collide as duplicates. Implemented as a functional unique index on `lower(name)` (Postgres has no case-insensitive `@unique` in the Prisma schema DSL — this needs raw SQL in the migration, same pattern as 7.6's hand-written migration).
+- **Uniqueness scope — settled 2026-09-07: global**, not per-category. One name across the whole commodity list, matching how every table/form in the app already lists commodities as one flat set.
+- **Gate**: Feature Loop for the error surface; Refactor Gate for the constraint.
+- **Done gate**: creating a duplicate name (case-insensitive, global) is rejected with a readable field-level message, no 500 reaches the client, and the migration applied cleanly to live data.
+
+#### 7.8 Effective Date Window — At Most One Week Ahead — ● Done (2026-09-07)
+
+`createSrpSchema.effectiveDate` is bare `z.coerce.date()` — any date, past or future, is accepted.
+
+- **Files (edit)**: `srp.schema.ts` (backend), `commodity.schema.ts` (frontend, matching bound — CLAUDE.md requires validating both sides), `AddCommodityDialog.tsx` (`min`/`max` on the date input plus inline error)
+- **Rule — settled 2026-09-07: past dates allowed.** Only the forward bound is enforced: **date ≤ today + 7 days**, no floor. Consistent with 6.6 — an SRP update always writes a *new* historical row, so blocking past dates would block legitimate backdated corrections.
+- **Watch**: put the bound in a **single shared constant** rather than duplicating `7` across three files, and be explicit about timezone / `Asia/Manila` day boundaries so a date valid in the browser is not rejected by the server.
+- **Gate**: Feature Loop.
+- **Done gate**: a date outside the agreed window is rejected on both client and server with a clear message; a date inside it saves; the boundary days themselves behave as decided.
+
+**Ticket B exit — met 2026-09-07.** All 3 items (7.6, 7.7, 7.8) done: categories are real reference data with their own CRUD, commodity names cannot collide, and effective dates fall inside an agreed window.
+
+### Ticket C — Analytics & Reporting Surfaces
+
+Three items on the analysis surfaces. Two carry contract changes.
+
+#### 7.9 Price Trends: Wider Ranges + Date Picker — ● Done (2026-09-07)
+
+`PriceAnalysisPage.tsx`'s `RangeKey` offered only **Week / Month** (`activeRange === "Week" ? 7 : 30`). Added 3-month, 6-month, and 1-year presets plus an explicit custom date range.
+
+- **Restructured the load-bearing binary into a range descriptor**, per the watch item: `RANGE_DESCRIPTORS: Record<RangeKey, RangeDescriptor>` (`RangeKey = "Week" | "Month" | "3M" | "6M" | "1Y" | "Custom"`) carries `days` (rolling window length, `null` for Custom), `title`, and `projection` copy per range — `buildTrendInsight` reads `RANGE_DESCRIPTORS[activeRange]` instead of ternary-branching on `"Week"`. All 6 range values get their own accurate title/copy, not just Week/Month.
+- **Custom range** uses explicit `customStartDate`/`customEndDate` state (defaulting to the last 30 days) filtered by a new `filterRecordsWithinDateRange` (inclusive end-of-day), independent of the rolling-window `filterRecordsWithinRealWindow`.
+- **Density**: added `downsampleRecords`/`MAX_TREND_POINTS = 60` — chronological records are bucketed and averaged down to at most 60 points before charting, regardless of range width. Verified against synthetic 365-daily-point data (no DB writes, same no-live-seeding precedent as the 2026-09-03 dashboard chart-density fix): 365 → 53 points, last bucket preserves the true latest date, no `NaN`s; Week/Month (≤30 records) pass through untouched. Also capped the per-day label-chip strip below the chart (`activeInsight.labels`) to ranges with ≤31 points — at 60-point density it duplicated the x-axis as unreadable clutter — and fixed a latent duplicate-`key` bug in that same map (`label` alone isn't unique once ranges span months with repeated day-of-month labels).
+- **No new date-picker primitive** — reused the existing native `<input type="date">` + `Input` pattern already established in `ReportGenerationPage.tsx`/`AuditLogFilters.tsx` (checked `ui-registry.md` first, per the watch item); the pair renders inline in `PriceTrendPanel.tsx` only when `activeRange === "Custom"`, with `min`/`max` cross-constraining the two fields and `max` capped at today.
+- **Empty state added**: an explicit "No price records in this range." message overlays the chart area when the active range/custom dates match zero records, rather than a chart silently rendering nothing.
+- **Files (edit)**: `features/public/pages/PriceAnalysisPage.tsx`, `features/public/components/price-analysis/PriceTrendPanel.tsx` (range pills now render `rangeLabels[range]`, custom date pair, empty state). `PriceAnalysisHeader.tsx` was **not** touched — the range/date controls live in `PriceTrendPanel.tsx` where the existing Week/Month toggle already was, not the header (which stays commodity-selection-only).
+- **Gate**: Feature Loop. **Verification**: `tsc --noEmit` clean; `eslint` clean (1 pre-existing unrelated `MdBarChart` unused-import warning on `PriceAnalysisPage.tsx`, confirmed via `git stash` to predate this change). Live-verified via Playwright against the live Neon-backed dev server using the real seeded "ABSOLUTE PURE WATER" commodity (24 real price records spanning Aug 6–29): all 6 range pills (Week/Month/3M/6M/1Y/Custom) render correct titles/copy/data; Custom's date pair defaults to a 30-day window and widening it correctly pulls in more of the real series; signed off visually at 1024/768/480 — pills wrap to a second row at 480px, the From/To inputs stack full-width with no overlap, chart and forecast panel stay legible at every width.
+- **Done gate**: met — all five presets and a custom range filter correctly; the trend chart stays readable at high density (verified via the synthetic-data downsample check); copy is accurate for every range, not just Week and Month.
+
+#### 7.10 Reports: Multi-Store Comparison — ● Done (2026-09-07)
+
+Report generation filtered to **one** optional store; now accepts a **multi-select** of stores.
+
+- **Resolved the "schema change" watch item as a non-issue**: `report.repository.ts` was already destructuring `storeId` *out* of the payload before every write (`const { format, commodityGroup, storeId, ...rest } = data`) — `Report` has **no persisted store column at all**, only the derived `filterLabel` string. So there was no migration to plan and no "old rows, new shape" read-path problem; confirmed by reading `schema.prisma`'s `Report` model directly before writing any code.
+- **Layout decision, asked and settled**: widen the filter only, reusing the existing layouts rather than building a new side-by-side matrix — `MONTHLY` already groups by commodity with a Store column per row (multiple stores read comparably within each commodity group), and `SRP_COMPLIANCE` already has a dedicated per-store `storeCompliance` table. No new PDF/Excel layout code was needed.
+- **Backend**: `report.schema.ts`'s `storeId?: string` → `storeIds?: z.array(uuid).min(1).optional()` on both create/update schemas. `report.generator.ts`: `mapStoreFilter` now builds `{ storeId: { in: storeIds } }`; new `describeStoreFilter(storeIds, rows)` names the selected stores from the already-filtered `rows` (not a re-query) — single store by name, 2 by "2 stores: A, B", 3+ capped at "N stores: A, B +N more" so the label can't grow unboundedly. `report.repository.ts`'s destructure renamed `storeId` → `storeIds` (same exclude-from-`rest` pattern, unchanged behavior).
+- **Frontend**: `ReportGenerationPage.tsx`'s single native `<select>` replaced with a wrapped `Chip` group (existing toggle-pill primitive, matches the app's established filter pattern — no new component) — one chip per store, `aria-pressed` toggle, "Store (N selected)" label with a Clear link, loading state via `Skeleton` bars (previously the `<select>` had no distinct loading affordance either). `CreateReportPayload.storeId` → `storeIds: string[]`.
+- **Two real bugs found and fixed while verifying, both pre-existing regressions from Ticket B's 7.6 (Category FK migration), not introduced by 7.10**: (1) **PDF header overlap** — `drawDocumentHeader`'s meta grid used `ellipsis: true` with `lineBreak: false`, which (same PDFKit quirk `fitText` was already built for in the table rows) doesn't reliably suppress wrapping; a multi-store label was the first value ever long enough to trigger it, wrapping "Store:" onto a second line and visually overlapping "Generated on:" below it. Fixed by reusing the existing `fitText` helper on the meta value too. (2) **`ReportGenerationPage.tsx`'s category filter was silently broken** — `loadCategories` still typed `commodity.category` as a bare `string` and deduplicated by `Set`, but 7.6 changed `Commodity.category` to a relation (`{id, name}`); every commodity's category object was "unique" to the `Set` (reference equality), so the dropdown rendered `[object Object]` for every entry and React logged a duplicate-key warning. Fixed by reading `item.category?.name`. Neither bug was caught by 7.6's own verification because report-page category filtering wasn't in that feature's test scope; found here because generating a Commodity Price report is part of 7.10's own regression check.
+- **New tests**: `report.generator.test.ts` (new file) — 6 cases for `describeStoreFilter` (all-stores fallback, single store, 2 stores, 3+ stores with the "+more" cap, no-records-in-range fallback, de-duplication). Backend 107 → **113/113**.
+- **Gate**: Feature Loop. **Verification**: `tsc --noEmit` clean both workspaces; `eslint` clean (1 pre-existing unrelated warning, confirmed via `git stash`); **113/113** backend tests. **Live-verified over real HTTP** against the live Neon-backed dev server as the seeded ADMIN: generated reports for 1 store, 2 stores (Excel), 3 stores (PDF, exercising the "+more" label), and the unrelated Commodity Price/category-filtered type — all `201`. Downloaded and read the generated multi-store PDF directly: summary panel aggregates correctly across all 3 stores (24 records, 21 compliant/2 above/1 below SRP), the commodity table interleaves all 3 stores' rows with each row's own Store column, and the meta header renders cleanly on one line after the `fitText` fix (re-verified: before the fix, "3 stores: ACC HYPERMART, ARDCIMART +1…" visibly wrapped and overlapped "Generated on:"; after, it ellipsizes cleanly). Downloaded and confirmed an **old, pre-7.10 single-store report still opens** (backward compatibility, as expected since no schema shape changed). Recent Reports card correctly shows the compact multi-store label ("2 stores: ACC HYPERMART, VIRAC LUCKY SUPERMART" / "3 stores: ACC HYPERMART, ARDCIMART +1 more").
+- **Done gate**: met — a report generated for 2+ stores presents their prices comparably (verified via real generated PDF content); single-store and all-store generation still work; previously generated reports still open and download.
+
+#### 7.11 Visualize SRP-Violating Stores — ● Done (2026-09-07)
+
+"Should visualize what stores that don't follow the SRP and other details" — the app classified every record against SRP but never surfaced *which stores* were the offenders as a visualization.
+
+- **Scoping questions asked and settled before any code**, via AskUserQuestion: **where** — a new dedicated screen, not a dashboard card or a report addition (`/admin/compliance` and `/officer/compliance`, mirroring 5.6's shared-page-plus-thin-route-wrappers pattern from Price Trends). **Who** — Admin and Officer only, not public (internal enforcement aid). **What** — violation count per store (one bar = that store's count of `OVERPRICE` records in the trailing 30 days).
+- **Reused D-8's compliance rule directly, per the data note** — `PriceRecord.status` is already computed at write time against the range-based rule; the new `buildStoreViolations` groups and counts by `status === 'OVERPRICE'` with no re-derivation, so there's no second averaging-based definition to drift from.
+- **Backend**: extended the existing `dashboard` module (same domain — aggregate, role-scoped analytics over a fixed window — rather than a new module) with `GET /api/v1/dashboard/store-violations`, `authorize('ADMIN', 'OFFICER')`. New `dashboardRepository.findRecentPriceRecordsWithStore` (30-day window, reuses `resolveDashboardScope` so an officer sees violations among records they personally logged, same scoping as the rest of their dashboard). New `buildStoreViolations(records)` service function returns the **full** ranked list (not capped to `DASHBOARD_CHART_LIMIT`) since this feeds a dedicated screen with a scrolling table, not a fixed-height dashboard card.
+- **Frontend**: new `features/compliance/` domain — `StoreComplianceOverviewPage`, a `StoreViolationsChart` (new shared chart component, mirrors `SrpVsActualChart`'s Chart.js recipe and `chart-tokens.ts` helpers) and a `StoreViolationsTable` (mirrors `AuditLogTable`'s responsive table/mobile-card recipe, `Badge` for the violation-rate color). Chart applies its own density cap (`CHART_STORE_LIMIT = 10`, same value and rationale as the dashboard's `DASHBOARD_CHART_LIMIT`) since a chart degrades with bar count even though the table underneath doesn't — the two intentionally cap independently. New nav entry ("Store Compliance", `MdWarningAmber`) on both roles.
+- **Gate**: Feature Loop — new screen, so UI+real-data render came before the human visual-verify gate, which ran and passed at 1024/768/480 (screenshots reviewed and explicitly approved).
+- **Verification**: `tsc --noEmit` clean both workspaces; `eslint` clean. New backend tests for `buildStoreViolations` (5 cases: worst-first ranking, empty input, a fully compliant store still listed at 0%, records with no store attached ignored, "Unknown store" fallback when the store relation is missing). Backend 113 → **118/118**. Live-verified over real HTTP and via Playwright against the live Neon-backed dev server as both seeded ADMIN and OFFICER: real violation counts/rates render correctly and sorted worst-first (verified against 3 real seeded stores); RBAC cross-checked — an officer visiting `/admin/compliance` redirects to their own dashboard, an unauthenticated guest redirects to `/`, matching the existing middleware guard with no route-specific config needed. One screenshot-timing false-negative during verification (an early officer-view capture showed near-empty bars) was diagnosed as a Chart.js animation not yet finished when the screenshot fired, not a data or scoping bug — a longer settle delay and a fresh capture confirmed the chart renders correctly.
+- **Done gate**: met — non-compliant stores are identifiable at a glance (chart + table, worst-first) on the agreed screen, using D-8's compliance rule unmodified, readable at realistic store counts via the same density-cap discipline as the dashboard's own charts.
+
+**Ticket C exit — met 2026-09-07.** All 3 items (7.9, 7.10, 7.11) done: trends span week-to-year plus custom ranges, reports compare multiple stores, and SRP violations are visible per store on a dedicated Admin/Officer screen.
+
+**Phase 7 exit — met 2026-09-07, all 11/11 done.** Logout leaves no stale state, commodity reference data is properly constrained, and the analysis surfaces answer both "how has this commodity moved, and over what period?" (7.9) and "who is overpricing, and by how much?" (7.10, 7.11).
+
+---
+
 ## 8. Progress Tracking
 
 Progress is **not** tracked in this file. This document is the plan (*what to build*); [progress.md](progress.md) is the record (*what is done*).
