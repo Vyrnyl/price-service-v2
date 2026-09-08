@@ -6,6 +6,7 @@ import Modal from "@/shared/components/Modal";
 import FormGroup from "@/shared/components/FormGroup";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
+import SearchableSelect from "@/shared/components/SearchableSelect";
 import Button from "@/shared/components/Button";
 import {
   createCommoditySchema,
@@ -60,10 +61,14 @@ export default function AddCommodityDialog({
     reset,
     setError,
     clearErrors,
+    watch,
+    setValue,
   } = useForm<CreateCommodityFormSchema>({
     defaultValues: defaultValues ?? emptyFormValues,
     mode: "onSubmit",
   });
+
+  const categoryId = watch("categoryId");
 
   useEffect(() => {
     if (open) {
@@ -117,21 +122,18 @@ export default function AddCommodityDialog({
         </div>
 
         <FormGroup label="Category" htmlFor="categoryId" error={errors.categoryId?.message}>
-          <Select
+          <SearchableSelect
             id="categoryId"
-            {...register("categoryId")}
+            value={categoryId}
+            onChange={(value) => setValue("categoryId", value, { shouldDirty: true, shouldValidate: true })}
+            options={categoryOptions.map((option) => ({ value: option.id, label: option.name }))}
+            placeholder="Select category"
+            searchPlaceholder="Search category"
+            emptyLabel="No categories found."
+            isLoading={categoryOptionsLoading}
             hasError={Boolean(errors.categoryId)}
-            disabled={categoryOptionsLoading}
-          >
-            <option value="">
-              {categoryOptionsLoading ? "Loading categories..." : "Select category"}
-            </option>
-            {categoryOptions.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.name}
-              </option>
-            ))}
-          </Select>
+            aria-label="Category"
+          />
         </FormGroup>
 
         <FormGroup label="Status" htmlFor="status" error={errors.status?.message}>
