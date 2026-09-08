@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import {
   MdBarChart,
+  MdKitchen,
   MdOutlineDashboard,
   MdOutlineHistory,
   MdOutlineInventory2,
@@ -11,6 +12,7 @@ import {
   MdOutlineSettings,
   MdOutlineStorefront,
   MdOutlineTrendingUp,
+  MdWarningAmber,
 } from "react-icons/md";
 import { HiUsers } from "react-icons/hi2";
 import { HiOutlineDocumentReport } from "react-icons/hi";
@@ -48,6 +50,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       label: "Commodities",
     },
     {
+      href: "/admin/categories",
+      icon: MdKitchen,
+      label: "Categories",
+    },
+    {
       href: "/admin/stores",
       icon: MdOutlineStorefront,
       label: "Stores",
@@ -62,6 +69,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       href: "/admin/price-trends",
       icon: MdBarChart,
       label: "Price Trends",
+    },
+    {
+      href: "/admin/compliance",
+      icon: MdWarningAmber,
+      label: "Store Compliance",
     },
     {
       href: "/admin/audit-log",
@@ -87,6 +99,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       label: "Commodities",
     },
     {
+      href: "/officer/categories",
+      icon: MdKitchen,
+      label: "Categories",
+    },
+    {
       href: "/officer/stores",
       icon: MdOutlineStorefront,
       label: "Store Registry",
@@ -100,6 +117,11 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       href: "/officer/price-trends",
       icon: MdBarChart,
       label: "Price Trends",
+    },
+    {
+      href: "/officer/compliance",
+      icon: MdWarningAmber,
+      label: "Store Compliance",
     },
     {
       href: "/officer/settings",
@@ -153,7 +175,8 @@ export default function NavigationDrawer({
     }
 
     setSessionUser(null);
-    router.push("/login");
+    router.replace("/login");
+    router.refresh();
     onClose();
   };
 
