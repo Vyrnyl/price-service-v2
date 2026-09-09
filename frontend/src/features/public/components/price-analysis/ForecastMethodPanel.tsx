@@ -12,7 +12,10 @@ export function ForecastMethodPanel() {
         {[
           { label: "Based on", value: "Recently recorded prices" },
           { label: "Looks ahead", value: "Next 7 days" },
-          { label: "Refreshed", value: "When DTI runs a new forecast" },
+          // Recalculated per request in `publicController.getPublicForecastByCommodityId`
+          // — there is no scheduled job, so the old "When DTI runs a new forecast"
+          // described a manual step that does not exist.
+          { label: "Refreshed", value: "Every time new prices are recorded" },
         ].map((item) => (
           <div key={item.label} className="flex flex-col gap-1 rounded-xl bg-surface-container px-3 py-2.5 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-on-surface-variant">{item.label}</span>
