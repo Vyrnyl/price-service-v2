@@ -1,9 +1,16 @@
 import type { ComponentType } from "react";
+import Skeleton from "@/shared/components/Skeleton";
 
 type SummaryCard = {
   title: string;
   value: string;
   detail: string;
+  /**
+   * Renders a placeholder in place of `value` while it is being fetched. Without
+   * this the forecast card kept showing the *previous* commodity's price for the
+   * whole request, contradicting its own "Generating forecast..." line.
+   */
+  isValueLoading?: boolean;
   /**
    * Plain-language note on what the figure above actually means. `detail` carries
    * live data (when it was updated, its compliance status), so the explanation
@@ -37,7 +44,13 @@ export function PriceAnalysisSummaryCards({ cards }: PriceAnalysisSummaryCardsPr
                 <Icon size={18} />
               </div>
             </div>
-            <p className="text-xl font-semibold tracking-tight text-on-surface sm:text-2xl">{card.value}</p>
+            {card.isValueLoading ? (
+              // Matches the rendered height of the value line below, so the card
+              // does not resize when the real figure arrives.
+              <Skeleton className="h-7 w-28 sm:h-8" />
+            ) : (
+              <p className="text-xl font-semibold tracking-tight text-on-surface sm:text-2xl">{card.value}</p>
+            )}
             <p className="mt-2 text-sm leading-6 text-on-surface-variant">{card.detail}</p>
             {card.explanation ? (
               <p className="mt-1.5 text-xs leading-5 text-outline">{card.explanation}</p>

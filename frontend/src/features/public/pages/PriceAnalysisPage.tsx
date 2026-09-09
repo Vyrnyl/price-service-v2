@@ -167,8 +167,11 @@ function buildTrendInsight({
     .filter((price): price is number => price != null);
   const latestPrice = records[0]?.price ?? null;
   const changeValue = values.length > 1 ? values[values.length - 1]! - values[0]! : null;
+  // No confidence value means "not known yet" (the forecast is still loading, or
+  // it failed) — not "low". Claiming low confidence for an unknown would
+  // misreport the forecast's quality on every commodity switch.
   const confidenceLabel = forecastConfidence == null
-    ? "Low"
+    ? null
     : forecastConfidence >= 0.75
       ? "High"
       : forecastConfidence >= 0.5
@@ -377,6 +380,7 @@ export default function PriceAnalysisPage() {
     {
       title: "Forecasted next week",
       value: formatCurrency(forecastPrice),
+      isValueLoading: isForecastLoading,
       detail: isForecastLoading
         ? "Generating forecast..."
         : forecastPrice != null
@@ -445,6 +449,11 @@ export default function PriceAnalysisPage() {
 
       if (isMounted) {
         setIsForecastLoading(true);
+        // Drop the previous commodity's figures immediately. Without this the
+        // old forecast stays in state for the whole request and would reappear
+        // the moment the loading flag clears, before the new value lands.
+        setForecastPrice(null);
+        setForecastConfidence(null);
       }
 
       try {

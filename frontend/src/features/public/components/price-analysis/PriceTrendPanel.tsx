@@ -26,7 +26,8 @@ type PriceInsight = {
   title: string;
   price: string;
   change: string;
-  confidence: string;
+  /** `null` while the forecast is loading or unavailable — the label is then omitted. */
+  confidence: string | null;
   path: string;
   labels: string[];
 };
@@ -247,7 +248,8 @@ export function PriceTrendPanel({
           <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">Price trend</p>
           <h3 className="mt-1 text-xl font-semibold tracking-tight text-on-surface">{activeInsight.title}</h3>
           <p className="mt-1 text-sm text-on-surface-variant">
-            {activeInsight.change} • {activeInsight.confidence} confidence
+            {activeInsight.change}
+            {activeInsight.confidence ? ` • ${activeInsight.confidence} confidence` : ""}
           </p>
         </div>
 
