@@ -33,12 +33,41 @@ const DEFAULT_CATEGORIES: CategoryOption[] = [
   { value: "ALL", label: "All Categories" },
 ];
 
-const MAX_REPORT_RANGE_DAYS = 30;
+const MAX_CUSTOM_RANGE_DAYS = 30;
+
+type RangeKey = "Week" | "Month" | "3M" | "6M" | "1Y" | "Custom";
+
+type RangeDescriptor = {
+  key: RangeKey;
+  label: string;
+  /** Rolling window length in days. `null` for "Custom", which uses explicit start/end dates instead. */
+  days: number | null;
+};
+
+const RANGE_DESCRIPTORS: Record<RangeKey, RangeDescriptor> = {
+  Week: { key: "Week", label: "Week", days: 7 },
+  Month: { key: "Month", label: "Month", days: 30 },
+  "3M": { key: "3M", label: "3M", days: 90 },
+  "6M": { key: "6M", label: "6M", days: 182 },
+  "1Y": { key: "1Y", label: "1Y", days: 365 },
+  Custom: { key: "Custom", label: "Custom", days: null },
+};
+
+const rangeOptions = Object.values(RANGE_DESCRIPTORS);
+
+function toIsoDate(date: Date) {
+  return date.toISOString().slice(0, 10);
+}
 
 function addDaysToDate(value: string, days: number) {
   const date = new Date(value);
   date.setDate(date.getDate() + days);
-  return date.toISOString().slice(0, 10);
+  return toIsoDate(date);
+}
+
+/** Earlier of two ISO dates — the end picker is bounded by both the cap and today. */
+function minIsoDate(a: string, b: string) {
+  return a < b ? a : b;
 }
 
 function getDateRangeError(startDate: string, endDate: string) {
@@ -54,8 +83,8 @@ function getDateRangeError(startDate: string, endDate: string) {
   }
 
   const diffInDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffInDays > MAX_REPORT_RANGE_DAYS) {
-    return `Date range cannot exceed ${MAX_REPORT_RANGE_DAYS} days.`;
+  if (diffInDays > MAX_CUSTOM_RANGE_DAYS) {
+    return `Selected range is ${diffInDays} days — a custom range cannot exceed ${MAX_CUSTOM_RANGE_DAYS} days. Pick a shorter range, or use a preset above for a longer period.`;
   }
 
   return null;
@@ -98,10 +127,11 @@ function mapBackendReportToRecent(report: BackendReport): RecentReport {
 export default function ReportGenerationPage() {
   const visibleReportTypes = reportTypes.filter((type) => type.id !== "daily-compliance");
   const defaultTypeId = visibleReportTypes[0]?.id ?? reportTypes[0].id;
-  const defaultFormatLabel = exportFormats.find((format) => format.label === "Excel Spreadsheet")?.label ?? exportFormats[0].label;
+  const defaultFormatLabel = exportFormats.find((format) => format.label === "Adobe PDF")?.label ?? exportFormats[0].label;
 
   const [selectedReportTypeId, setSelectedReportTypeId] = useState(defaultTypeId);
   const [selectedExportFormat, setSelectedExportFormat] = useState(defaultFormatLabel);
+  const [activeRange, setActiveRange] = useState<RangeKey>("Month");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [categories, setCategories] = useState<CategoryOption[]>(DEFAULT_CATEGORIES);
@@ -115,22 +145,47 @@ export default function ReportGenerationPage() {
   const [recentReports, setRecentReports] = useState<RecentReport[]>([]);
   const [reportsPage, setReportsPage] = useState(1);
   const [reportsTotal, setReportsTotal] = useState(0);
+  const today = useMemo(() => toIsoDate(new Date()), []);
   const { showToast } = useToast();
 
   const selectedReportType = reportTypes.find((type) => type.id === selectedReportTypeId) ?? reportTypes[0];
   const isStoreMonitoring = selectedReportType.id === "store-monitoring";
   const isDailyCompliance = selectedReportType.id === "daily-compliance";
+  const isCustomRange = activeRange === "Custom";
 
-  const rangeError = useMemo(() => getDateRangeError(startDate, endDate), [startDate, endDate]);
-  const isGenerateDisabled = (!isDailyCompliance && (!startDate || !endDate)) || Boolean(rangeError) || (isStoreMonitoring && selectedStoreIds.length === 0);
+  /**
+   * Preset pills resolve to a rolling window ending today and deliberately bypass
+   * the 30-day cap — that cap exists to stop an unbounded hand-typed range, and a
+   * 3M/6M/1Y preset is an explicit, bounded choice. Only Custom stays capped.
+   */
+  const resolvedPeriod = useMemo(() => {
+    if (isCustomRange) {
+      return startDate && endDate ? { startDate, endDate } : null;
+    }
+
+    const days = RANGE_DESCRIPTORS[activeRange].days ?? 30;
+    const start = new Date();
+    start.setDate(start.getDate() - days);
+
+    return { startDate: toIsoDate(start), endDate: toIsoDate(new Date()) };
+  }, [activeRange, isCustomRange, startDate, endDate]);
+
+  const rangeError = useMemo(
+    () => (isCustomRange ? getDateRangeError(startDate, endDate) : null),
+    [isCustomRange, startDate, endDate],
+  );
+  const isGenerateDisabled =
+    (!isDailyCompliance && !resolvedPeriod) ||
+    Boolean(rangeError) ||
+    (isStoreMonitoring && selectedStoreIds.length === 0);
 
   const period = useMemo(() => {
-    if (!startDate || !endDate) {
+    if (!resolvedPeriod) {
       return "";
     }
 
-    return `${startDate} to ${endDate}`;
-  }, [startDate, endDate]);
+    return `${resolvedPeriod.startDate} to ${resolvedPeriod.endDate}`;
+  }, [resolvedPeriod]);
 
   const loadReports = async (page: number) => {
     try {
@@ -190,13 +245,14 @@ export default function ReportGenerationPage() {
 
     const nextType = reportTypes.find((type) => type.id === typeId) ?? reportTypes[0];
     if (nextType.id === "daily-compliance") {
-      const today = new Date().toISOString().slice(0, 10);
+      setActiveRange("Custom");
       setStartDate(today);
       setEndDate(today);
       setSelectedStoreIds([]);
       return;
     }
 
+    setActiveRange("Month");
     setStartDate("");
     setEndDate("");
     setSelectedStoreIds([]);
@@ -210,30 +266,18 @@ export default function ReportGenerationPage() {
     );
   };
 
+  /**
+   * Both handlers deliberately keep whatever the user picked rather than
+   * silently clamping the other end of the range to fit the cap. Rewriting a
+   * date the user just chose, with no message, reads as the picker being
+   * broken — surfacing `rangeError` and blocking Generate explains it instead.
+   */
   const handleStartDateChange = (value: string) => {
     setStartDate(value);
-
-    if (!value || !endDate) {
-      return;
-    }
-
-    const error = getDateRangeError(value, endDate);
-    if (error && error.includes("exceed")) {
-      setEndDate(addDaysToDate(value, MAX_REPORT_RANGE_DAYS));
-    }
   };
 
   const handleEndDateChange = (value: string) => {
     setEndDate(value);
-
-    if (!startDate || !value) {
-      return;
-    }
-
-    const error = getDateRangeError(startDate, value);
-    if (error && error.includes("exceed")) {
-      setEndDate(addDaysToDate(startDate, MAX_REPORT_RANGE_DAYS));
-    }
   };
 
   const handleGenerateReport = async () => {
@@ -318,29 +362,64 @@ export default function ReportGenerationPage() {
 
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
                   {!isDailyCompliance ? (
-                    <div className="flex flex-col gap-2 min-w-0">
+                    <div className="flex flex-col gap-2 min-w-0 md:col-span-2">
                       <label className="font-sans text-label-caps text-on-surface-variant">Date Range</label>
-                      <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                        <input
-                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm"
-                          type="date"
-                          value={startDate}
-                          onChange={(event) => handleStartDateChange(event.target.value)}
-                        />
-                        <span className="flex items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-4 text-body-sm font-semibold text-on-surface-variant">
-                          to
-                        </span>
-                        <input
-                          className="flex-1 min-w-0 rounded-xl border border-outline-variant bg-surface-container-lowest p-3 font-sans text-body-sm"
-                          type="date"
-                          value={endDate}
-                          onChange={(event) => handleEndDateChange(event.target.value)}
-                        />
+                      <div className="flex flex-wrap gap-2">
+                        {rangeOptions.map((range) => (
+                          <button
+                            key={range.key}
+                            type="button"
+                            className={`rounded-full px-3 py-1.5 text-sm font-semibold transition-all ${
+                              activeRange === range.key
+                                ? "bg-primary text-on-primary shadow-sm"
+                                : "bg-surface-container-high text-on-surface-variant hover:bg-surface-container-highest"
+                            }`}
+                            onClick={() => setActiveRange(range.key)}
+                          >
+                            {range.label}
+                          </button>
+                        ))}
                       </div>
+
+                      {isCustomRange ? (
+                        <div className="mt-1 flex flex-col gap-2 md:flex-row md:items-center">
+                          <input
+                            className={`flex-1 min-w-0 rounded-xl border bg-surface-container-lowest p-3 font-sans text-body-sm ${
+                              rangeError ? "border-error" : "border-outline-variant"
+                            }`}
+                            type="date"
+                            value={startDate}
+                            max={endDate || today}
+                            aria-label="Custom range start date"
+                            aria-invalid={Boolean(rangeError)}
+                            onChange={(event) => handleStartDateChange(event.target.value)}
+                          />
+                          <span className="flex items-center justify-center rounded-xl border border-outline-variant bg-surface-container-lowest px-4 text-body-sm font-semibold text-on-surface-variant">
+                            to
+                          </span>
+                          <input
+                            className={`flex-1 min-w-0 rounded-xl border bg-surface-container-lowest p-3 font-sans text-body-sm ${
+                              rangeError ? "border-error" : "border-outline-variant"
+                            }`}
+                            type="date"
+                            value={endDate}
+                            min={startDate || undefined}
+                            max={startDate ? minIsoDate(addDaysToDate(startDate, MAX_CUSTOM_RANGE_DAYS), today) : today}
+                            aria-label="Custom range end date"
+                            aria-invalid={Boolean(rangeError)}
+                            onChange={(event) => handleEndDateChange(event.target.value)}
+                          />
+                        </div>
+                      ) : null}
+
                       {rangeError ? (
-                        <p className="text-sm text-error">{rangeError}</p>
+                        <p className="text-sm text-error" role="alert">{rangeError}</p>
                       ) : (
-                        <p className="text-sm text-on-surface-variant">Maximum export range is {MAX_REPORT_RANGE_DAYS} days.</p>
+                        <p className="text-sm text-on-surface-variant">
+                          {isCustomRange
+                            ? `Custom range is limited to ${MAX_CUSTOM_RANGE_DAYS} days.`
+                            : `Covers ${period.replace(" to ", " – ")}.`}
+                        </p>
                       )}
                     </div>
                   ) : null}
@@ -388,20 +467,20 @@ export default function ReportGenerationPage() {
                         Select one or more stores to compare.
                       </p>
                     </div>
-                  ) : (
-                    <div className="flex flex-col gap-2 min-w-0">
-                      <label className="font-sans text-label-caps text-on-surface-variant">Category list</label>
-                      <SearchableSelect
-                        value={commodityGroup}
-                        onChange={setCommodityGroup}
-                        options={categories.map((category) => ({ value: category.value, label: category.label }))}
-                        placeholder="All Categories"
-                        searchPlaceholder="Search category"
-                        emptyLabel="No categories found."
-                        aria-label="Filter by category"
-                      />
-                    </div>
-                  )}
+                  ) : null}
+
+                  <div className="flex flex-col gap-2 min-w-0">
+                    <label className="font-sans text-label-caps text-on-surface-variant">Category list</label>
+                    <SearchableSelect
+                      value={commodityGroup}
+                      onChange={setCommodityGroup}
+                      options={categories.map((category) => ({ value: category.value, label: category.label }))}
+                      placeholder="All Categories"
+                      searchPlaceholder="Search category"
+                      emptyLabel="No categories found."
+                      aria-label="Filter by category"
+                    />
+                  </div>
                 </div>
 
                 <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
@@ -446,6 +525,7 @@ export default function ReportGenerationPage() {
                         setRecentReports([]);
                         setReportsTotal(0);
                         setReportsPage(1);
+                        setActiveRange("Month");
                         setStartDate("");
                         setEndDate("");
                         setSelectedReportTypeId(defaultTypeId);
