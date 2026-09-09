@@ -93,7 +93,7 @@ export default function AddCategoryDialog({
             type="text"
             {...register("name")}
             hasError={Boolean(errors.name)}
-            placeholder="AG"
+            placeholder="eg."
           />
         </FormGroup>
 
