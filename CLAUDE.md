@@ -6,17 +6,21 @@ Roles: `ADMIN` · `OFFICER` (accounts) · unauthenticated public access
 
 ## Current state — read this first
 
-**The application is built, running, and structurally current.** Nine product modules work end to end for both account roles plus unauthenticated public access. It was built *before* these standards existed, but refactor phases R0–R3 closed the structural gap, and every phase in the plan — 0, P, 1, 2, 3, 4 — is now complete.
+**The application is built, running, and structurally current.** Nine product modules work end to end for both account roles plus unauthenticated public access. It was built *before* these standards existed, but refactor phases R0–R3 closed the structural gap.
 
 Check [context/progress.md](context/progress.md) at the start of every session — it is the single source of truth for what is actually built. Never assume a feature exists; verify there first.
 
-> **Phases 0–4 are all done — 48 features ●, and none of them has regressed.** No open security findings at any severity, no open decisions. Phase 3 — Public Transparency closed 2026-08-16 (3/3 ●). Phase 4 — Hardening & Scale closed 2026-08-16 (6/6 ●): the report IDOR (B-43/B-44), login rate limiting/headers/password complexity (B-45–B-47), server-side pagination (B-50), refresh-token session continuity (B-49), differentiated report types (B-48), and the accessibility pass — modal focus trap, label association, focus-visible rings, WCAG AA status-colour contrast (B-52) — are all resolved.
+> **The entire tracked plan is complete — Phases 0 through 7, 71/71 features ● (100%), closed 2026-09-07 with 7.11.** No open security findings at any severity, no open decisions, no queued backlog (`update.txt` is empty of work).
 >
-> ⚠️ **Phase 5 — Panel Revisions is now in play (0/6 ☐, scoped 2026-08-28), so the tracker reads 48/54 (89%).** That is an *addition* to the plan, not a regression. These are requested changes to behaviour that already met its Definition of Done — and two of them (**5.1** Commodity CRUD → Officer, **5.3** Reports → Admin) deliberately **reverse** placement decisions that were themselves signed off as done. They are the two halves of one role swap: **ADMIN gains Reports, OFFICER gains Commodity CRUD.** Land them together; doing one alone inverts the ownership model rather than moving it. Current feature: **5.1**.
+> **Post-plan revisions are the ongoing mode of work.** Requests arrive via `update.txt` or directly, land against features that already met their Definition of Done, and do **not** move the 71/71 count. Each is recorded in [context/progress.md](context/progress.md)'s header notes and Session Log — read the newest entries there for what has changed since the plan closed, because a fair amount has.
 
 **Ownership is not a role check.** `authorize(...roles)` gates *who may use a route*, never *whose row this is*. Any id-addressed route on an own-data domain also needs its module's scope helper applied in the repository — on writes as much as reads. That gap is what made B-43 reachable; see [context/architecture.md](context/architecture.md) §8.
 
-Verified baseline (2026-08-16): backend `tsc` clean · frontend `tsc` clean · backend `npm test` 83/83 passing.
+**Commodity CRUD belongs to OFFICER, Reports to ADMIN** (Phase 5.1/5.3's deliberate role swap). Testing commodity create/edit as an admin finds no Add button — that is `canManage` working correctly, not a bug. Use `/officer/commodities`.
+
+**There is no separate dev database.** Local dev points at the **live production Neon DB**, so any write — seeding, migrations, deletions — is a production change and needs explicit sign-off first. See the 2026-09-09 seeding entry in [context/progress.md](context/progress.md) for the tagged-manifest pattern used when demo data is genuinely wanted.
+
+Verified baseline (2026-09-09): backend `tsc` clean · frontend `tsc` clean · backend `npm test` 132/132 passing.
 
 ## The one rule that governs everything
 
