@@ -116,7 +116,7 @@ export default function AddCommodityDialog({
               type="text"
               {...register("name")}
               hasError={Boolean(errors.name) || Boolean(nameError)}
-              placeholder="eg."
+              placeholder="e.g."
             />
           </FormGroup>
         </div>
