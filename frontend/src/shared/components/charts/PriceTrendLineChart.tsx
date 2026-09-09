@@ -18,6 +18,13 @@ type PriceTrendLineChartProps = {
    * would state the wrong thing the moment either filter moves.
    */
   subheading?: string;
+  /**
+   * How the line is actually computed. `subheading` says what the line covers;
+   * this says how each point is arrived at — which is what a reader needs to
+   * read a dip correctly rather than mistaking a thin day of monitoring for a
+   * real price drop.
+   */
+  explanation?: string;
 };
 
 export function PriceTrendLineChart({
@@ -25,6 +32,7 @@ export function PriceTrendLineChart({
   isLoading,
   error,
   subheading = "Average recorded price across all commodities, last 30 days.",
+  explanation = "Each point is the average of every price recorded that day. Days with no records are skipped, so the line joins only the days officers actually monitored.",
 }: PriceTrendLineChartProps) {
   const lineColor = readToken("--color-primary-container", "#2563eb");
   const surfaceLowest = readToken("--color-surface-container-lowest", "#ffffff");
@@ -100,6 +108,9 @@ export function PriceTrendLineChart({
       <div className="mb-6 flex flex-col gap-1">
         <h4 className="font-sans text-h3-desktop text-on-surface">Market Price Trend</h4>
         <p className="text-body-sm text-on-surface-variant">{subheading}</p>
+        {explanation ? (
+          <p className="mt-0.5 text-xs leading-5 text-outline">{explanation}</p>
+        ) : null}
       </div>
 
       {error ? (
