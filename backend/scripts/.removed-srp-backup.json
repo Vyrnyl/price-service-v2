@@ -1,0 +1,11 @@
+{
+  "removedAt": "2026-09-09T13:36:40.137Z",
+  "note": "Duplicate SRP row (PHP 23, same effectiveDate as PHP 142) removed so \"latest SRP\" is unambiguous. Re-create with prisma.sRP.create using these fields.",
+  "row": {
+    "id": "48a42359-a42c-4edb-a467-483d0b08d374",
+    "commodityId": "c126cedc-aeba-40ce-ad25-f900cf836d64",
+    "price": 23,
+    "effectiveDate": "2026-09-03T00:00:00.000Z",
+    "createdAt": "2026-09-03T06:32:44.090Z"
+  }
+}
