@@ -7,3 +7,6 @@ from January to August 2026. Prices declined from ₱200 to ₱135, a drop of 32
 
 COMMODITY PAGE
 add form - change 'e.g.' to e.g. [commdity name]
+
+in Price Trends page Commodity Dropdown and Commodities page, why is the order of 
+commodities not the same, make it alphabetically like in the Commodities page
