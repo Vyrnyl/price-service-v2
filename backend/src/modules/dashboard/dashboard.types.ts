@@ -16,10 +16,17 @@ export type SrpVsActualPoint = {
   actualAverage: number;
 };
 
+export type CommodityOption = {
+  commodityId: string;
+  commodityName: string;
+};
+
 export type DashboardAnalytics = {
   priceTrend: PriceTrendPoint[];
   commodityComparison: CommodityComparisonPoint[];
   srpVsActual: SrpVsActualPoint[];
+  /** Commodities with records in the selected window — populates the trend filter. */
+  commodityOptions: CommodityOption[];
 };
 
 export type StoreViolationPoint = {

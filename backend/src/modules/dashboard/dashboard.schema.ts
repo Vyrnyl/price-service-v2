@@ -22,12 +22,33 @@ const endOfDayIfDateOnly = (value: unknown) => {
   return `${value}T23:59:59.999Z`;
 };
 
-export const storeViolationsQuerySchema = z.object({
+/**
+ * Shared by every dashboard range filter so they cannot drift apart — the
+ * end-of-day widening above was originally fixed on the store-violations filter
+ * alone, and duplicating the shape rather than reusing it is exactly how the
+ * report generator and that filter ended up disagreeing in the first place.
+ */
+const dateRangeShape = {
   startDate: z.preprocess(emptyToUndefined, z.coerce.date().optional()),
   endDate: z.preprocess(
     (value) => endOfDayIfDateOnly(emptyToUndefined(value)),
     z.coerce.date().optional(),
   ),
-});
+};
+
+export const storeViolationsQuerySchema = z.object(dateRangeShape);
 
 export type StoreViolationsQuery = z.infer<typeof storeViolationsQuerySchema>;
+
+/**
+ * `commodityId` narrows the price-trend line only. The two ranking charts
+ * (Commodity Comparison, SRP vs. Actual) exist to compare commodities against
+ * each other, so narrowing them to one commodity would collapse each to a
+ * single bar — they honour the date range and ignore this.
+ */
+export const dashboardAnalyticsQuerySchema = z.object({
+  ...dateRangeShape,
+  commodityId: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
+});
+
+export type DashboardAnalyticsQuery = z.infer<typeof dashboardAnalyticsQuerySchema>;

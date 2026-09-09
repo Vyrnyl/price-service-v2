@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { storeViolationsQuerySchema } from './dashboard.schema';
+import { dashboardAnalyticsQuerySchema, storeViolationsQuerySchema } from './dashboard.schema';
 
 /**
  * These pin the boundary that made the Store Compliance date filter silently
@@ -50,4 +50,33 @@ test('omitted and empty range values are both treated as no filter', () => {
 
 test('an unparseable date is rejected rather than silently ignored', () => {
   assert.throws(() => storeViolationsQuerySchema.parse({ endDate: 'not-a-date' }));
+});
+
+/**
+ * The analytics filter shares its date shape with the store-violations filter
+ * above, so these pin that the end-of-day fix genuinely reaches it rather than
+ * the two schemas drifting apart the way the report generator once did.
+ */
+
+test('the analytics endDate covers the whole day, same as the store-violations filter', () => {
+  const { endDate } = dashboardAnalyticsQuerySchema.parse({ endDate: '2026-09-02' });
+
+  assert.equal(endDate?.toISOString(), '2026-09-02T23:59:59.999Z');
+});
+
+test('analytics accepts a commodityId and passes it through', () => {
+  const { commodityId } = dashboardAnalyticsQuerySchema.parse({
+    commodityId: '3f2504e0-4f89-41d3-9a0c-0305e82c3301',
+  });
+
+  assert.equal(commodityId, '3f2504e0-4f89-41d3-9a0c-0305e82c3301');
+});
+
+test('an omitted or blank commodityId means "all commodities", not a filter on ""', () => {
+  assert.equal(dashboardAnalyticsQuerySchema.parse({}).commodityId, undefined);
+  assert.equal(dashboardAnalyticsQuerySchema.parse({ commodityId: '' }).commodityId, undefined);
+});
+
+test('a non-uuid commodityId is rejected rather than reaching the query', () => {
+  assert.throws(() => dashboardAnalyticsQuerySchema.parse({ commodityId: 'rice' }));
 });

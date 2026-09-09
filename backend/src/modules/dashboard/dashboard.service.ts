@@ -1,7 +1,8 @@
-import { dashboardRepository } from './dashboard.repository';
+import { dashboardRepository, type DashboardDateRange } from './dashboard.repository';
 import type { AuthUser } from '../../shared/types/express';
 import type {
   CommodityComparisonPoint,
+  CommodityOption,
   DashboardAnalytics,
   PriceTrendPoint,
   SrpVsActualPoint,
@@ -68,6 +69,26 @@ export function buildCommodityComparison(records: PriceRecordForAnalytics[]): Co
 }
 
 /**
+ * The commodity picker offers only commodities that actually have records in the
+ * selected window and the caller's own scope, so an officer never sees a name
+ * that would render an empty trend line for them. Derived from the records
+ * already fetched for the charts rather than a second query.
+ */
+export function buildCommodityOptions(records: PriceRecordForAnalytics[]): CommodityOption[] {
+  const namesById = new Map<string, string>();
+
+  for (const record of records) {
+    if (!namesById.has(record.commodityId)) {
+      namesById.set(record.commodityId, record.commodity.name);
+    }
+  }
+
+  return [...namesById.entries()]
+    .map(([commodityId, name]) => ({ commodityId, commodityName: name }))
+    .sort((a, b) => a.commodityName.localeCompare(b.commodityName));
+}
+
+/**
  * Ranks commodities by how far their recorded average sits above SRP, worst
  * first. Ordering by price alone would surface whatever happens to be expensive
  * rather than what is actually overpriced, which is the decision this chart
@@ -128,10 +149,20 @@ export function buildStoreViolations(records: PriceRecordWithStoreForAnalytics[]
 }
 
 export const dashboardService = {
-  getAnalytics: async (authUser?: AuthUser): Promise<DashboardAnalytics> => {
-    const records = await dashboardRepository.findRecentPriceRecords(authUser);
+  getAnalytics: async (
+    authUser?: AuthUser,
+    filters?: DashboardDateRange & { commodityId?: string },
+  ): Promise<DashboardAnalytics> => {
+    const records = await dashboardRepository.findRecentPriceRecords(authUser, filters);
 
-    const priceTrend = buildPriceTrend(records);
+    // The commodity filter narrows the trend line only. The two ranking charts
+    // below exist to compare commodities against one another, so they read the
+    // full in-window set — narrowing them would collapse each to a single bar.
+    const trendRecords = filters?.commodityId
+      ? records.filter((record) => record.commodityId === filters.commodityId)
+      : records;
+
+    const priceTrend = buildPriceTrend(trendRecords);
     const commodityComparison = buildCommodityComparison(records);
 
     const srps = await dashboardRepository.findLatestSrps(
@@ -153,6 +184,7 @@ export const dashboardService = {
       priceTrend,
       commodityComparison: commodityComparison.slice(0, DASHBOARD_CHART_LIMIT),
       srpVsActual: srpVsActual.slice(0, DASHBOARD_CHART_LIMIT),
+      commodityOptions: buildCommodityOptions(records),
     };
   },
 

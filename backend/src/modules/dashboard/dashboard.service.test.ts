@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   buildCommodityComparison,
+  buildCommodityOptions,
   buildPriceTrend,
   buildSrpVsActual,
   buildStoreViolations,
@@ -180,4 +181,58 @@ test('buildStoreViolations falls back to "Unknown store" when the store relation
   const result = buildStoreViolations(records);
 
   assert.equal(result[0].storeName, 'Unknown store');
+});
+
+test('buildCommodityOptions lists each commodity once, alphabetically', () => {
+  const options = buildCommodityOptions([
+    record('c2', 'Sugar', 90, '2026-08-01T09:00:00.000Z'),
+    record('c1', 'Rice', 50, '2026-08-02T08:00:00.000Z'),
+    record('c1', 'Rice', 45, '2026-08-01T08:00:00.000Z'),
+  ]);
+
+  assert.deepEqual(options, [
+    { commodityId: 'c1', commodityName: 'Rice' },
+    { commodityId: 'c2', commodityName: 'Sugar' },
+  ]);
+});
+
+test('buildCommodityOptions offers nothing when the window holds no records', () => {
+  assert.deepEqual(buildCommodityOptions([]), []);
+});
+
+/**
+ * The dashboard's commodity filter narrows the trend line only. These pin the
+ * split: filtering the records that feed the ranking charts would collapse
+ * Commodity Comparison and SRP vs. Actual to a single bar each, defeating the
+ * comparison those charts exist to make.
+ */
+test('filtering records to one commodity leaves a trend line covering every day it was recorded', () => {
+  const records = [
+    record('c1', 'Rice', 50, '2026-08-01T08:00:00.000Z'),
+    record('c2', 'Sugar', 90, '2026-08-01T09:00:00.000Z'),
+    record('c1', 'Rice', 60, '2026-08-02T08:00:00.000Z'),
+  ];
+
+  const trend = buildPriceTrend(records.filter((entry) => entry.commodityId === 'c1'));
+
+  assert.deepEqual(trend, [
+    { date: '2026-08-01', averagePrice: 50 },
+    { date: '2026-08-02', averagePrice: 60 },
+  ]);
+});
+
+test('the ranking chart still sees every commodity while the trend is narrowed to one', () => {
+  const records = [
+    record('c1', 'Rice', 50, '2026-08-01T08:00:00.000Z'),
+    record('c2', 'Sugar', 90, '2026-08-01T09:00:00.000Z'),
+  ];
+
+  // Same input the service hands the ranking charts when commodityId === 'c1'.
+  const comparison = buildCommodityComparison(records);
+
+  assert.equal(comparison.length, 2);
+  assert.deepEqual(
+    comparison.map((point) => point.commodityId).sort(),
+    ['c1', 'c2'],
+  );
 });
