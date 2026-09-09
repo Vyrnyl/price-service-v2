@@ -358,6 +358,8 @@ export default function PriceAnalysisPage() {
             day: "numeric",
           })}`
         : "No recent price data",
+      explanation:
+        "The most recent price a monitoring officer recorded for this item in a store.",
       icon: MdMonetizationOn,
       accent: "text-primary",
     },
@@ -367,6 +369,8 @@ export default function PriceAnalysisPage() {
       detail: selectedCommodityData?.complianceStatus
         ? `Status: ${selectedCommodityData.complianceStatus}`
         : "No SRP data available",
+      explanation:
+        "The Suggested Retail Price set by DTI — the reference this item's price is checked against.",
       icon: MdVerified,
       accent: "text-success",
     },
@@ -378,6 +382,8 @@ export default function PriceAnalysisPage() {
         : forecastPrice != null
           ? "Projected from recent trend"
           : "No forecast data available",
+      explanation:
+        "An estimate of next week's price, projected from this item's recent price history.",
       icon: MdTrendingUp,
       accent: "text-error",
     },
@@ -528,6 +534,8 @@ export default function PriceAnalysisPage() {
           projectedPrice={forecastPrice}
           confidence={forecastConfidence}
           srpPrice={selectedCommodityData?.srpPrice ?? null}
+          trendPoints={trendPoints}
+          rangeTitle={activeInsight.title}
           onClose={() => setShowDetailModal(false)}
         />
       ) : null}

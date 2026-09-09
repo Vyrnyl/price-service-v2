@@ -4,6 +4,12 @@ type SummaryCard = {
   title: string;
   value: string;
   detail: string;
+  /**
+   * Plain-language note on what the figure above actually means. `detail` carries
+   * live data (when it was updated, its compliance status), so the explanation
+   * needs its own field rather than being folded into that line.
+   */
+  explanation?: string;
   icon: ComponentType<{ size?: number; className?: string }>;
   accent: string;
 };
@@ -33,6 +39,9 @@ export function PriceAnalysisSummaryCards({ cards }: PriceAnalysisSummaryCardsPr
             </div>
             <p className="text-xl font-semibold tracking-tight text-on-surface sm:text-2xl">{card.value}</p>
             <p className="mt-2 text-sm leading-6 text-on-surface-variant">{card.detail}</p>
+            {card.explanation ? (
+              <p className="mt-1.5 text-xs leading-5 text-outline">{card.explanation}</p>
+            ) : null}
           </div>
         );
       })}

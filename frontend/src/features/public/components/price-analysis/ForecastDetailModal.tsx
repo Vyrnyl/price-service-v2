@@ -1,5 +1,6 @@
 import { MdClose } from "react-icons/md";
 import Modal from "@/shared/components/Modal";
+import { buildTrendNarrative, type TrendNarrativePoint } from "@/shared/utils/trend-narrative";
 
 type ForecastDetailModalProps = {
   selectedCommodity: string;
@@ -7,6 +8,13 @@ type ForecastDetailModalProps = {
   projectedPrice: number | null;
   confidence: number | null;
   srpPrice: number | null;
+  /**
+   * The observed series the chart draws, oldest first — the narrative below is
+   * derived from it so the words always match the picture the reader just saw.
+   */
+  trendPoints: TrendNarrativePoint[];
+  /** Names the window those points cover, e.g. "Last 30 Days". */
+  rangeTitle: string;
   onClose: () => void;
 };
 
@@ -36,8 +44,12 @@ export function ForecastDetailModal({
   projectedPrice,
   confidence,
   srpPrice,
+  trendPoints,
+  rangeTitle,
   onClose,
 }: ForecastDetailModalProps) {
+  const narrative = buildTrendNarrative(trendPoints);
+
   return (
     <Modal open onClose={onClose} maxWidth="max-w-3xl">
         <div className="flex items-start justify-between gap-4">
@@ -70,6 +82,24 @@ export function ForecastDetailModal({
           </div>
         </div>
 
+        {narrative ? (
+          <div className="mt-6 rounded-xl border border-outline-variant bg-surface-container p-4">
+            <p className="text-sm font-semibold text-on-surface">What the price history shows</p>
+            <p className="mt-2 text-sm leading-7 text-on-surface-variant">
+              {narrative.direction} {narrative.movement}
+            </p>
+            <p className="mt-2 text-xs text-outline">Based on recorded prices over the {rangeTitle.toLowerCase()}.</p>
+          </div>
+        ) : (
+          <div className="mt-6 rounded-xl border border-outline-variant bg-surface-container p-4">
+            <p className="text-sm font-semibold text-on-surface">What the price history shows</p>
+            <p className="mt-2 text-sm leading-7 text-on-surface-variant">
+              No price records were logged for this commodity over the {rangeTitle.toLowerCase()}, so there is no
+              movement to summarize yet.
+            </p>
+          </div>
+        )}
+
         <div className="mt-6 rounded-xl border border-outline-variant bg-surface-container p-4">
           <p className="text-sm font-semibold text-on-surface">Why this forecast matters</p>
           <p className="mt-2 text-sm leading-7 text-on-surface-variant">
@@ -79,7 +109,7 @@ export function ForecastDetailModal({
 
         <div className="mt-6 flex flex-wrap gap-3">
           {[
-            { label: "Confidence", value: formatConfidence(confidence) },
+            { label: "Confidence level", value: formatConfidence(confidence) },
             { label: "Range", value: `${formatCurrency(currentPrice)} - ${formatCurrency(projectedPrice)}` },
             { label: "Model", value: "ARIMA" },
           ].map((item) => (

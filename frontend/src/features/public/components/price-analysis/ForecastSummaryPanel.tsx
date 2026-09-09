@@ -56,7 +56,7 @@ export function ForecastSummaryPanel({
           {[
             { label: "Current price", value: formatCurrency(currentPrice) },
             { label: "Projected", value: formatCurrency(projectedPrice) },
-            { label: "Confidence", value: formatConfidence(confidence) },
+            { label: "Confidence level", value: formatConfidence(confidence) },
           ].map((item) => (
             <div key={item.label} className="flex flex-col gap-1 rounded-xl bg-surface-container px-3 py-2.5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
               <span className="text-sm text-on-surface-variant">{item.label}</span>
