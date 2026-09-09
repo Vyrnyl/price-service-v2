@@ -20,3 +20,24 @@ Filter should also have specific date range(date picker), 3, 6 months, and 1 yea
 
 REPORTS
 Can select multiple stores to compare their prices.
+
+
+
+All categories dropdown should also be like Commodity dropdown with search bar
+
+PUBLIC COMMODITY LIST 
+remove municipality filter
+
+STORE COMPLIANCE
+add date range filter or week and months
+
+SIDE BAR
+make it scrollable if there's too many navigations
+
+REPORTS
+add week and month, 3, and 6 months filter instead of just date range.
+add category filter for type Store Monitoring.
+in the Report Type section, add info details for each based on what they actually generate, 
+for example. the type Commodity Price prints only the average prices and not the actual all records,
+you can also change the type name of each.
+in the generated file, what's the 'vs Period Start' column? can it be remove? if so, remove it.
