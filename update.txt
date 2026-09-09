@@ -1,43 +1,9 @@
-Stale Dashboard or still showing dashboard after logging out.
-
-All commodities dropdown loading state.
-
-Should visualize what stores that don't follow the srp and other details.
-
-COMMODITIES
-Add category dropdown - means also have to add new page for category CRUD.
-Unique commodity constraints(can't add with the exactly the same with existing name).
-The effective date should only be within and not past more than 1 week.
-Change the "Coconut Oil" placeholder to "AG".
-
-PRICE RECORDS
-Make the commodity dropdown the same as other commodity dropdown with search bar.
 
 PRICE TRENDS
-Forecast Method - Simplify and convert into simple terms on how forecasting works, not too deep words.
-Filter should also have specific date range(date picker), 3, 6 months, and 1 year
+1 quick sentence explanation for both Current Price and Latest SRP cards.
+Forecast outlook - 'Confidence' to 'Confidence level'
+Detailed forecast report - add explanation nor details like for example 'The visualization shows a downward price trend 
+from January to August 2026. Prices declined from ₱200 to ₱135, a drop of 32.5%.' or you can enhance it.
 
-
-REPORTS
-Can select multiple stores to compare their prices.
-
-
-
-All categories dropdown should also be like Commodity dropdown with search bar
-
-PUBLIC COMMODITY LIST 
-remove municipality filter
-
-STORE COMPLIANCE
-add date range filter or week and months
-
-SIDE BAR
-make it scrollable if there's too many navigations
-
-REPORTS
-add week and month, 3, and 6 months filter instead of just date range.
-add category filter for type Store Monitoring.
-in the Report Type section, add info details for each based on what they actually generate, 
-for example. the type Commodity Price prints only the average prices and not the actual all records,
-you can also change the type name of each.
-in the generated file, what's the 'vs Period Start' column? can it be remove? if so, remove it.
+COMMODITY PAGE
+add form - change 'e.g.' to e.g. [commdity name]
