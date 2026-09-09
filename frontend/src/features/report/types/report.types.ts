@@ -6,6 +6,8 @@ export type ReportType = {
   id: string;
   title: string;
   description: string;
+  /** Longer explanation of what the generated file actually contains, shown on selection. */
+  detail: string;
   icon: ComponentType<{ className?: string; size?: number }>;
   backendType: ReportTypeEnum;
   iconBg: string;

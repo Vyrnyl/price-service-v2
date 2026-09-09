@@ -42,6 +42,11 @@ export default function ReportTypeCard({
         {type.title}
       </h4>
       <span className="mt-3 text-body-sm text-on-surface-variant">{type.description}</span>
+      {isSelected ? (
+        <span className="mt-2 rounded-lg bg-surface-container p-3 text-body-xs text-on-surface-variant">
+          {type.detail}
+        </span>
+      ) : null}
     </button>
   );
 }

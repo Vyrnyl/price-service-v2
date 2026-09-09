@@ -805,37 +805,17 @@ function drawComplianceBody(
 
 /* -- TREND: weekly average per commodity, movement vs. period start -- */
 
-function trendColumns(trend: CommodityTrend): PdfColumn<TrendPoint>[] {
-  // 140 + 140 + 100 + 135 = 515
-  return [
-    { label: 'Week Starting', width: 140, align: 'left', value: (p) => formatDate(p.weekStart) },
-    {
-      label: 'Avg Price (PHP)',
-      width: 140,
-      align: 'right',
-      value: (p) => formatAmount(p.averagePrice),
-    },
-    { label: 'Records', width: 100, align: 'right', value: (p) => String(p.recordCount) },
-    {
-      label: 'vs Period Start',
-      width: 135,
-      align: 'right',
-      value: (p) =>
-        trend.periodStartPrice == null || trend.periodStartPrice === 0
-          ? '—'
-          : formatSignedPercent(
-              ((p.averagePrice - trend.periodStartPrice) / trend.periodStartPrice) * 100,
-            ),
-      color: (p) => {
-        if (trend.periodStartPrice == null || trend.periodStartPrice === 0) return COLORS.bodyText;
-        if (p.averagePrice > trend.periodStartPrice) return COLORS.overprice;
-        if (p.averagePrice < trend.periodStartPrice) return COLORS.compliant;
-        return COLORS.mutedText;
-      },
-      bold: true,
-    },
-  ];
-}
+// 190 + 190 + 135 = 515
+const TREND_COLUMNS: PdfColumn<TrendPoint>[] = [
+  { label: 'Week Starting', width: 190, align: 'left', value: (p) => formatDate(p.weekStart) },
+  {
+    label: 'Avg Price (PHP)',
+    width: 190,
+    align: 'right',
+    value: (p) => formatAmount(p.averagePrice),
+  },
+  { label: 'Records', width: 135, align: 'right', value: (p) => String(p.recordCount) },
+];
 
 function drawTrendBody(
   doc: PDFKit.PDFDocument,
@@ -853,7 +833,7 @@ function drawTrendBody(
       bottomLimit,
     );
     cursorY = drawGroupBand(doc, `${trend.commodity}  ·  ${trend.category}`, cursorY);
-    cursorY = drawTable(doc, trendColumns(trend), trend.points, cursorY, bottomLimit);
+    cursorY = drawTable(doc, TREND_COLUMNS, trend.points, cursorY, bottomLimit);
 
     cursorY = ensureSpace(doc, cursorY, 22, bottomLimit);
     const movementText =
@@ -932,7 +912,6 @@ async function generatePdf(
 
 const PESO_FORMAT = '₱#,##0.00';
 const SIGNED_PESO_FORMAT = '[Green]+₱#,##0.00;[Red]-₱#,##0.00;₱0.00';
-const SIGNED_PERCENT_FORMAT = '[Red]+0.0%;[Green]-0.0%;0.0%';
 
 function hex(color: string) {
   return `FF${color.replace('#', '').toUpperCase()}`;
@@ -1201,7 +1180,6 @@ function addTrendSheet(workbook: ExcelJS.Workbook, trends: CommodityTrend[]) {
     { header: 'Week Starting', key: 'weekStart', width: 16 },
     { header: 'Avg Price', key: 'averagePrice', width: 14 },
     { header: 'Records', key: 'recordCount', width: 10 },
-    { header: 'vs Period Start', key: 'movement', width: 16 },
   ];
   styleHeaderRow(sheet.getRow(1));
 
@@ -1209,24 +1187,14 @@ function addTrendSheet(workbook: ExcelJS.Workbook, trends: CommodityTrend[]) {
 
   trends.forEach((trend) => {
     trend.points.forEach((point) => {
-      const movement =
-        trend.periodStartPrice == null || trend.periodStartPrice === 0
-          ? null
-          : (point.averagePrice - trend.periodStartPrice) / trend.periodStartPrice;
-
       const added = sheet.addRow({
         commodity: trend.commodity,
         category: trend.category,
         weekStart: formatDate(point.weekStart),
         averagePrice: point.averagePrice,
         recordCount: point.recordCount,
-        movement: movement ?? '—',
       });
       added.getCell('averagePrice').numFmt = PESO_FORMAT;
-
-      if (movement != null) {
-        added.getCell('movement').numFmt = SIGNED_PERCENT_FORMAT;
-      }
 
       if (zebraIndex % 2 === 1) {
         zebraStripe(added);
