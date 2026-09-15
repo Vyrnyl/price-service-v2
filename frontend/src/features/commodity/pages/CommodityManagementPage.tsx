@@ -12,7 +12,7 @@ import {
   MdOutlineWarning,
 } from "react-icons/md";
 import PageShell from "@/shared/components/PageShell";
-import { SkeletonStatCard } from "@/shared/components/Skeleton";
+import Skeleton, { SkeletonStatCard } from "@/shared/components/Skeleton";
 import AddCommodityDialog, { type CategoryOption } from "../components/AddCommodityDialog";
 import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
@@ -233,6 +233,12 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     }
   };
 
+  // The Add button stays a placeholder until every fetch this page depends on
+  // has settled. `categoryOptionsLoading` is the load-bearing one: it gates the
+  // dialog's category dropdown, so gating on it means the form can never open
+  // with an empty category list.
+  const pageLoading = statsLoading || isLoading || categoryOptionsLoading;
+
   const totalListed = summaryStats.total;
   const activeCount = summaryStats.active;
   const categoriesCount = summaryStats.categories;
@@ -308,20 +314,28 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
               </p>
             </div>
             {canManage ? (
-              <button
-                type="button"
-                onClick={() => {
-                  setEditingCommodity(null);
-                  setFormOpen(true);
-                  setFormError(null);
-                  setNameError(null);
-                  setFormSuccess(null);
-                }}
-                className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-              >
-                <MdAddCircle size={20} />
-                New Commodity
-              </button>
+              pageLoading ? (
+                // Placeholder rather than nothing: the button sits in a flex row
+                // beside the heading, so omitting it until the data lands would
+                // shift the header. Sized to the real button's footprint
+                // (px-6 py-3 around a 20px icon + label) so nothing moves on swap.
+                <Skeleton className="h-12 w-52 shrink-0 rounded-xl" />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditingCommodity(null);
+                    setFormOpen(true);
+                    setFormError(null);
+                    setNameError(null);
+                    setFormSuccess(null);
+                  }}
+                  className="flex items-center gap-2 rounded-xl bg-primary px-6 py-3 font-semibold text-on-primary shadow-sm transition-all hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                >
+                  <MdAddCircle size={20} />
+                  New Commodity
+                </button>
+              )
             ) : null}
           </div>
 
