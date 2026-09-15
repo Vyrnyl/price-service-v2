@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import Modal from "@/shared/components/Modal";
 import FormGroup from "@/shared/components/FormGroup";
@@ -70,12 +70,21 @@ export default function AddCommodityDialog({
 
   const categoryId = watch("categoryId");
 
+  // Reset only on the open transition, not on every re-render while the
+  // dialog stays open. `defaultValues` is a fresh object literal from the
+  // parent on every render (see CommodityManagementPage), so depending on it
+  // directly re-ran reset() whenever the page re-rendered in the background
+  // (e.g. stats/table finishing a load) and stole focus from whatever the
+  // user was typing.
+  const wasOpen = useRef(false);
   useEffect(() => {
-    if (open) {
+    if (open && !wasOpen.current) {
       reset(defaultValues ?? emptyFormValues);
       clearErrors();
     }
-  }, [open, defaultValues, reset, clearErrors]);
+    wasOpen.current = open;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleFormSubmit = handleSubmit(async (data) => {
     clearErrors();

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import Modal from "@/shared/components/Modal";
 import FormGroup from "@/shared/components/FormGroup";
@@ -60,11 +60,18 @@ export default function AddUserDialog({
     mode: "onSubmit",
   });
 
+  // Reset only on the open transition. `defaultValues` is a fresh object
+  // literal from the parent on every render, so depending on it re-ran reset()
+  // whenever the page re-rendered in the background (e.g. the user list
+  // finishing a load) and stole focus from whatever was being typed.
+  const wasOpen = useRef(false);
   useEffect(() => {
-    if (open) {
+    if (open && !wasOpen.current) {
       reset(defaultValues ?? emptyFormValues);
     }
-  }, [open, defaultValues, reset]);
+    wasOpen.current = open;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open]);
 
   const handleFormSubmit = handleSubmit(async (data) => {
     clearErrors();
