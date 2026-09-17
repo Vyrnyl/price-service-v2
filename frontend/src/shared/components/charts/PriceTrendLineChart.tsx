@@ -1,6 +1,7 @@
 "use client";
 
 import { CategoryScale, Chart as ChartJS, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
+import type { ReactNode } from "react";
 import { Line } from "react-chartjs-2";
 import type { PriceTrendPoint } from "@/shared/types/dashboard.types";
 import { hexToRgba, readToken } from "@/shared/utils/chart-tokens";
@@ -16,8 +17,11 @@ type PriceTrendLineChartProps = {
    * Describes what the line actually covers. The dashboard filters this chart by
    * both range and commodity, so a hardcoded "all commodities, last 30 days"
    * would state the wrong thing the moment either filter moves.
+   *
+   * Typed as `ReactNode` rather than `string` so a caller can emphasise the part
+   * that changes with the filters — the commodity name — inside the sentence.
    */
-  subheading?: string;
+  subheading?: ReactNode;
   /**
    * How the line is actually computed. `subheading` says what the line covers;
    * this says how each point is arrived at — which is what a reader needs to

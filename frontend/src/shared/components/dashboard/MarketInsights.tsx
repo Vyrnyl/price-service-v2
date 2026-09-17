@@ -198,9 +198,15 @@ export function MarketInsights() {
         isLoading={isLoading}
         error={error}
         subheading={
-          selectedCommodityName
-            ? `Average recorded price for ${selectedCommodityName}, ${activeDescriptor.description}.`
-            : `Average recorded price across all commodities, ${activeDescriptor.description}.`
+          selectedCommodityName ? (
+            <>
+              Average recorded price for{" "}
+              <strong className="font-semibold text-on-surface">{selectedCommodityName}</strong>,{" "}
+              {activeDescriptor.description}.
+            </>
+          ) : (
+            `Average recorded price across all commodities, ${activeDescriptor.description}.`
+          )
         }
       />
       <div className="grid gap-6 xl:grid-cols-2">

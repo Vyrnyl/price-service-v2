@@ -430,15 +430,26 @@ export default function ReportGenerationPage() {
                         <label className="font-sans text-label-caps text-on-surface-variant">
                           Store{selectedStoreIds.length > 0 ? ` (${selectedStoreIds.length} selected)` : ""}
                         </label>
-                        {selectedStoreIds.length > 0 ? (
-                          <button
-                            type="button"
-                            className="text-body-xs font-semibold text-primary hover:opacity-80"
-                            onClick={() => setSelectedStoreIds([])}
-                          >
-                            Clear
-                          </button>
-                        ) : null}
+                        <div className="flex items-center gap-3">
+                          {stores.length > 0 && selectedStoreIds.length < stores.length ? (
+                            <button
+                              type="button"
+                              className="text-body-xs font-semibold text-primary hover:opacity-80"
+                              onClick={() => setSelectedStoreIds(stores.map((store) => store.id))}
+                            >
+                              Select all
+                            </button>
+                          ) : null}
+                          {selectedStoreIds.length > 0 ? (
+                            <button
+                              type="button"
+                              className="text-body-xs font-semibold text-primary hover:opacity-80"
+                              onClick={() => setSelectedStoreIds([])}
+                            >
+                              Clear
+                            </button>
+                          ) : null}
+                        </div>
                       </div>
                       {storesLoading ? (
                         <div className="flex flex-wrap gap-2">
@@ -502,7 +513,7 @@ export default function ReportGenerationPage() {
                 className="flex w-full items-center justify-center gap-2 rounded-full bg-primary px-5 py-4 text-sm font-semibold text-on-primary transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <MdDownload size={18} />
-                {loading ? "Generating report…" : "GENERATE OFFICIAL REPORT"}
+                {loading ? "Generating report…" : "GENERATE REPORT"}
               </button>
 
               {error ? <p className="mt-4 text-sm text-error">{error}</p> : null}
