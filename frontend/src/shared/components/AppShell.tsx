@@ -42,7 +42,7 @@ export default function AppShell({
       <main className="flex-1 pb-8 md:pb-10">
         {children}
       </main>
-      <FooterSection />
+      <FooterSection offsetForSidebar={!hideNavigation} />
     </div>
   );
 }
