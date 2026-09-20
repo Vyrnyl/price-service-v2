@@ -48,8 +48,17 @@ app.get("/", (_req: Request, res: Response) => {
   res.json({ message: "PresyoSerbisyo backend is running" });
 });
 
+// Liveness only — deliberately does not touch the database. Render polls this
+// path (render.yaml healthCheckPath) and an uptime cron hits it every 10 minutes;
+// querying here wakes the Neon compute on every probe and keeps it billable for
+// its full idle timeout, which burns the free tier's 100 CU-hours. Use
+// /health/db when connectivity itself needs checking.
+app.get("/health", (_req: Request, res: Response) => {
+  res.json({ status: "ok" });
+});
+
 app.get(
-  "/health",
+  "/health/db",
   asyncHandler(async (_req: Request, res: Response) => {
     try {
       await prisma.$queryRaw`SELECT 1`;
