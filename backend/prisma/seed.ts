@@ -337,7 +337,21 @@ const DTI_COMMODITIES_NO_SRP: Array<{ name: string; category: string }> = [
 // Of the 208 DTI commodities above, only these get simulated 90-day price
 // history (like COMMODITIES does) — one per category, kept small so seeding
 // stays fast; the rest get just a Commodity + SRP row.
+//
+// The first five are deliberately the five that sort FIRST alphabetically.
+// Commodity lists are ordered `name: asc` everywhere (public list, Price
+// Trends picker), so these are the items a visitor lands on without touching
+// a filter — seeding them richly is what makes the charts non-empty on the
+// first screen anyone sees. The remaining entries keep one sample per
+// category so other parts of the catalogue are not uniformly flat.
 const DTI_PRICE_HISTORY_SAMPLE = new Set([
+  // --- the five that sort first by name ---
+  "5-STAR Esperma (White) #14 4pcs./pack",
+  "5-STAR Esperma (White) #22 2pcs./pack",
+  "5-STAR Esperma (White) #3 20pcs./pack",
+  "5-STAR Esperma (White) #6 25pcs./pack",
+  "5-STAR Esperma (White) #8 5pcs./pack",
+  // --- one per category, for breadth ---
   "ABSOLUTE PURE Distilled Drinking Water 350ml",
   "555 BONUS Pack Sardines (Green) 155g",
   "HO-MI Instant Mami Noodles - Beef Brisket 55g",
@@ -358,6 +372,18 @@ const STORES = [
 
 const DAYS_OF_HISTORY = 90;
 
+// The public Price Trends page clamps history to PUBLIC_HISTORY_WINDOW_DAYS
+// (60) regardless of the range pill, so the most recent 60 days are the ones
+// a visitor can actually see. History runs to 90 for the admin/officer side.
+const DAYS_BETWEEN_VISITS = 2;
+
+// Prices stay inside this band around each item's own SRP. Learned the hard
+// way: an earlier demo dataset used ±20% plus unbounded outliers, which
+// flattened every chart's y-axis and dragged the ARIMA forecast badly enough
+// that a separate normalization script had to be written to undo it. Keeping
+// generation inside the band means no clean-up pass is needed.
+const PRICE_BAND = 0.1;
+
 type PriceStatus = "COMPLIANT" | "OVERPRICE" | "UNDERPRICE";
 
 function calculateStatus(price: number, srpPrice: number): PriceStatus {
@@ -366,9 +392,44 @@ function calculateStatus(price: number, srpPrice: number): PriceStatus {
   return "COMPLIANT";
 }
 
-function randomBetween(min: number, max: number): number {
-  return min + Math.random() * (max - min);
+// Deterministic per (commodity, day) jitter. Re-running the seed reproduces
+// the same series instead of inventing new noise, so a chart someone signed
+// off on does not silently change shape on the next run.
+function jitter(seed: number, index: number): number {
+  const x = Math.sin(seed * 127.1 + index * 311.7) * 43758.5453;
+  return (x - Math.floor(x)) * 2 - 1; // -1..1
 }
+
+function hashName(name: string): number {
+  let h = 0;
+  for (let i = 0; i < name.length; i += 1) {
+    h = (h * 31 + name.charCodeAt(i)) % 100000;
+  }
+  return h;
+}
+
+// Six distinct shapes, assigned per commodity, so the charts do not all look
+// copy-pasted. Each returns a multiplier in roughly -1..1, scaled below by
+// PRICE_BAND so every shape stays inside the band by construction.
+//
+// Every shape must CROSS zero, not just approach it. A shape that stays on one
+// side of SRP for its whole window renders as permanently over- or
+// under-priced, which misrepresents compliance — a dry run caught exactly that
+// here (an uncentred dip sat below SRP on 111 of 115 records), and the same
+// defect had to be fixed once before in the 2026-09-09 normalization pass.
+const SHAPES: Array<(t: number) => number> = [
+  (t) => -0.7 + 1.4 * t, // steady rise through SRP
+  (t) => 0.7 - 1.4 * t, // decline through SRP
+  (t) => Math.sin(t * Math.PI * 2) * 0.8, // full wave
+  (t) => 0.45 - Math.sin(t * Math.PI) * 0.9, // dip and recover, centred on SRP
+  (t) => Math.sin(t * Math.PI * 4) * 0.35, // near-flat ripple
+  (t) => -0.5 + t * 1.0 + Math.sin(t * Math.PI * 3) * 0.3, // rise with wobble
+];
+
+// Shape and per-store noise are both scaled so that, added together, they
+// cannot leave PRICE_BAND: the shapes peak at ~1.0 and the noise at
+// NOISE_SHARE, so the trend gets the remainder.
+const NOISE_SHARE = 0.2;
 
 async function main() {
   const hashedPassword = await passwordUtils.hashPassword(SEED_PASSWORD);
@@ -476,33 +537,75 @@ async function main() {
   }
   console.log(`Created ${stores.length} stores.`);
 
-  let recordCount = 0;
+  // Price history. Each commodity gets one of six shapes so the charts are
+  // visibly different from each other, with every point held inside
+  // ±PRICE_BAND of that item's OWN SRP — a commodity priced at ₱12 and one at
+  // ₱320 therefore move by proportionate amounts, not by the same pesos.
+  //
+  // Officers visit every other day rather than daily, which is both closer to
+  // real field monitoring and what makes the chart's "days with no records are
+  // skipped" behaviour visible. Several stores are recorded per visit so
+  // Store Compliance has more than one store to compare.
+  const rows: Array<{
+    commodityId: string;
+    storeId: string;
+    userId: string;
+    price: number;
+    dateAndTime: Date;
+    status: PriceStatus;
+  }> = [];
+
   for (const commodity of commodities) {
-    // Mild upward drift over the window so ARIMA sees a real trend, plus
-    // day-to-day noise and an occasional over/under-price outlier.
-    for (let dayOffset = DAYS_OF_HISTORY; dayOffset >= 0; dayOffset -= 1) {
-      const date = new Date();
-      date.setDate(date.getDate() - dayOffset);
+    const seed = hashName(commodity.name);
+    const shape = SHAPES[seed % SHAPES.length];
+    // Rotate the starting store per commodity so the same shop is not always
+    // the first one recorded.
+    const storeOffset = seed % stores.length;
 
-      const drift = ((DAYS_OF_HISTORY - dayOffset) / DAYS_OF_HISTORY) * (commodity.srp * 0.06);
-      const noise = randomBetween(-commodity.srp * 0.03, commodity.srp * 0.03);
-      const price = Math.max(1, Number((commodity.srp + drift + noise).toFixed(2)));
-      const store = stores[Math.floor(Math.random() * stores.length)];
+    for (let dayOffset = DAYS_OF_HISTORY; dayOffset >= 0; dayOffset -= DAYS_BETWEEN_VISITS) {
+      const step = (DAYS_OF_HISTORY - dayOffset) / DAYS_BETWEEN_VISITS;
+      const t = (DAYS_OF_HISTORY - dayOffset) / DAYS_OF_HISTORY; // 0 -> 1 over the window
 
-      await prisma.priceRecord.create({
-        data: {
+      // 2-3 stores per visit, varying by day so the counts are not suspiciously uniform.
+      const storesToday = 2 + (step % 2);
+
+      for (let s = 0; s < storesToday; s += 1) {
+        const store = stores[(storeOffset + s) % stores.length];
+
+        const date = new Date();
+        date.setDate(date.getDate() - dayOffset);
+        // Field visits happen during working hours, not at midnight.
+        date.setHours(8 + ((step + s) % 8), (seed + s * 17) % 60, 0, 0);
+
+        // Shape drives the trend; jitter adds small per-store disagreement so
+        // the same commodity is not identically priced in every shop.
+        const trend = shape(t) * PRICE_BAND * (1 - NOISE_SHARE);
+        const storeNoise = jitter(seed + s * 991, step) * PRICE_BAND * NOISE_SHARE;
+        const raw = commodity.srp * (1 + trend + storeNoise);
+        const price = Math.max(0.5, Number(raw.toFixed(2)));
+
+        rows.push({
           commodityId: commodity.id,
           storeId: store.id,
           userId: officer.id,
           price,
           dateAndTime: date,
           status: calculateStatus(price, commodity.srp),
-        },
-      });
-      recordCount += 1;
+        });
+      }
     }
   }
-  console.log(`Created ${recordCount} price records across ${DAYS_OF_HISTORY + 1} days.`);
+
+  // createMany in chunks — one insert per row is slow enough to matter at this
+  // volume, and a single oversized insert risks the driver's parameter limit.
+  const CHUNK = 500;
+  for (let i = 0; i < rows.length; i += CHUNK) {
+    await prisma.priceRecord.createMany({ data: rows.slice(i, i + CHUNK) });
+  }
+  console.log(
+    `Created ${rows.length} price records for ${commodities.length} commodities ` +
+      `across ${DAYS_OF_HISTORY} days (every ${DAYS_BETWEEN_VISITS} days, multiple stores per visit).`,
+  );
 }
 
 main()
