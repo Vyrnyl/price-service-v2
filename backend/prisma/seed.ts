@@ -362,12 +362,14 @@ const DTI_PRICE_HISTORY_SAMPLE = new Set([
   "GREEN Cross Pure Care - WHITE 55g",
 ]);
 
+// The stores DTI Catanduanes actually monitors. Kept to these three on
+// purpose — earlier placeholder shops were replaced in full (see
+// scripts/replace-stores.ts), so re-adding one here would resurrect it on the
+// next fresh seed.
 const STORES = [
-  { name: "ABC Supermarket", location: "San Andres, Virac" },
-  { name: "Virac Public Market", location: "Poblacion, Virac" },
-  { name: "SaveMore Virac", location: "San Roque, Virac" },
-  { name: "Panganiban Talipapa", location: "Panganiban" },
-  { name: "Bato Public Market", location: "Bato" },
+  { name: "ARDCIMART", location: "Virac, Catanduanes" },
+  { name: "ACC HYPERMART", location: "Virac, Catanduanes" },
+  { name: "VIRAC LUCKY SUPERMART", location: "Virac, Catanduanes" },
 ];
 
 const DAYS_OF_HISTORY = 90;
