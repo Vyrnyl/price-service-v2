@@ -45,22 +45,6 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
   admin: [
     { href: "/admin", icon: MdOutlineDashboard, label: "Admin Dashboard" },
     {
-      href: "/admin/commodities",
-      icon: MdOutlineInventory2,
-      label: "Commodities",
-    },
-    {
-      href: "/admin/categories",
-      icon: MdKitchen,
-      label: "Categories",
-    },
-    {
-      href: "/admin/stores",
-      icon: MdOutlineStorefront,
-      label: "Stores",
-    },
-    { href: "/admin/users", icon: HiUsers, label: "Users" },
-    {
       href: "/admin/price-records",
       icon: MdOutlineTrendingUp,
       label: "Price Records",
@@ -76,15 +60,31 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       label: "Store Compliance",
     },
     {
-      href: "/admin/audit-log",
-      icon: MdOutlineHistory,
-      label: "Audit Log",
+      href: "/admin/commodities",
+      icon: MdOutlineInventory2,
+      label: "Commodities",
+    },
+    {
+      href: "/admin/categories",
+      icon: MdKitchen,
+      label: "Categories",
+    },
+    {
+      href: "/admin/stores",
+      icon: MdOutlineStorefront,
+      label: "Stores",
     },
     {
       href: "/admin/reports",
       icon: HiOutlineDocumentReport,
       label: "Reports",
     },
+    {
+      href: "/admin/audit-log",
+      icon: MdOutlineHistory,
+      label: "Audit Log",
+    },
+    { href: "/admin/users", icon: HiUsers, label: "Users" },
     {
       href: "/admin/settings",
       icon: MdOutlineSettings,
@@ -93,21 +93,6 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
   ],
   officer: [
     { href: "/officer", icon: MdOutlineDashboard, label: "Officer Dashboard" },
-    {
-      href: "/officer/commodities",
-      icon: MdOutlineInventory2,
-      label: "Commodities",
-    },
-    {
-      href: "/officer/categories",
-      icon: MdKitchen,
-      label: "Categories",
-    },
-    {
-      href: "/officer/stores",
-      icon: MdOutlineStorefront,
-      label: "Store Registry",
-    },
     {
       href: "/officer/price-records",
       icon: MdOutlineTrendingUp,
@@ -122,6 +107,21 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       href: "/officer/compliance",
       icon: MdWarningAmber,
       label: "Store Compliance",
+    },
+    {
+      href: "/officer/commodities",
+      icon: MdOutlineInventory2,
+      label: "Commodities",
+    },
+    {
+      href: "/officer/categories",
+      icon: MdKitchen,
+      label: "Categories",
+    },
+    {
+      href: "/officer/stores",
+      icon: MdOutlineStorefront,
+      label: "Store Registry",
     },
     {
       href: "/officer/settings",
