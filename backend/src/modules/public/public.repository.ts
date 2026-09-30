@@ -30,6 +30,24 @@ export const publicRepository = {
     },
   }),
 
+  // Every SRP row, not just the latest — editing an SRP inserts a new dated row,
+  // so the table already is the history.
+  findCommodityWithSrpHistory: (id: string) => prisma.commodity.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      name: true,
+      category: { select: { name: true } },
+      srps: {
+        orderBy: [
+          { effectiveDate: 'asc' },
+          { createdAt: 'asc' },
+        ],
+        select: { id: true, price: true, effectiveDate: true, createdAt: true },
+      },
+    },
+  }),
+
   countMonitoredStores: () => prisma.store.count(),
 
   countPriceUpdatesSince: (cutoff: Date) => prisma.priceRecord.count({

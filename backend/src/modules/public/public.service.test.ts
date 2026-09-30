@@ -6,6 +6,7 @@ import {
   buildPerStorePrices,
   computePriceRange,
   buildPublicCommodityDto,
+  buildSrpHistoryDto,
 } from './public.service';
 
 test('resolveComplianceStatus: price above SRP', () => {
@@ -161,4 +162,51 @@ test('buildPublicCommodityDto handles a commodity with no price history yet', ()
   assert.equal(dto.priceRange, null);
   assert.equal(dto.perStorePrices.length, 0);
   assert.equal(dto.priceRecords.length, 0);
+});
+
+function srpRow(id: string, price: string, effectiveDate: string, createdAt: string) {
+  return { id, price, effectiveDate: new Date(effectiveDate), createdAt: new Date(createdAt) };
+}
+
+const srpHistoryCommodity = {
+  id: 'commodity-1',
+  name: 'Rice',
+  category: { name: 'Grains' },
+};
+
+test('buildSrpHistoryDto: returns every SRP oldest first with numeric prices', () => {
+  const dto = buildSrpHistoryDto({
+    ...srpHistoryCommodity,
+    srps: [
+      srpRow('b', '45.2500', '2025-06-01T00:00:00Z', '2025-06-01T00:00:00Z'),
+      srpRow('a', '42.0000', '2024-11-04T00:00:00Z', '2024-11-04T00:00:00Z'),
+      srpRow('c', '47.0000', '2026-06-09T00:00:00Z', '2026-06-09T00:00:00Z'),
+    ],
+  });
+
+  assert.equal(dto.commodityId, 'commodity-1');
+  assert.equal(dto.category, 'Grains');
+  assert.deepEqual(dto.entries.map((entry) => entry.id), ['a', 'b', 'c']);
+  assert.deepEqual(dto.entries.map((entry) => entry.price), [42, 45.25, 47]);
+});
+
+test('buildSrpHistoryDto: same effective date keeps only the last one saved, in its date position', () => {
+  const dto = buildSrpHistoryDto({
+    ...srpHistoryCommodity,
+    srps: [
+      srpRow('first', '40', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z'),
+      srpRow('typo', '4500', '2025-06-01T00:00:00Z', '2025-06-01T08:00:00Z'),
+      srpRow('fixed', '45', '2025-06-01T00:00:00Z', '2025-06-01T09:00:00Z'),
+      srpRow('latest', '47', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z'),
+    ],
+  });
+
+  assert.deepEqual(dto.entries.map((entry) => entry.id), ['first', 'fixed', 'latest']);
+  assert.equal(dto.entries[1].price, 45);
+});
+
+test('buildSrpHistoryDto: a commodity with no SRP returns an empty history', () => {
+  const dto = buildSrpHistoryDto({ ...srpHistoryCommodity, srps: [] });
+
+  assert.deepEqual(dto.entries, []);
 });

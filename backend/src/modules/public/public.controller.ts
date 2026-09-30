@@ -2,9 +2,11 @@ import { Request, Response } from 'express';
 import AppError from '../../shared/utils/AppError';
 import { forecastService } from '../forecast';
 import { publicRepository } from './public.repository';
+import { publicCommodityIdParamSchema } from './public.schema';
 import {
   buildPublicCommoditiesPayload,
   buildPublicStatsDto,
+  buildSrpHistoryDto,
   resolveHistoryWindowStart,
   resolveUpdatesCutoff,
 } from './public.service';
@@ -31,6 +33,17 @@ export const publicController = {
     const payload = buildPublicCommoditiesPayload(commodities);
 
     res.json({ status: 'success', data: payload });
+  },
+
+  getPublicSrpHistory: async (req: Request, res: Response) => {
+    const { id } = publicCommodityIdParamSchema.parse(req.params);
+    const commodity = await publicRepository.findCommodityWithSrpHistory(id);
+
+    if (!commodity) {
+      throw new AppError('Commodity not found', 404);
+    }
+
+    res.json({ status: 'success', data: buildSrpHistoryDto(commodity) });
   },
 
   getPublicStats: async (_req: Request, res: Response) => {

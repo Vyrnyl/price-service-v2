@@ -235,3 +235,60 @@ export function resolveUpdatesCutoff(now: Date = new Date()): Date {
 export function buildPublicStatsDto(monitoredStoreCount: number, updatesToday: number): PublicStatsDto {
   return { monitoredStoreCount, updatesToday };
 }
+
+interface RawSrpHistoryRow {
+  id: string;
+  price: unknown;
+  effectiveDate: Date;
+  createdAt: Date;
+}
+
+interface RawCommodityWithSrpHistory {
+  id: string;
+  name: string;
+  category: { name: string };
+  srps: RawSrpHistoryRow[];
+}
+
+export interface PublicSrpHistoryEntryDto {
+  id: string;
+  price: number;
+  effectiveDate: Date;
+}
+
+export interface PublicSrpHistoryDto {
+  commodityId: string;
+  commodityName: string;
+  category: string;
+  /** Oldest first. */
+  entries: PublicSrpHistoryEntryDto[];
+}
+
+/**
+ * Two rows sharing an effective date are an officer correcting that day's SRP,
+ * not two changes. Only the last one saved counts — the same tie-break
+ * (`createdAt` desc) the commodity list uses to pick the current SRP — so the
+ * history never shows a zero-length "change" to a value that was never in force.
+ */
+export function buildSrpHistoryDto(commodity: RawCommodityWithSrpHistory): PublicSrpHistoryDto {
+  const chronological = [...commodity.srps].sort(
+    (a, b) =>
+      a.effectiveDate.getTime() - b.effectiveDate.getTime() || a.createdAt.getTime() - b.createdAt.getTime(),
+  );
+
+  const latestPerDate = new Map<number, RawSrpHistoryRow>();
+  for (const srp of chronological) {
+    latestPerDate.set(srp.effectiveDate.getTime(), srp);
+  }
+
+  return {
+    commodityId: commodity.id,
+    commodityName: commodity.name,
+    category: commodity.category.name,
+    entries: [...latestPerDate.values()].map((srp) => ({
+      id: srp.id,
+      price: Number(srp.price),
+      effectiveDate: srp.effectiveDate,
+    })),
+  };
+}
