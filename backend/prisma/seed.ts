@@ -1,5 +1,6 @@
 import { prisma } from "../src/prisma";
 import { passwordUtils } from "../src/shared/utils/password.utils";
+import { SRP_HISTORY_SAMPLE_NAMES, buildEarlierSrps } from "./srp-history-sample";
 
 const SEED_PASSWORD = "Password123!";
 
@@ -511,6 +512,17 @@ async function main() {
         effectiveDate: srpEffectiveDate,
       },
     });
+    // Earlier SRPs for the SRP history pop-up. Dated before `srpEffectiveDate`,
+    // which already precedes every generated price record, so no record is
+    // judged against one of these.
+    if (SRP_HISTORY_SAMPLE_NAMES.includes(spec.name)) {
+      await prisma.sRP.createMany({
+        data: buildEarlierSrps(spec.name, spec.srp, srpEffectiveDate).map((step) => ({
+          commodityId: commodity.id,
+          ...step,
+        })),
+      });
+    }
     dtiWithSrpCount += 1;
     if (DTI_PRICE_HISTORY_SAMPLE.has(spec.name)) {
       dtiHistorySample.push({ ...commodity, srp: spec.srp });
