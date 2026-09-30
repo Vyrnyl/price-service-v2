@@ -12,6 +12,19 @@ import Select from "@/shared/components/Select";
 import FormGroup from "@/shared/components/FormGroup";
 import Logo from "@/shared/components/Logo";
 import { useToast } from "@/shared/components/Toast";
+import { SrpHistoryModal } from "@/features/commodity/components/SrpHistoryModal";
+import { SAMPLE_SINGLE_SRP_HISTORY, SAMPLE_SRP_HISTORY } from "@/shared/mocks/srp-history.mock";
+import type { SrpHistoryEntry } from "@/shared/types/srp-history.types";
+
+type SrpHistoryDemo = "full" | "single" | "empty" | "loading" | "error";
+
+const SRP_HISTORY_DEMOS: Record<SrpHistoryDemo, { label: string; entries: SrpHistoryEntry[] }> = {
+  full: { label: "With revisions", entries: SAMPLE_SRP_HISTORY },
+  single: { label: "Single SRP", entries: SAMPLE_SINGLE_SRP_HISTORY },
+  empty: { label: "Empty", entries: [] },
+  loading: { label: "Loading", entries: [] },
+  error: { label: "Error", entries: [] },
+};
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
   return (
@@ -25,6 +38,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 export default function ComponentGalleryPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [nameValue, setNameValue] = useState("");
+  const [srpDemo, setSrpDemo] = useState<SrpHistoryDemo | null>(null);
   const { showToast } = useToast();
 
   return (
@@ -186,6 +200,29 @@ export default function ComponentGalleryPage() {
             </Select>
           </FormGroup>
         </div>
+      </Section>
+
+      <Section title="SRP history modal">
+        <p className="mb-4 text-body-sm text-on-surface-variant">
+          Every state of the pop-up opened from the Commodity List. Mock data only.
+        </p>
+        <div className="flex flex-wrap gap-3">
+          {(Object.keys(SRP_HISTORY_DEMOS) as SrpHistoryDemo[]).map((demo) => (
+            <Button key={demo} variant="secondary" size="sm" onClick={() => setSrpDemo(demo)}>
+              {SRP_HISTORY_DEMOS[demo].label}
+            </Button>
+          ))}
+        </div>
+        <SrpHistoryModal
+          open={srpDemo !== null}
+          onClose={() => setSrpDemo(null)}
+          commodityName="Rice, Well-milled (per kg)"
+          category="Rice"
+          entries={srpDemo ? SRP_HISTORY_DEMOS[srpDemo].entries : []}
+          isLoading={srpDemo === "loading"}
+          error={srpDemo === "error" ? "Unable to load the SRP history. Please try again." : null}
+          onRetry={() => setSrpDemo("full")}
+        />
       </Section>
     </PageShell>
   );

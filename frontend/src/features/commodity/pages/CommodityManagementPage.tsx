@@ -16,6 +16,8 @@ import Skeleton, { SkeletonStatCard } from "@/shared/components/Skeleton";
 import AddCommodityDialog, { type CategoryOption } from "../components/AddCommodityDialog";
 import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
+import { SrpHistoryModal } from "../components/SrpHistoryModal";
+import { useSrpHistory } from "../hooks/use-srp-history";
 import {
   createCommodity,
   getCommodityById,
@@ -87,6 +89,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [statusFilter, setStatusFilter] = useState<"ALL" | "Active" | "Inactive">("ALL");
   const [currentPage, setCurrentPage] = useState(1);
   const [categoryOptions, setCategoryOptions] = useState<CategoryOption[]>([]);
+  const [historyRow, setHistoryRow] = useState<CommodityRow | null>(null);
+
+  const srpHistory = useSrpHistory(historyRow?.id ?? null);
   const [categoryOptionsLoading, setCategoryOptionsLoading] = useState(true);
   const { showToast } = useToast();
 
@@ -365,10 +370,23 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
               }}
               onPageChange={setCurrentPage}
               onEditCommodity={canManage ? handleEditCommodity : undefined}
+              onViewSrpHistory={setHistoryRow}
             />
           </div>
         </div>
       </section>
+
+      <SrpHistoryModal
+        open={historyRow !== null}
+        onClose={() => setHistoryRow(null)}
+        commodityName={historyRow?.name ?? ""}
+        category={historyRow?.category}
+        entries={srpHistory.entries}
+        isLoading={srpHistory.isLoading}
+        error={srpHistory.error}
+        onRetry={srpHistory.retry}
+      />
+
     </PageShell>
   );
 }

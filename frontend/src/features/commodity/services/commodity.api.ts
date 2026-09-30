@@ -1,6 +1,7 @@
 import { apiFetch } from "../../../shared/services/api";
 import type { CommodityStatus } from "../commodity.schema";
 import type { SrpItem } from "./srp.api";
+import type { SrpHistoryResponse } from "@/shared/types/srp-history.types";
 
 export interface CommodityCategory {
   id: string;
@@ -127,6 +128,18 @@ export async function getPublicCommodities() {
     method: 'GET',
     credentials: 'omit',
   });
+
+  return response.data;
+}
+
+export async function getPublicSrpHistory(commodityId: string) {
+  const response = await apiFetch<{ status: string; data: SrpHistoryResponse }>(
+    `/api/public/commodities/${encodeURIComponent(commodityId)}/srp-history`,
+    {
+      method: 'GET',
+      credentials: 'omit',
+    },
+  );
 
   return response.data;
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
-import { MdLocalDining, MdLocalGroceryStore, MdSearch } from "react-icons/md";
+import { MdChevronRight, MdLocalDining, MdLocalGroceryStore, MdSearch } from "react-icons/md";
 import Badge from "@/shared/components/Badge";
 import DataProvenanceStrip from "@/shared/components/DataProvenanceStrip";
 import Input from "@/shared/components/Input";
@@ -10,6 +10,8 @@ import PageShell from "@/shared/components/PageShell";
 import Pagination from "@/shared/components/Pagination";
 import Select from "@/shared/components/Select";
 import SearchableSelect from "@/shared/components/SearchableSelect";
+import { SrpHistoryModal } from "../components/SrpHistoryModal";
+import { useSrpHistory } from "../hooks/use-srp-history";
 import { getPublicCommodities, type PublicCommodityItem, type PublicPriceRange } from "../services/commodity.api";
 
 interface CommodityRow {
@@ -100,7 +102,10 @@ export default function CommodityListPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [historyRow, setHistoryRow] = useState<CommodityRow | null>(null);
   const pageSize = 5;
+
+  const srpHistory = useSrpHistory(historyRow?.id ?? null);
 
   const categories = useMemo(() => {
     const values = allRows
@@ -236,6 +241,8 @@ export default function CommodityListPage() {
       </section>
 
       <div className="space-y-4">
+        <p className="text-sm text-on-surface-variant">Select a commodity to see how its SRP has changed over time.</p>
+
         {error ? (
           <div className="rounded-xl border border-error bg-error/10 p-4 text-sm text-error">
             {error}
@@ -253,18 +260,21 @@ export default function CommodityListPage() {
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Price Range</th>
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">SRP</th>
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Last Updated</th>
+                    <th className="w-10 px-3 py-3">
+                      <span className="sr-only">SRP history</span>
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-sm text-on-surface-variant">
+                      <td colSpan={6} className="py-12 text-center text-sm text-on-surface-variant">
                         Loading commodities...
                       </td>
                     </tr>
                   ) : tableRows.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="py-12 text-center text-sm text-on-surface-variant">
+                      <td colSpan={6} className="py-12 text-center text-sm text-on-surface-variant">
                         No commodities found.
                       </td>
                     </tr>
@@ -274,7 +284,16 @@ export default function CommodityListPage() {
                       return (
                         <tr
                           key={row.id}
-                          className="border-b border-outline-variant transition-colors last:border-b-0 hover:bg-surface-container"
+                          tabIndex={0}
+                          aria-label={`View SRP history for ${row.name}`}
+                          onClick={() => setHistoryRow(row)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" || event.key === " ") {
+                              event.preventDefault();
+                              setHistoryRow(row);
+                            }
+                          }}
+                          className="cursor-pointer border-b border-outline-variant transition-colors last:border-b-0 hover:bg-surface-container focus-visible:bg-surface-container focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
                         >
                           <td className="px-3 py-3">
                             <div className="flex items-center gap-3">
@@ -290,6 +309,9 @@ export default function CommodityListPage() {
                           <td className="px-3 py-3 text-sm font-medium text-on-surface">{row.priceRangeLabel}</td>
                           <td className="px-3 py-3 text-sm text-outline">{row.srp}</td>
                           <td className="px-3 py-3 text-xs text-on-surface-variant">{row.lastUpdated}</td>
+                          <td className="px-3 py-3 text-outline">
+                            <MdChevronRight size={20} aria-hidden="true" />
+                          </td>
                         </tr>
                       );
                     })
@@ -308,9 +330,12 @@ export default function CommodityListPage() {
               pagedRows.map((row) => {
                 const Icon = row.icon;
                 return (
-                  <div
+                  <button
+                    type="button"
                     key={row.id}
-                    className="rounded-xl border border-outline-variant bg-surface-container-low p-4 transition-colors hover:bg-surface-container"
+                    aria-label={`View SRP history for ${row.name}`}
+                    onClick={() => setHistoryRow(row)}
+                    className="block w-full rounded-xl border border-outline-variant bg-surface-container-low p-4 text-left transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
                   >
                     <div className="flex items-center gap-3">
                       <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${row.iconBg}`}>
@@ -333,10 +358,14 @@ export default function CommodityListPage() {
                       </div>
                     </div>
 
-                    <div className="mt-3 flex items-center justify-end border-t border-outline-variant pt-2 text-[11px] text-on-surface-variant">
+                    <div className="mt-3 flex items-center justify-between border-t border-outline-variant pt-2 text-[11px] text-on-surface-variant">
+                      <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
+                        SRP history
+                        <MdChevronRight size={16} aria-hidden="true" />
+                      </span>
                       <span>{row.lastUpdated}</span>
                     </div>
-                  </div>
+                  </button>
                 );
               })
             )}
@@ -350,6 +379,17 @@ export default function CommodityListPage() {
           <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
         </div>
       </div>
+
+      <SrpHistoryModal
+        open={historyRow !== null}
+        onClose={() => setHistoryRow(null)}
+        commodityName={historyRow?.name ?? ""}
+        category={historyRow?.category}
+        entries={srpHistory.entries}
+        isLoading={srpHistory.isLoading}
+        error={srpHistory.error}
+        onRetry={srpHistory.retry}
+      />
     </PageShell>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { MdEdit, MdSearch } from "react-icons/md";
+import { MdEdit, MdHistory, MdSearch } from "react-icons/md";
 import type { ComponentType } from "react";
 import Pagination from "@/shared/components/Pagination";
 import Skeleton from "@/shared/components/Skeleton";
@@ -33,6 +33,7 @@ type CommodityTableProps = {
   onStatusFilterChange: (value: "ALL" | "Active" | "Inactive") => void;
   onPageChange: (page: number) => void;
   onEditCommodity?: (commodity: Pick<CommodityItem, "id">) => void;
+  onViewSrpHistory?: (row: CommodityRow) => void;
 };
 
 export default function CommodityTable({
@@ -47,8 +48,9 @@ export default function CommodityTable({
   onStatusFilterChange,
   onPageChange,
   onEditCommodity,
+  onViewSrpHistory,
 }: CommodityTableProps) {
-  const showActions = Boolean(onEditCommodity);
+  const showActions = Boolean(onEditCommodity || onViewSrpHistory);
   const columnCount = showActions ? 6 : 5;
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -159,7 +161,13 @@ export default function CommodityTable({
               commodityRows.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <tr key={item.id}>
+                  <tr
+                    key={item.id}
+                    // Row click is a mouse shortcut; keyboard users get the explicit
+                    // history button in the Actions column instead of a tab stop per row.
+                    onClick={onViewSrpHistory ? () => onViewSrpHistory(item) : undefined}
+                    className={onViewSrpHistory ? "cursor-pointer transition-colors hover:bg-surface-container-low" : undefined}
+                  >
                     <td className="py-4">
                       <div className="flex items-center gap-3">
                         <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${item.iconBg}`}>
@@ -183,12 +191,30 @@ export default function CommodityTable({
                     <td className="py-4 text-sm text-on-surface-variant">{item.effectiveDate}</td>
                     <td className="py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
+                        {onViewSrpHistory ? (
+                          <button
+                            className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary"
+                            type="button"
+                            title="View SRP history"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              onViewSrpHistory(item);
+                            }}
+                          >
+                            <span className="sr-only">View SRP history for {item.name}</span>
+                            <MdHistory size={18} />
+                          </button>
+                        ) : null}
                         {onEditCommodity ? (
                           <button
                             className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary"
                             type="button"
                             title="Edit commodity"
-                            onClick={() => onEditCommodity({ id: item.id })}
+                            onClick={(event) => {
+                              // Editing must not also open the history pop-up behind the dialog.
+                              event.stopPropagation();
+                              onEditCommodity({ id: item.id });
+                            }}
                           >
                             <span className="sr-only">Edit commodity</span>
                             <MdEdit size={18} />
