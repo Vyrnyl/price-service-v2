@@ -74,7 +74,7 @@ export function StorePriceRecordsModal({ storeId, storeName, records, loading, o
           </div>
         ) : normalizedRecords.length > 0 ? (
           <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-2 sm:p-3">
-            <PriceRecordsTable records={pagedRecords} hideActions hideOfficerColumn hideCommodityColumn compact />
+            <PriceRecordsTable records={pagedRecords} hideActions hideOfficerColumn compact />
             {normalizedRecords.length > pageSize ? (
               <div className="mt-3 flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                 <p className="text-[11px] text-on-surface-variant sm:text-sm">
