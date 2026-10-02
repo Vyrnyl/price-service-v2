@@ -65,6 +65,17 @@ export const commodityRepository = {
       include: commodityInclude,
     }),
 
+  // Every SRP row, not just the latest — editing an SRP inserts a new dated row,
+  // so the table already is the history.
+  findSrpRevisions: (id: string) =>
+    prisma.commodity.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        srps: { select: { price: true, effectiveDate: true, createdAt: true } },
+      },
+    }),
+
   findByNameCaseInsensitive: (name: string) =>
     prisma.commodity.findFirst({
       where: { name: { equals: name, mode: 'insensitive' } },

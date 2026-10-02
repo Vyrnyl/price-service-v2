@@ -8,7 +8,7 @@ function toDecimal(value: number) {
   return Number(value.toFixed(4));
 }
 
-function calculateConfidence(series: number[], horizon: number, index: number): number {
+export function calculateConfidence(series: number[], horizon: number, index: number): number {
   const values = series.filter((value) => Number.isFinite(value) && value > 0);
 
   if (values.length < 3) {

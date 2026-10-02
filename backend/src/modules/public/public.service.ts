@@ -1,3 +1,5 @@
+import { latestPerEffectiveDate } from '../../shared/utils/srp-revisions';
+
 export type ComplianceStatus = 'Above SRP' | 'Below SRP' | 'Compliant' | 'Unknown';
 
 export const PUBLIC_HISTORY_WINDOW_DAYS = 60;
@@ -264,28 +266,13 @@ export interface PublicSrpHistoryDto {
   entries: PublicSrpHistoryEntryDto[];
 }
 
-/**
- * Two rows sharing an effective date are an officer correcting that day's SRP,
- * not two changes. Only the last one saved counts — the same tie-break
- * (`createdAt` desc) the commodity list uses to pick the current SRP — so the
- * history never shows a zero-length "change" to a value that was never in force.
- */
+/** Same-date rows collapse to the last one saved — see `latestPerEffectiveDate`. */
 export function buildSrpHistoryDto(commodity: RawCommodityWithSrpHistory): PublicSrpHistoryDto {
-  const chronological = [...commodity.srps].sort(
-    (a, b) =>
-      a.effectiveDate.getTime() - b.effectiveDate.getTime() || a.createdAt.getTime() - b.createdAt.getTime(),
-  );
-
-  const latestPerDate = new Map<number, RawSrpHistoryRow>();
-  for (const srp of chronological) {
-    latestPerDate.set(srp.effectiveDate.getTime(), srp);
-  }
-
   return {
     commodityId: commodity.id,
     commodityName: commodity.name,
     category: commodity.category.name,
-    entries: [...latestPerDate.values()].map((srp) => ({
+    entries: latestPerEffectiveDate(commodity.srps).map((srp) => ({
       id: srp.id,
       price: Number(srp.price),
       effectiveDate: srp.effectiveDate,

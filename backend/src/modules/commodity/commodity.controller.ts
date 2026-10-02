@@ -34,6 +34,13 @@ export const commodityController = {
     res.json({ status: 'success', data: commodity });
   },
 
+  getSrpProjection: async (req: Request, res: Response) => {
+    const { id } = commodityIdParamSchema.parse(req.params);
+    const data = await commodityService.getSrpProjection(id);
+
+    res.json({ status: 'success', data });
+  },
+
   updateCommodity: async (req: Request, res: Response) => {
     const { id } = commodityIdParamSchema.parse(req.params);
     const data = updateCommoditySchema.parse(req.body);
