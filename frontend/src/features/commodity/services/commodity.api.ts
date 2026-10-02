@@ -1,7 +1,7 @@
 import { apiFetch } from "../../../shared/services/api";
 import type { CommodityStatus } from "../commodity.schema";
 import type { SrpItem } from "./srp.api";
-import type { SrpHistoryResponse } from "@/shared/types/srp-history.types";
+import type { SrpHistoryResponse, SrpProjectionResponse } from "@/shared/types/srp-history.types";
 
 export interface CommodityCategory {
   id: string;
@@ -185,6 +185,19 @@ export async function updateCommodity(id: string, payload: Partial<CreateCommodi
 export interface CommodityDetailResponse {
   status: string;
   data: CommodityDetailsItem;
+}
+
+/** Admin/officer only — the public Commodity List does not show the outlook. */
+export async function getSrpProjection(commodityId: string) {
+  const response = await apiFetch<{ status: string; data: SrpProjectionResponse }>(
+    `/api/commodities/${encodeURIComponent(commodityId)}/srp-projection`,
+    {
+      method: "GET",
+      credentials: "include",
+    },
+  );
+
+  return response.data;
 }
 
 export async function getCommodityById(id: string) {

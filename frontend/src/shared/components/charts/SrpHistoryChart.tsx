@@ -14,9 +14,15 @@ type SrpHistoryChartProps = {
   /** Window to draw, as timestamps. The caller owns "now" so rendering stays pure. */
   rangeStart: number;
   rangeEnd: number;
+  /**
+   * Estimated SRP at a future date, drawn as a dashed line from the window's
+   * end. Pass it only when the window ends today — a projection hanging off a
+   * past window would read as a forecast made back then.
+   */
+  projection?: { x: number; y: number } | null;
 };
 
-type ChartPoint = { x: number; y: number; isRevision: boolean };
+type ChartPoint = { x: number; y: number; isRevision: boolean; isProjection?: boolean };
 
 const SIX_MONTHS_MS = 1000 * 60 * 60 * 24 * 182;
 
@@ -73,7 +79,7 @@ export function buildSrpChartPoints(entries: SrpHistoryEntry[], rangeStart: numb
  * revision: SRP changes are months apart and irregular, and evenly spaced
  * category labels would make a two-week SRP look as long-lived as a year-long one.
  */
-export function SrpHistoryChart({ entries, rangeStart, rangeEnd }: SrpHistoryChartProps) {
+export function SrpHistoryChart({ entries, rangeStart, rangeEnd, projection = null }: SrpHistoryChartProps) {
   const lineColor = readToken("--color-primary-container", "#2563eb");
   const surfaceLowest = readToken("--color-surface-container-lowest", "#ffffff");
   const onSurface = readToken("--color-on-surface", "#191b23");
@@ -82,7 +88,16 @@ export function SrpHistoryChart({ entries, rangeStart, rangeEnd }: SrpHistoryCha
   const outline = readToken("--color-outline", "#737686");
 
   const points = buildSrpChartPoints(entries, rangeStart, rangeEnd);
-  const spanMs = rangeEnd - rangeStart;
+  const lastPoint = points[points.length - 1];
+  const projectionPoints: ChartPoint[] =
+    projection && lastPoint && projection.x > lastPoint.x
+      ? [
+          { x: lastPoint.x, y: lastPoint.y, isRevision: false },
+          { x: projection.x, y: projection.y, isRevision: false, isProjection: true },
+        ]
+      : [];
+  const axisEnd = projectionPoints.length > 0 ? projectionPoints[1].x : rangeEnd;
+  const spanMs = axisEnd - rangeStart;
 
   if (points.length === 0) {
     return (
@@ -123,6 +138,20 @@ export function SrpHistoryChart({ entries, rangeStart, rangeEnd }: SrpHistoryCha
         // dot is cut in half by the chart area.
         clip: false as const,
       },
+      {
+        label: "Estimated SRP",
+        data: projectionPoints,
+        borderColor: lineColor,
+        borderWidth: 2,
+        borderDash: [6, 5],
+        fill: false,
+        pointRadius: projectionPoints.map((point) => (point.isProjection ? 4 : 0)),
+        pointHoverRadius: projectionPoints.map((point) => (point.isProjection ? 6 : 0)),
+        pointBackgroundColor: surfaceLowest,
+        pointBorderColor: lineColor,
+        pointBorderWidth: 2,
+        clip: false as const,
+      },
     ],
   };
 
@@ -141,11 +170,20 @@ export function SrpHistoryChart({ entries, rangeStart, rangeEnd }: SrpHistoryCha
         borderColor: primaryFixed,
         borderWidth: 1,
         padding: 10,
-        filter: (item: { raw: unknown }) => (item.raw as ChartPoint).isRevision,
+        filter: (item: { raw: unknown }) => {
+          const point = item.raw as ChartPoint;
+          return point.isRevision || Boolean(point.isProjection);
+        },
         callbacks: {
-          title: (items: { raw: unknown }[]) =>
-            items.length > 0 ? `Effective ${formatFullDate((items[0].raw as ChartPoint).x)}` : "",
-          label: (item: { raw: unknown }) => `SRP ${formatCurrency((item.raw as ChartPoint).y)}`,
+          title: (items: { raw: unknown }[]) => {
+            if (items.length === 0) return "";
+            const point = items[0].raw as ChartPoint;
+            return `${point.isProjection ? "Projected for" : "Effective"} ${formatFullDate(point.x)}`;
+          },
+          label: (item: { raw: unknown }) => {
+            const point = item.raw as ChartPoint;
+            return `${point.isProjection ? "Estimated SRP" : "SRP"} ${formatCurrency(point.y)}`;
+          },
         },
       },
     },
@@ -153,7 +191,7 @@ export function SrpHistoryChart({ entries, rangeStart, rangeEnd }: SrpHistoryCha
       x: {
         type: "linear" as const,
         min: rangeStart,
-        max: rangeEnd,
+        max: axisEnd,
         ticks: {
           color: outline,
           maxTicksLimit: 5,

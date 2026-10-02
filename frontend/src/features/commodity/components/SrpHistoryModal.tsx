@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { MdArrowDownward, MdArrowUpward, MdClose } from "react-icons/md";
+import { useState, type ReactNode } from "react";
+import { MdArrowDownward, MdArrowUpward, MdBolt, MdClose, MdInfo } from "react-icons/md";
 import Alert from "@/shared/components/Alert";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
@@ -9,7 +9,12 @@ import Input from "@/shared/components/Input";
 import Modal from "@/shared/components/Modal";
 import Skeleton from "@/shared/components/Skeleton";
 import { SrpHistoryChart } from "@/shared/components/charts/SrpHistoryChart";
-import type { SrpHistoryEntry } from "@/shared/types/srp-history.types";
+import {
+  SRP_PROJECTION_MIN_ENTRIES,
+  type SrpHistoryEntry,
+  type SrpProjection,
+  type SrpProjectionState,
+} from "@/shared/types/srp-history.types";
 import { formatCurrency } from "@/shared/utils/currency";
 
 type SrpHistoryModalProps = {
@@ -22,6 +27,8 @@ type SrpHistoryModalProps = {
   isLoading?: boolean;
   error?: string | null;
   onRetry?: () => void;
+  /** Omit to hide the outlook entirely. */
+  projection?: SrpProjectionState;
 };
 
 function formatDate(value: string) {
@@ -124,7 +131,7 @@ function parseDateInputValue(value: string, endOfDay: boolean) {
     : new Date(year, month - 1, day).getTime();
 }
 
-function SrpChartPanel({ entries }: { entries: SrpHistoryEntry[] }) {
+function SrpChartPanel({ entries, projection }: { entries: SrpHistoryEntry[]; projection: SrpProjection | null }) {
   // Read once per mount so re-renders don't move the window.
   const [now] = useState(() => Date.now());
   const [activeRange, setActiveRange] = useState<SrpRangeKey>("All");
@@ -150,6 +157,12 @@ function SrpChartPanel({ entries }: { entries: SrpHistoryEntry[] }) {
     return effective >= rangeStart && effective <= rangeEnd;
   }).length;
   const hadSrpBeforeRange = firstEffective < rangeStart;
+  // Only a window that ends today leads into the future; a custom range ending
+  // earlier would make the estimate look like one made back then.
+  const chartProjection =
+    projection && rangeEnd === now
+      ? { x: new Date(projection.projectedDate).getTime(), y: projection.projectedPrice }
+      : null;
 
   return (
     <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 sm:p-5">
@@ -214,9 +227,129 @@ function SrpChartPanel({ entries }: { entries: SrpHistoryEntry[] }) {
       ) : null}
 
       <div className="mt-4">
-        <SrpHistoryChart entries={entries} rangeStart={rangeStart} rangeEnd={rangeEnd} />
+        <SrpHistoryChart entries={entries} rangeStart={rangeStart} rangeEnd={rangeEnd} projection={chartProjection} />
       </div>
+
+      {chartProjection ? (
+        <div className="mt-3 flex flex-wrap items-center gap-x-5 gap-y-2 text-xs text-on-surface-variant">
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden="true" className="inline-block w-6 border-t-2 border-primary-container" />
+            SRP set by DTI
+          </span>
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden="true" className="inline-block w-6 border-t-2 border-dashed border-primary-container" />
+            Estimate (not an official SRP)
+          </span>
+        </div>
+      ) : null}
     </div>
+  );
+}
+
+function confidenceLabel(value: number) {
+  return value >= 0.75 ? "High" : value >= 0.5 ? "Medium" : "Low";
+}
+
+function formatHorizon(days: number) {
+  const months = Math.round(days / 30);
+  return months >= 1 ? `Next ${months} month${months === 1 ? "" : "s"}` : `Next ${days} days`;
+}
+
+function OutlookTile({ label, value, children }: { label: string; value: string; children: ReactNode }) {
+  return (
+    <div className="rounded-xl bg-surface-container px-3 py-2.5">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-on-surface">{value}</p>
+      <div className="mt-0.5 text-xs text-on-surface-variant">{children}</div>
+    </div>
+  );
+}
+
+/** Modelled on Price Trends' "Forecast outlook" panel, sized for the pop-up. */
+function SrpOutlookPanel({ state, inEffectCount }: { state: SrpProjectionState; inEffectCount: number }) {
+  const { projection, isLoading, error, onRetry } = state;
+
+  let body: ReactNode;
+  if (isLoading) {
+    body = (
+      <div className="grid gap-3 sm:grid-cols-3" aria-busy="true" aria-label="Loading SRP outlook">
+        {[0, 1, 2].map((index) => (
+          <Skeleton key={index} className="h-20" />
+        ))}
+      </div>
+    );
+  } else if (error) {
+    body = (
+      <Alert variant="error" className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <span>{error}</span>
+        {onRetry ? (
+          <Button variant="secondary" size="sm" onClick={onRetry} className="self-start sm:self-auto">
+            Try again
+          </Button>
+        ) : null}
+      </Alert>
+    );
+  } else if (!projection) {
+    body = (
+      <p className="text-sm leading-6 text-on-surface-variant">
+        Not enough SRP history to estimate a direction yet. An outlook needs at least {SRP_PROJECTION_MIN_ENTRIES} SRPs
+        on record; this item has {inEffectCount}.
+      </p>
+    );
+  } else {
+    body = (
+      <>
+        <div className="grid gap-3 sm:grid-cols-3">
+          <OutlookTile label="Current SRP" value={formatCurrency(projection.currentPrice)}>
+            In force today
+          </OutlookTile>
+          <OutlookTile label="Projected SRP" value={formatCurrency(projection.projectedPrice)}>
+            <ChangeLabel previous={projection.currentPrice} current={projection.projectedPrice} />
+            <span className="block">by {formatDate(projection.projectedDate)}</span>
+          </OutlookTile>
+          <OutlookTile label="Confidence" value={`${Math.round(projection.confidence * 100)}%`}>
+            {confidenceLabel(projection.confidence)} · from {projection.basedOn} SRPs
+          </OutlookTile>
+        </div>
+        <p className="mt-4 text-sm leading-6 text-on-surface-variant">
+          If DTI keeps revising this SRP the way it has across its {projection.basedOn - 1} changes so far, it could be
+          about{" "}
+          <span className="font-semibold text-on-surface">{formatCurrency(projection.projectedPrice)}</span> by{" "}
+          {formatDate(projection.projectedDate)}.
+        </p>
+      </>
+    );
+  }
+
+  return (
+    <section
+      aria-labelledby="srp-outlook-title"
+      className="rounded-xl border border-outline-variant bg-surface-container-lowest p-4 sm:p-5"
+    >
+      <div className="flex items-start gap-3">
+        <div className="rounded-xl bg-primary/10 p-2 text-primary">
+          <MdBolt size={20} aria-hidden="true" />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-outline">SRP outlook</p>
+          <p id="srp-outlook-title" className="mt-1 text-sm font-semibold text-on-surface">
+            {projection && !isLoading && !error ? formatHorizon(projection.horizonDays) : "Where the SRP may be headed"}
+          </p>
+        </div>
+      </div>
+
+      <div className="mt-4">{body}</div>
+
+      {projection && !isLoading && !error ? (
+        <div className="mt-4 flex items-start gap-2 rounded-xl border border-outline-variant/70 bg-surface-container-high p-3">
+          <MdInfo className="mt-0.5 shrink-0 text-primary" size={16} aria-hidden="true" />
+          <p className="text-xs leading-5 text-on-surface-variant">
+            An estimate from how this SRP has changed in the past — not an official SRP. Only DTI sets SRPs, and the
+            current SRP is the one in force.
+          </p>
+        </div>
+      ) : null}
+    </section>
   );
 }
 
@@ -252,7 +385,7 @@ function SummaryTiles({ entries }: { entries: SrpHistoryEntry[] }) {
   );
 }
 
-function HistoryBody({ entries }: { entries: SrpHistoryEntry[] }) {
+function HistoryBody({ entries, projection }: { entries: SrpHistoryEntry[]; projection?: SrpProjectionState }) {
   // Read once per mount so re-renders don't reclassify an entry mid-view.
   const [now] = useState(() => Date.now());
   // An SRP can be recorded up to a few days ahead of its effective date. It is
@@ -266,7 +399,11 @@ function HistoryBody({ entries }: { entries: SrpHistoryEntry[] }) {
       {inEffect.length > 0 ? (
         <>
           <SummaryTiles entries={inEffect} />
-          <SrpChartPanel entries={inEffect} />
+          <SrpChartPanel
+            entries={inEffect}
+            projection={projection && !projection.isLoading && !projection.error ? projection.projection : null}
+          />
+          {projection ? <SrpOutlookPanel state={projection} inEffectCount={inEffect.length} /> : null}
         </>
       ) : (
         <div className="rounded-xl border border-outline-variant bg-surface-container p-6 text-center">
@@ -330,6 +467,7 @@ export function SrpHistoryModal({
   isLoading = false,
   error = null,
   onRetry,
+  projection,
 }: SrpHistoryModalProps) {
   return (
     <Modal open={open} onClose={onClose} maxWidth="max-w-3xl">
@@ -380,7 +518,7 @@ export function SrpHistoryModal({
               </p>
             </div>
           ) : (
-            <HistoryBody entries={entries} />
+            <HistoryBody entries={entries} projection={projection} />
           )}
         </div>
       </div>

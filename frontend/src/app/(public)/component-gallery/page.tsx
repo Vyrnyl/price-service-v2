@@ -13,10 +13,10 @@ import FormGroup from "@/shared/components/FormGroup";
 import Logo from "@/shared/components/Logo";
 import { useToast } from "@/shared/components/Toast";
 import { SrpHistoryModal } from "@/features/commodity/components/SrpHistoryModal";
-import { SAMPLE_SINGLE_SRP_HISTORY, SAMPLE_SRP_HISTORY } from "@/shared/mocks/srp-history.mock";
+import { mockSrpProjection, SAMPLE_SINGLE_SRP_HISTORY, SAMPLE_SRP_HISTORY } from "@/shared/mocks/srp-history.mock";
 import type { SrpHistoryEntry } from "@/shared/types/srp-history.types";
 
-type SrpHistoryDemo = "full" | "single" | "empty" | "loading" | "error";
+type SrpHistoryDemo = "full" | "single" | "empty" | "loading" | "error" | "outlookLoading" | "outlookError";
 
 const SRP_HISTORY_DEMOS: Record<SrpHistoryDemo, { label: string; entries: SrpHistoryEntry[] }> = {
   full: { label: "With revisions", entries: SAMPLE_SRP_HISTORY },
@@ -24,6 +24,8 @@ const SRP_HISTORY_DEMOS: Record<SrpHistoryDemo, { label: string; entries: SrpHis
   empty: { label: "Empty", entries: [] },
   loading: { label: "Loading", entries: [] },
   error: { label: "Error", entries: [] },
+  outlookLoading: { label: "Outlook loading", entries: SAMPLE_SRP_HISTORY },
+  outlookError: { label: "Outlook error", entries: SAMPLE_SRP_HISTORY },
 };
 
 function Section({ title, children }: { title: string; children: React.ReactNode }) {
@@ -39,6 +41,7 @@ export default function ComponentGalleryPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [nameValue, setNameValue] = useState("");
   const [srpDemo, setSrpDemo] = useState<SrpHistoryDemo | null>(null);
+  const [galleryNow] = useState(() => Date.now());
   const { showToast } = useToast();
 
   return (
@@ -222,6 +225,12 @@ export default function ComponentGalleryPage() {
           isLoading={srpDemo === "loading"}
           error={srpDemo === "error" ? "Unable to load the SRP history. Please try again." : null}
           onRetry={() => setSrpDemo("full")}
+          projection={{
+            projection: srpDemo ? mockSrpProjection(SRP_HISTORY_DEMOS[srpDemo].entries, galleryNow) : null,
+            isLoading: srpDemo === "outlookLoading",
+            error: srpDemo === "outlookError" ? "Unable to load the SRP outlook. Please try again." : null,
+            onRetry: () => setSrpDemo("full"),
+          }}
         />
       </Section>
     </PageShell>

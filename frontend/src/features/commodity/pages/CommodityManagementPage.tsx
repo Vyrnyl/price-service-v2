@@ -18,6 +18,7 @@ import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
 import { SrpHistoryModal } from "../components/SrpHistoryModal";
 import { useSrpHistory } from "../hooks/use-srp-history";
+import { useSrpProjection } from "../hooks/use-srp-projection";
 import {
   createCommodity,
   getCommodityById,
@@ -92,6 +93,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [historyRow, setHistoryRow] = useState<CommodityRow | null>(null);
 
   const srpHistory = useSrpHistory(historyRow?.id ?? null);
+  const srpProjection = useSrpProjection(historyRow?.id ?? null);
   const [categoryOptionsLoading, setCategoryOptionsLoading] = useState(true);
   const { showToast } = useToast();
 
@@ -385,6 +387,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
         isLoading={srpHistory.isLoading}
         error={srpHistory.error}
         onRetry={srpHistory.retry}
+        projection={srpProjection}
       />
 
     </PageShell>
