@@ -20,7 +20,7 @@ Check [context/progress.md](context/progress.md) at the start of every session �
 
 **There is no separate dev database.** Local dev points at the **live production Neon DB**, so any write — seeding, migrations, deletions — is a production change and needs explicit sign-off first. See the 2026-09-09 seeding entry in [context/progress.md](context/progress.md) for the tagged-manifest pattern used when demo data is genuinely wanted.
 
-Verified baseline (2026-09-09): backend `tsc` clean · frontend `tsc` clean · backend `npm test` 132/132 passing.
+Verified baseline (2026-10-02): backend `tsc` clean · frontend `tsc` clean · backend `npm test` 142/142 passing.
 
 ## The one rule that governs everything
 
