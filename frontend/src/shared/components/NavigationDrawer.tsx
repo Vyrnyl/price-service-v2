@@ -45,24 +45,19 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
   admin: [
     { href: "/admin", icon: MdOutlineDashboard, label: "Admin Dashboard" },
     {
+      href: "/admin/stores",
+      icon: MdOutlineStorefront,
+      label: "Stores",
+    },
+    {
       href: "/admin/price-records",
       icon: MdOutlineTrendingUp,
       label: "Price Records",
     },
     {
-      href: "/admin/price-trends",
-      icon: MdBarChart,
-      label: "Price Trends",
-    },
-    {
-      href: "/admin/compliance",
-      icon: MdWarningAmber,
-      label: "Store Compliance",
-    },
-    {
       href: "/admin/commodities",
       icon: MdOutlineInventory2,
-      label: "Commodities",
+      label: "SRP Trends",
     },
     {
       href: "/admin/categories",
@@ -70,9 +65,14 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       label: "Categories",
     },
     {
-      href: "/admin/stores",
-      icon: MdOutlineStorefront,
-      label: "Stores",
+      href: "/admin/compliance",
+      icon: MdWarningAmber,
+      label: "Store Compliance",
+    },
+    {
+      href: "/admin/price-trends",
+      icon: MdBarChart,
+      label: "Price Trends",
     },
     {
       href: "/admin/reports",
@@ -94,14 +94,19 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
   officer: [
     { href: "/officer", icon: MdOutlineDashboard, label: "Officer Dashboard" },
     {
+      href: "/officer/stores",
+      icon: MdOutlineStorefront,
+      label: "Store Registry",
+    },
+    {
       href: "/officer/price-records",
       icon: MdOutlineTrendingUp,
       label: "Price Records",
     },
     {
-      href: "/officer/price-trends",
-      icon: MdBarChart,
-      label: "Price Trends",
+      href: "/officer/commodities",
+      icon: MdOutlineInventory2,
+      label: "SRP Trends",
     },
     {
       href: "/officer/compliance",
@@ -109,19 +114,14 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
       label: "Store Compliance",
     },
     {
-      href: "/officer/commodities",
-      icon: MdOutlineInventory2,
-      label: "Commodities",
+      href: "/officer/price-trends",
+      icon: MdBarChart,
+      label: "Price Trends",
     },
     {
       href: "/officer/categories",
       icon: MdKitchen,
       label: "Categories",
-    },
-    {
-      href: "/officer/stores",
-      icon: MdOutlineStorefront,
-      label: "Store Registry",
     },
     {
       href: "/officer/settings",
