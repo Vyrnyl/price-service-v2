@@ -40,13 +40,17 @@ export default function MonitoringOfficerDashboardPage() {
   const [latestPriceRecords, setLatestPriceRecords] = useState<Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>>([]);
 
   useEffect(() => {
+    // Stop paging when the page goes away (e.g. logout) rather than carry on without a session.
+    const controller = new AbortController();
+    const { signal } = controller;
+
     async function loadDashboardCounts() {
       try {
         setCountsLoading(true);
         const [commoditiesResponse, storesData, priceRecordsResponse] = await Promise.all([
-          apiFetch<{ status: string; data: unknown[]; total: number }>("/api/commodities?pageSize=1"),
-          fetchAllPages<{ id: string; name: string; location: string; createdAt: string }>("/api/stores"),
-          apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>; total: number }>("/api/price-records"),
+          apiFetch<{ status: string; data: unknown[]; total: number }>("/api/commodities?pageSize=1", { signal }),
+          fetchAllPages<{ id: string; name: string; location: string; createdAt: string }>("/api/stores", { signal }),
+          apiFetch<{ status: string; data: Array<{ id: string; commodity: { name: string }; store: { name: string } | null; price: string; createdAt: string }>; total: number }>("/api/price-records", { signal }),
         ]);
 
         setTotalCommodities(commoditiesResponse.total);
@@ -59,13 +63,15 @@ export default function MonitoringOfficerDashboardPage() {
         const sortedPriceRecords = [...priceRecordsResponse.data].sort((a, b) => (new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()));
         setLatestPriceRecords(sortedPriceRecords.slice(0, 3));
       } catch (error) {
+        if (signal.aborted) return;
         console.error("Failed to load dashboard counts", error);
       } finally {
-        setCountsLoading(false);
+        if (!signal.aborted) setCountsLoading(false);
       }
     }
 
     void loadDashboardCounts();
+    return () => controller.abort();
   }, []);
 
   return (

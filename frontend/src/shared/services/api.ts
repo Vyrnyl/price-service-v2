@@ -3,6 +3,12 @@ export interface ApiRequestOptions {
   headers?: HeadersInit;
   body?: unknown;
   credentials?: RequestCredentials;
+  /**
+   * Abort when the caller unmounts. Matters most for multi-request loads
+   * (`fetchAllPages`): without it the loop keeps going after the page is gone —
+   * after a logout, with no session, so the remaining requests come back 401.
+   */
+  signal?: AbortSignal;
 }
 
 export class ApiError extends Error {
@@ -32,13 +38,14 @@ function resolveUrl(path: string) {
 }
 
 export async function apiFetch<T>(path: string, options: ApiRequestOptions = {}): Promise<T> {
-  const { method = "GET", headers = {}, body, credentials = "include" } = options;
+  const { method = "GET", headers = {}, body, credentials = "include", signal } = options;
   const url = resolveUrl(path);
 
   const fetchOptions: RequestInit = {
     method,
     credentials,
     headers: { ...headers },
+    signal,
   };
 
   if (body !== undefined) {

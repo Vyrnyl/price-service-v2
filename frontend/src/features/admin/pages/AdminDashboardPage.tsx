@@ -162,6 +162,11 @@ export default function AdminDashboardPage() {
   }, []);
 
   useEffect(() => {
+    // Walks every page of stores and commodities; stop when the page goes away
+    // (e.g. logout) instead of carrying on without a session.
+    const controller = new AbortController();
+    const { signal } = controller;
+
     async function loadActivityAndRecentStores() {
       try {
         setRecentLoading(true);
@@ -170,10 +175,10 @@ export default function AdminDashboardPage() {
         // Stores are fetched once here and reused for both the activity feed and the
         // "Recently Added Stores" table — these used to be two separate effects that
         // each walked the full store list independently, doubling the request count.
-        const storesData = await fetchAllPages<StoreListItem>("/api/stores");
+        const storesData = await fetchAllPages<StoreListItem>("/api/stores", { signal });
         const [commoditiesData, priceRecordsResponse] = await Promise.all([
-          fetchAllPages<{ id: string; name: string; createdAt?: string }>("/api/commodities"),
-          apiFetch<{ status: string; data: Array<{ id: string; commodity?: { name?: string }; store?: { name?: string }; price?: number | string; createdAt?: string; dateAndTime?: string }> }>("/api/price-records?pageSize=20"),
+          fetchAllPages<{ id: string; name: string; createdAt?: string }>("/api/commodities", { signal }),
+          apiFetch<{ status: string; data: Array<{ id: string; commodity?: { name?: string }; store?: { name?: string }; price?: number | string; createdAt?: string; dateAndTime?: string }> }>("/api/price-records?pageSize=20", { signal }),
         ]);
 
         const nextItems: ActivityItem[] = [
@@ -222,13 +227,15 @@ export default function AdminDashboardPage() {
 
         setRecentStores(recentStoreRows);
       } catch (error) {
+        if (signal.aborted) return;
         console.error("Failed to load activity feed and recent stores", error);
       } finally {
-        setRecentLoading(false);
+        if (!signal.aborted) setRecentLoading(false);
       }
     }
 
     void loadActivityAndRecentStores();
+    return () => controller.abort();
   }, []);
 
   return (

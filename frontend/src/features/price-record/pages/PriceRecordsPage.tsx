@@ -177,24 +177,30 @@ export default function PriceRecordsPage({
   // registry data that can exceed the backend's per-request pagination ceiling,
   // so every page is walked rather than assuming one page is "all".
   useEffect(() => {
+    // Stop paging when the page goes away (e.g. logout) rather than carry on without a session.
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const loadOptions = async () => {
       try {
         setOptionsLoading(true);
         const [storeData, commodityData] = await Promise.all([
-          fetchAllPages<StoreOption>("/api/stores"),
-          fetchAllPages<CommodityOption>("/api/commodities"),
+          fetchAllPages<StoreOption>("/api/stores", { signal }),
+          fetchAllPages<CommodityOption>("/api/commodities", { signal }),
         ]);
 
         setStores(storeData);
         setCommodities(commodityData);
       } catch (error) {
+        if (signal.aborted) return;
         console.error("Unable to load store/commodity options", error);
       } finally {
-        setOptionsLoading(false);
+        if (!signal.aborted) setOptionsLoading(false);
       }
     };
 
     void loadOptions();
+    return () => controller.abort();
   }, []);
 
   const loadRecords = async (page: number) => {

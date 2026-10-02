@@ -205,26 +205,36 @@ export default function ReportGenerationPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reportsPage]);
 
+  // Both loaders page through a whole table; stop when the page goes away
+  // (e.g. logout) rather than carry on without a session.
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const loadStores = async () => {
       try {
         setStoresLoading(true);
-        const data = await fetchAllPages<StoreOption>("/api/stores");
+        const data = await fetchAllPages<StoreOption>("/api/stores", { signal });
         setStores(data);
       } catch (err) {
+        if (signal.aborted) return;
         console.error("Unable to load stores", err);
       } finally {
-        setStoresLoading(false);
+        if (!signal.aborted) setStoresLoading(false);
       }
     };
 
     void loadStores();
+    return () => controller.abort();
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const { signal } = controller;
+
     const loadCategories = async () => {
       try {
-        const data = await fetchAllPages<{ category: { name: string } | null }>("/api/commodities");
+        const data = await fetchAllPages<{ category: { name: string } | null }>("/api/commodities", { signal });
         const unique = Array.from(
           new Set(data.map((item) => item.category?.name).filter((name): name is string => Boolean(name))),
         ).sort();
@@ -233,11 +243,13 @@ export default function ReportGenerationPage() {
           ...unique.map((category) => ({ value: category, label: category })),
         ]);
       } catch (err) {
+        if (signal.aborted) return;
         console.error("Unable to load commodity categories", err);
       }
     };
 
     void loadCategories();
+    return () => controller.abort();
   }, []);
 
   const handleReportTypeSelect = (typeId: string) => {
