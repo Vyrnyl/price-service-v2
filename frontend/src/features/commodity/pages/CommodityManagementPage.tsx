@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   MdAddCircle,
   MdEdit,
@@ -78,6 +78,10 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [summaryStats, setSummaryStats] = useState({ total: 0, active: 0, categories: 0 });
   const [statsLoading, setStatsLoading] = useState(true);
   const [isLoading, setIsLoading] = useState(true);
+  // Separate from `isLoading` (first load only), which also gates the header's
+  // Add button — a page change should redraw the table, not the header.
+  const [isPaging, setIsPaging] = useState(false);
+  const listRequestRef = useRef(0);
   const [error, setError] = useState<string | null>(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingCommodity, setEditingCommodity] = useState<CommodityItem | null>(null);
@@ -98,6 +102,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const { showToast } = useToast();
 
   const loadCommodities = async (page: number) => {
+    // Only the newest request may write: clicking through pages quickly must
+    // not let a slower, earlier page land on top of the one asked for last.
+    const requestId = ++listRequestRef.current;
     try {
       const response = await getCommodities({
         page,
@@ -105,13 +112,24 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
         search: debouncedSearch || undefined,
         status: statusFilter !== "ALL" ? statusFilter : undefined,
       });
+      if (requestId !== listRequestRef.current) return;
       setCommodityRows(mapCommoditiesToRows(response.data));
       setTotal(response.total);
+      setError(null);
     } catch {
-      setError("Unable to load commodity list.");
+      if (requestId === listRequestRef.current) setError("Unable to load commodity list.");
     } finally {
-      setIsLoading(false);
+      if (requestId === listRequestRef.current) {
+        setIsLoading(false);
+        setIsPaging(false);
+      }
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    if (page === currentPage) return;
+    setIsPaging(true);
+    setCurrentPage(page);
   };
 
   useEffect(() => {
@@ -360,7 +378,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
             <CommodityTable
               commodityRows={commodityRows}
               total={total}
-              isLoading={isLoading}
+              isLoading={isLoading || isPaging}
               error={error}
               searchTerm={searchTerm}
               statusFilter={statusFilter}
@@ -370,7 +388,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
                 setStatusFilter(value);
                 setCurrentPage(1);
               }}
-              onPageChange={setCurrentPage}
+              onPageChange={handlePageChange}
               onEditCommodity={canManage ? handleEditCommodity : undefined}
               onViewSrpHistory={setHistoryRow}
             />
