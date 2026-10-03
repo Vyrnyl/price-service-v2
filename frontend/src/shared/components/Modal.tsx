@@ -24,6 +24,15 @@ export default function Modal({
 }: ModalProps) {
   const dialogRef = useRef<HTMLDivElement>(null);
   const previouslyFocused = useRef<HTMLElement | null>(null);
+  // Callers usually pass an inline or re-created `onClose`, so its identity
+  // changes on every parent render — including each keystroke in a form inside
+  // the dialog. Reading it through a ref keeps the focus effect below keyed to
+  // `open` alone; with `onClose` as a dependency the effect re-ran per
+  // keystroke, and its cleanup/setup pulled focus out of the field being typed in.
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
 
   useEffect(() => {
     if (!open) return;
@@ -36,7 +45,7 @@ export default function Modal({
 
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") {
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -71,7 +80,7 @@ export default function Modal({
       document.removeEventListener("keydown", handleKeyDown);
       previouslyFocused.current?.focus();
     };
-  }, [open, onClose]);
+  }, [open]);
 
   if (!open) return null;
 
