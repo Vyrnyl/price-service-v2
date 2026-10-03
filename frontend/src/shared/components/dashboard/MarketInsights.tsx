@@ -34,7 +34,9 @@ const RANGE_DESCRIPTORS: Record<RangeKey, RangeDescriptor> = {
 
 const rangeOptions = Object.values(RANGE_DESCRIPTORS);
 
-const ALL_COMMODITIES = "";
+// The trend always shows one commodity — there is no "all commodities" view.
+// Empty only until the first response names which commodities have records.
+const NO_COMMODITY = "";
 
 function toIsoDate(date: Date) {
   return date.toISOString().slice(0, 10);
@@ -58,7 +60,7 @@ export function MarketInsights() {
   const today = useMemo(() => toIsoDate(new Date()), []);
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState(today);
-  const [selectedCommodityId, setSelectedCommodityId] = useState(ALL_COMMODITIES);
+  const [selectedCommodityId, setSelectedCommodityId] = useState(NO_COMMODITY);
 
   const activeDescriptor = RANGE_DESCRIPTORS[activeRange];
 
@@ -89,25 +91,30 @@ export function MarketInsights() {
         });
 
         if (!isMounted) return;
+
+        // Nothing picked yet, or the pick has no records in this range (a
+        // commodity chosen in a wide window may be absent from a narrower one):
+        // switch to the first commodity that does, and let the refetch this
+        // triggers render. Staying in the loading state until then means the
+        // unfiltered, every-commodity trend never flashes on screen.
+        const selectionIsValid = data.commodityOptions.some(
+          (option) => option.commodityId === selectedCommodityId,
+        );
+        const fallback = data.commodityOptions[0]?.commodityId;
+        if (!selectionIsValid && fallback) {
+          setSelectedCommodityId(fallback);
+          return;
+        }
+
         setAnalytics(data);
         setError(null);
-
-        // A commodity picked in a wide window may have no records in a narrower
-        // one. Drop the selection here, where the new options are already in
-        // hand, rather than leaving a filter that renders an empty trend line
-        // with no explanation. The refetch this triggers returns the unfiltered
-        // trend for the same range.
-        if (
-          selectedCommodityId &&
-          !data.commodityOptions.some((option) => option.commodityId === selectedCommodityId)
-        ) {
-          setSelectedCommodityId(ALL_COMMODITIES);
-        }
+        setIsLoading(false);
       } catch (loadError) {
         console.error("Failed to load dashboard analytics", loadError);
-        if (isMounted) setError("Unable to load market insights right now.");
-      } finally {
-        if (isMounted) setIsLoading(false);
+        if (isMounted) {
+          setError("Unable to load market insights right now.");
+          setIsLoading(false);
+        }
       }
     };
 
@@ -156,10 +163,9 @@ export function MarketInsights() {
                 value: option.commodityId,
                 label: option.commodityName,
               }))}
-              placeholder="All commodities"
+              placeholder="Select commodity"
               searchPlaceholder="Search commodity"
               emptyLabel="No commodities in this range."
-              clearLabel="All commodities"
               isLoading={isLoading}
               aria-label="Filter price trend by commodity"
             />
@@ -205,7 +211,7 @@ export function MarketInsights() {
               {activeDescriptor.description}.
             </>
           ) : (
-            `Average recorded price across all commodities, ${activeDescriptor.description}.`
+            `Average recorded price, ${activeDescriptor.description}.`
           )
         }
       />
