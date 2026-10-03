@@ -57,7 +57,7 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
     {
       href: "/admin/commodities",
       icon: MdOutlineInventory2,
-      label: "SRP Trends",
+      label: "Commodities",
     },
     {
       href: "/admin/categories",
@@ -106,7 +106,7 @@ const roleSpecificLinks: Record<UserRole, NavLink[]> = {
     {
       href: "/officer/commodities",
       icon: MdOutlineInventory2,
-      label: "SRP Trends",
+      label: "Commodities",
     },
     {
       href: "/officer/compliance",
