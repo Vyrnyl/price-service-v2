@@ -80,7 +80,8 @@ export const priceRecordRepository = {
         : {}),
     };
 
-    const [data, total] = await prisma.$transaction([
+    // Independent reads, not a $transaction — see commodity.repository.ts findAll.
+    const [data, total] = await Promise.all([
       prisma.priceRecord.findMany({
         where,
         include: { commodity: true, store: true, user: true },

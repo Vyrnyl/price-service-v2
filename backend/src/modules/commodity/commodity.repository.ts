@@ -45,7 +45,14 @@ export const commodityRepository = {
         : {}),
     };
 
-    const [data, total] = await prisma.$transaction([
+    // Two independent reads, not a `$transaction`. The batch transaction bought
+    // no consistency (Postgres runs READ COMMITTED, so each statement takes its
+    // own snapshot anyway) but did inherit Prisma's transaction limits — 2 s to
+    // acquire a connection and BEGIN, 5 s in total — which a cold Neon
+    // connection under a few concurrent requests exceeds, turning a plain list
+    // read into an intermittent 500 (P2028). The other paginated repositories
+    // follow the same pattern for the same reason.
+    const [data, total] = await Promise.all([
       prisma.commodity.findMany({
         where,
         include: commodityInclude,

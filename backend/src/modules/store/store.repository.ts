@@ -51,7 +51,8 @@ export const storeRepository = {
 
     const where: Prisma.StoreWhereInput = conditions.length ? { AND: conditions } : {};
 
-    const [data, total] = await prisma.$transaction([
+    // Independent reads, not a $transaction — see commodity.repository.ts findAll.
+    const [data, total] = await Promise.all([
       prisma.store.findMany({ where, include: { user: true }, orderBy: { name: 'asc' }, skip, take }),
       prisma.store.count({ where }),
     ]);

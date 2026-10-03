@@ -27,7 +27,8 @@ export const userRepository = {
         : {}),
     };
 
-    const [data, total] = await prisma.$transaction([
+    // Independent reads, not a $transaction — see commodity.repository.ts findAll.
+    const [data, total] = await Promise.all([
       prisma.user.findMany({ where, orderBy: { createdAt: 'desc' }, skip, take }),
       prisma.user.count({ where }),
     ]);

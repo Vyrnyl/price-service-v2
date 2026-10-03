@@ -38,7 +38,8 @@ export const reportRepository = {
     const scope = resolveReportScope(authUser);
     const { skip, take } = toSkipTake(query);
 
-    const [data, total] = await prisma.$transaction([
+    // Independent reads, not a $transaction — see commodity.repository.ts findAll.
+    const [data, total] = await Promise.all([
       prisma.report.findMany({
         where: scope,
         select: reportSummarySelect,

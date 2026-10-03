@@ -21,7 +21,8 @@ export const auditLogRepository = {
         : {}),
     };
 
-    const [data, total] = await prisma.$transaction([
+    // Independent reads, not a $transaction — see commodity.repository.ts findAll.
+    const [data, total] = await Promise.all([
       prisma.auditLog.findMany({
         where,
         include: { user: true },
