@@ -2,10 +2,9 @@
 
 import { useEffect, useMemo, useState, type ComponentType } from "react";
 import Link from "next/link";
-import { MdChevronRight, MdLocalDining, MdLocalGroceryStore, MdSearch } from "react-icons/md";
+import { MdChevronRight, MdLocalDining, MdLocalGroceryStore } from "react-icons/md";
 import Badge from "@/shared/components/Badge";
 import DataProvenanceStrip from "@/shared/components/DataProvenanceStrip";
-import Input from "@/shared/components/Input";
 import PageShell from "@/shared/components/PageShell";
 import Pagination from "@/shared/components/Pagination";
 import Select from "@/shared/components/Select";
@@ -95,7 +94,6 @@ function mapCommoditiesToRows(commodities: PublicCommodityItem[]): CommodityRow[
 
 export default function CommodityListPage() {
   const [allRows, setAllRows] = useState<CommodityRow[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("All");
   const [statusFilter, setStatusFilter] = useState("All");
   const [municipalityFilter, setMunicipalityFilter] = useState("All");
@@ -135,22 +133,14 @@ export default function CommodityListPage() {
   }, [allRows]);
 
   const tableRows = useMemo(() => {
-    const normalizedSearch = searchTerm.trim().toLowerCase();
-
     return allRows.filter((row) => {
-      const matchesSearch =
-        normalizedSearch.length === 0 ||
-        [row.name, row.category, row.storeName, row.municipality, row.commodityStatus, row.status].some((value) =>
-          value.toLowerCase().includes(normalizedSearch),
-        );
-
       const matchesCategory = categoryFilter === "All" || row.category === categoryFilter;
       const matchesStatus = statusFilter === "All" || row.status === statusFilter;
       const matchesMunicipality = municipalityFilter === "All" || row.municipality === municipalityFilter;
 
-      return matchesSearch && matchesCategory && matchesStatus && matchesMunicipality;
+      return matchesCategory && matchesStatus && matchesMunicipality;
     });
-  }, [allRows, categoryFilter, municipalityFilter, searchTerm, statusFilter]);
+  }, [allRows, categoryFilter, municipalityFilter, statusFilter]);
 
   const totalPages = Math.max(1, Math.ceil(tableRows.length / pageSize));
   const safeCurrentPage = Math.min(currentPage, totalPages);
@@ -161,7 +151,7 @@ export default function CommodityListPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, categoryFilter, statusFilter, municipalityFilter]);
+  }, [categoryFilter, statusFilter, municipalityFilter]);
 
   useEffect(() => {
     async function loadCommodities() {
@@ -201,41 +191,36 @@ export default function CommodityListPage() {
           </Link>
         </p>
 
-        <div className="space-y-4 rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
-          <Input
-            icon={<MdSearch size={20} />}
-            placeholder="Search commodity, store, or municipality..."
-            aria-label="Search commodities"
-            type="text"
-            value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-          />
+        <div className="rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow">
+          <div className="flex flex-col gap-4 sm:flex-row">
+            <div className="w-full sm:w-64">
+              <SearchableSelect
+                value={categoryFilter}
+                onChange={setCategoryFilter}
+                options={categories.map((category) => ({
+                  value: category,
+                  label: category === "All" ? "All categories" : category,
+                }))}
+                placeholder="All categories"
+                searchPlaceholder="Search category"
+                emptyLabel="No categories found."
+                aria-label="Filter by category"
+              />
+            </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <SearchableSelect
-              value={categoryFilter}
-              onChange={setCategoryFilter}
-              options={categories.map((category) => ({
-                value: category,
-                label: category === "All" ? "All categories" : category,
-              }))}
-              placeholder="All categories"
-              searchPlaceholder="Search category"
-              emptyLabel="No categories found."
-              aria-label="Filter by category"
-            />
-
-            <Select
-              value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value)}
-              aria-label="Filter by compliance status"
-            >
-              {statuses.map((status) => (
-                <option key={status} value={status}>
-                  {status === "All" ? "All statuses" : status}
-                </option>
-              ))}
-            </Select>
+            <div className="w-full sm:w-64">
+              <Select
+                value={statusFilter}
+                onChange={(event) => setStatusFilter(event.target.value)}
+                aria-label="Filter by compliance status"
+              >
+                {statuses.map((status) => (
+                  <option key={status} value={status}>
+                    {status === "All" ? "All statuses" : status}
+                  </option>
+                ))}
+              </Select>
+            </div>
           </div>
         </div>
       </section>
