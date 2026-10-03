@@ -17,6 +17,7 @@ import AddCommodityDialog, { type CategoryOption } from "../components/AddCommod
 import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
 import { SrpHistoryModal } from "../components/SrpHistoryModal";
+import { SRP_HISTORY_ENABLED } from "../srp-history.config";
 import { useSrpHistory } from "../hooks/use-srp-history";
 import { useSrpProjection } from "../hooks/use-srp-projection";
 import {
@@ -390,7 +391,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
               }}
               onPageChange={handlePageChange}
               onEditCommodity={canManage ? handleEditCommodity : undefined}
-              onViewSrpHistory={setHistoryRow}
+              onViewSrpHistory={SRP_HISTORY_ENABLED ? setHistoryRow : undefined}
             />
           </div>
         </div>

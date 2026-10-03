@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, type ComponentType } from "react";
+import { useEffect, useMemo, useState, type ComponentType, type KeyboardEvent } from "react";
 import Link from "next/link";
 import { MdChevronRight, MdLocalDining, MdLocalGroceryStore } from "react-icons/md";
 import Badge from "@/shared/components/Badge";
@@ -10,6 +10,7 @@ import Pagination from "@/shared/components/Pagination";
 import Select from "@/shared/components/Select";
 import SearchableSelect from "@/shared/components/SearchableSelect";
 import { SrpHistoryModal } from "../components/SrpHistoryModal";
+import { SRP_HISTORY_ENABLED } from "../srp-history.config";
 import { useSrpHistory } from "../hooks/use-srp-history";
 import { getPublicCommodities, type PublicCommodityItem, type PublicPriceRange } from "../services/commodity.api";
 
@@ -102,6 +103,7 @@ export default function CommodityListPage() {
   const [error, setError] = useState<string | null>(null);
   const [historyRow, setHistoryRow] = useState<CommodityRow | null>(null);
   const pageSize = 5;
+  const columnCount = SRP_HISTORY_ENABLED ? 6 : 5;
 
   const srpHistory = useSrpHistory(historyRow?.id ?? null);
 
@@ -226,7 +228,9 @@ export default function CommodityListPage() {
       </section>
 
       <div className="space-y-4">
-        <p className="text-sm text-on-surface-variant">Select a commodity to see how its SRP has changed over time.</p>
+        {SRP_HISTORY_ENABLED ? (
+          <p className="text-sm text-on-surface-variant">Select a commodity to see how its SRP has changed over time.</p>
+        ) : null}
 
         {error ? (
           <div className="rounded-xl border border-error bg-error/10 p-4 text-sm text-error">
@@ -245,21 +249,23 @@ export default function CommodityListPage() {
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Price Range</th>
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">SRP</th>
                     <th className="px-3 py-3 text-[10px] font-semibold uppercase tracking-wide text-outline">Last Updated</th>
-                    <th className="w-10 px-3 py-3">
-                      <span className="sr-only">SRP history</span>
-                    </th>
+                    {SRP_HISTORY_ENABLED ? (
+                      <th className="w-10 px-3 py-3">
+                        <span className="sr-only">SRP history</span>
+                      </th>
+                    ) : null}
                   </tr>
                 </thead>
                 <tbody>
                   {isLoading ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-sm text-on-surface-variant">
+                      <td colSpan={columnCount} className="py-12 text-center text-sm text-on-surface-variant">
                         Loading commodities...
                       </td>
                     </tr>
                   ) : tableRows.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="py-12 text-center text-sm text-on-surface-variant">
+                      <td colSpan={columnCount} className="py-12 text-center text-sm text-on-surface-variant">
                         No commodities found.
                       </td>
                     </tr>
@@ -269,16 +275,24 @@ export default function CommodityListPage() {
                       return (
                         <tr
                           key={row.id}
-                          tabIndex={0}
-                          aria-label={`View SRP history for ${row.name}`}
-                          onClick={() => setHistoryRow(row)}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" || event.key === " ") {
-                              event.preventDefault();
-                              setHistoryRow(row);
-                            }
-                          }}
-                          className="cursor-pointer border-b border-outline-variant transition-colors last:border-b-0 hover:bg-surface-container focus-visible:bg-surface-container focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+                          {...(SRP_HISTORY_ENABLED
+                            ? {
+                                tabIndex: 0,
+                                "aria-label": `View SRP history for ${row.name}`,
+                                onClick: () => setHistoryRow(row),
+                                onKeyDown: (event: KeyboardEvent<HTMLTableRowElement>) => {
+                                  if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault();
+                                    setHistoryRow(row);
+                                  }
+                                },
+                              }
+                            : {})}
+                          className={
+                            SRP_HISTORY_ENABLED
+                              ? "cursor-pointer border-b border-outline-variant transition-colors last:border-b-0 hover:bg-surface-container focus-visible:bg-surface-container focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+                              : "border-b border-outline-variant last:border-b-0"
+                          }
                         >
                           <td className="px-3 py-3">
                             <div className="flex items-center gap-3">
@@ -294,9 +308,11 @@ export default function CommodityListPage() {
                           <td className="px-3 py-3 text-sm font-medium text-on-surface">{row.priceRangeLabel}</td>
                           <td className="px-3 py-3 text-sm text-outline">{row.srp}</td>
                           <td className="px-3 py-3 text-xs text-on-surface-variant">{row.lastUpdated}</td>
-                          <td className="px-3 py-3 text-outline">
-                            <MdChevronRight size={20} aria-hidden="true" />
-                          </td>
+                          {SRP_HISTORY_ENABLED ? (
+                            <td className="px-3 py-3 text-outline">
+                              <MdChevronRight size={20} aria-hidden="true" />
+                            </td>
+                          ) : null}
                         </tr>
                       );
                     })
@@ -314,14 +330,8 @@ export default function CommodityListPage() {
             ) : (
               pagedRows.map((row) => {
                 const Icon = row.icon;
-                return (
-                  <button
-                    type="button"
-                    key={row.id}
-                    aria-label={`View SRP history for ${row.name}`}
-                    onClick={() => setHistoryRow(row)}
-                    className="block w-full rounded-xl border border-outline-variant bg-surface-container-low p-4 text-left transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                  >
+                const cardBody = (
+                  <>
                     <div className="flex items-center gap-3">
                       <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${row.iconBg}`}>
                         <Icon className="text-base" />
@@ -344,13 +354,33 @@ export default function CommodityListPage() {
                     </div>
 
                     <div className="mt-3 flex items-center justify-between border-t border-outline-variant pt-2 text-[11px] text-on-surface-variant">
-                      <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
-                        SRP history
-                        <MdChevronRight size={16} aria-hidden="true" />
-                      </span>
+                      {SRP_HISTORY_ENABLED ? (
+                        <span className="inline-flex items-center gap-0.5 font-semibold text-primary">
+                          SRP history
+                          <MdChevronRight size={16} aria-hidden="true" />
+                        </span>
+                      ) : (
+                        <span>Last updated</span>
+                      )}
                       <span>{row.lastUpdated}</span>
                     </div>
+                  </>
+                );
+
+                return SRP_HISTORY_ENABLED ? (
+                  <button
+                    type="button"
+                    key={row.id}
+                    aria-label={`View SRP history for ${row.name}`}
+                    onClick={() => setHistoryRow(row)}
+                    className="block w-full rounded-xl border border-outline-variant bg-surface-container-low p-4 text-left transition-colors hover:bg-surface-container focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                  >
+                    {cardBody}
                   </button>
+                ) : (
+                  <div key={row.id} className="rounded-xl border border-outline-variant bg-surface-container-low p-4">
+                    {cardBody}
+                  </div>
                 );
               })
             )}
