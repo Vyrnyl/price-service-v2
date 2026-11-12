@@ -25,6 +25,8 @@ type AddCommodityDialogProps = {
   defaultValues?: CreateCommodityFormSchema;
   categoryOptions: CategoryOption[];
   categoryOptionsLoading?: boolean;
+  /** Show the SRP price + effective date fields. Off for edit while INLINE_SRP_EDIT_ENABLED. */
+  showSrpFields?: boolean;
   nameError?: string | null;
   formError: string | null;
   formSuccess: string | null;
@@ -47,6 +49,7 @@ export default function AddCommodityDialog({
   defaultValues,
   categoryOptions,
   categoryOptionsLoading = false,
+  showSrpFields = true,
   nameError,
   formError,
   formSuccess,
@@ -113,7 +116,9 @@ export default function AddCommodityDialog({
       title={mode === "edit" ? "Edit Commodity" : "Add New Commodity"}
       description={
         mode === "edit"
-          ? "Update commodity details, or record a new SRP effective from a given date."
+          ? showSrpFields
+            ? "Update commodity details, or record a new SRP effective from a given date."
+            : "Update the commodity's name, category, or status. SRPs are edited in the Commodities table."
           : "Register a new commodity for monitoring and compliance tracking."
       }
     >
@@ -155,36 +160,40 @@ export default function AddCommodityDialog({
           </Select>
         </FormGroup>
 
-        <FormGroup
-          label={mode === "edit" ? "New SRP Price (PHP) — Optional" : "SRP Price (PHP) — Optional"}
-          htmlFor="srpPrice"
-          error={errors.srpPrice?.message}
-        >
-          <Input
-            id="srpPrice"
-            type="number"
-            step="0.01"
-            {...register("srpPrice")}
-            hasError={Boolean(errors.srpPrice)}
-            placeholder="e.g. 55.00"
-          />
-        </FormGroup>
+        {showSrpFields ? (
+          <>
+            <FormGroup
+              label={mode === "edit" ? "New SRP Price (PHP) — Optional" : "SRP Price (PHP) — Optional"}
+              htmlFor="srpPrice"
+              error={errors.srpPrice?.message}
+            >
+              <Input
+                id="srpPrice"
+                type="number"
+                step="0.01"
+                {...register("srpPrice")}
+                hasError={Boolean(errors.srpPrice)}
+                placeholder="e.g. 55.00"
+              />
+            </FormGroup>
 
-        <FormGroup
-          label="Effective Date (required with SRP price)"
-          htmlFor="srpEffectiveDate"
-          error={errors.srpEffectiveDate?.message}
-        >
-          <Input
-            id="srpEffectiveDate"
-            type="date"
-            max={getMaxSrpEffectiveDateString()}
-            {...register("srpEffectiveDate")}
-            hasError={Boolean(errors.srpEffectiveDate)}
-          />
-        </FormGroup>
+            <FormGroup
+              label="Effective Date (required with SRP price)"
+              htmlFor="srpEffectiveDate"
+              error={errors.srpEffectiveDate?.message}
+            >
+              <Input
+                id="srpEffectiveDate"
+                type="date"
+                max={getMaxSrpEffectiveDateString()}
+                {...register("srpEffectiveDate")}
+                hasError={Boolean(errors.srpEffectiveDate)}
+              />
+            </FormGroup>
+          </>
+        ) : null}
 
-        {mode === "edit" ? (
+        {mode === "edit" && showSrpFields ? (
           <p className="text-xs text-on-surface-variant sm:col-span-2">
             SRP is historical — entering a price and date here adds a new SRP record effective from that date, it does not overwrite the current one.
           </p>

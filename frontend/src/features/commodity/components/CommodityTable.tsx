@@ -1,8 +1,12 @@
 "use client";
 
-import { MdEdit, MdHistory, MdSearch } from "react-icons/md";
+import { MdEdit, MdHistory, MdSave, MdSearch } from "react-icons/md";
 import type { ComponentType } from "react";
+import Button from "@/shared/components/Button";
+import { FieldError } from "@/shared/components/FieldError";
+import Input from "@/shared/components/Input";
 import Pagination from "@/shared/components/Pagination";
+import SearchableSelect, { type SearchableSelectOption } from "@/shared/components/SearchableSelect";
 import Skeleton from "@/shared/components/Skeleton";
 import type { CommodityItem } from "../services/commodity.api";
 import type { CommodityStatus } from "../commodity.schema";
@@ -13,10 +17,40 @@ export type CommodityRow = {
   category: string;
   status: CommodityStatus;
   srp: string;
+  /** The current SRP as a plain number string ("37.25"), or null when the commodity has none. */
+  srpValue: string | null;
   effectiveDate: string;
   statusClass: string;
   icon: ComponentType<{ className?: string; size?: number }>;
   iconBg: string;
+};
+
+/** Category dropdown in the filter panel. Omit to hide it (COMMODITY_CATEGORY_FILTER_ENABLED). */
+export type CategoryFilterControl = {
+  /** Category id, or "" for all categories. */
+  value: string;
+  options: SearchableSelectOption[];
+  isLoading: boolean;
+  onChange: (value: string) => void;
+};
+
+/** Inline SRP editor. Omit to hide it (INLINE_SRP_EDIT_ENABLED, officer only). */
+export type SrpEditControl = {
+  isEditing: boolean;
+  isSaving: boolean;
+  /** Draft SRP per commodity id, as typed. */
+  drafts: Record<string, string>;
+  /** Validation message per commodity id. */
+  errors: Record<string, string>;
+  effectiveDate: string;
+  effectiveDateError: string | null;
+  maxEffectiveDate: string;
+  changedCount: number;
+  onStart: () => void;
+  onCancel: () => void;
+  onSave: () => void;
+  onDraftChange: (commodityId: string, value: string) => void;
+  onEffectiveDateChange: (value: string) => void;
 };
 
 const PAGE_SIZE = 5;
@@ -34,6 +68,8 @@ type CommodityTableProps = {
   onPageChange: (page: number) => void;
   onEditCommodity?: (commodity: Pick<CommodityItem, "id">) => void;
   onViewSrpHistory?: (row: CommodityRow) => void;
+  categoryFilter?: CategoryFilterControl;
+  srpEdit?: SrpEditControl;
 };
 
 export default function CommodityTable({
@@ -49,8 +85,14 @@ export default function CommodityTable({
   onPageChange,
   onEditCommodity,
   onViewSrpHistory,
+  categoryFilter,
+  srpEdit,
 }: CommodityTableProps) {
   const showActions = Boolean(onEditCommodity || onViewSrpHistory);
+  // While SRPs are being edited, filters and paging are locked (`inert`) so
+  // the visible rows — and the drafts typed into them — cannot change under
+  // the officer. Save or Cancel unlocks them.
+  const isEditingSrp = Boolean(srpEdit?.isEditing);
   const columnCount = showActions ? 6 : 5;
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -61,26 +103,106 @@ export default function CommodityTable({
 
   return (
     <div className="flex min-h-105 flex-1 flex-col rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow md:p-8">
-      <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+      <div className="mb-6 flex flex-col items-start justify-between gap-4 md:flex-row md:items-start">
         <div>
           <h4 className="font-sans text-h3-desktop text-on-surface">Commodity with SRP</h4>
           <p className="text-body-sm text-on-surface-variant">
             Active market listings and monitoring status
           </p>
         </div>
+
+        {srpEdit ? (
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-start md:w-auto">
+            <div className="sm:w-44">
+              <label
+                htmlFor="srp-effective-date"
+                className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-outline"
+              >
+                Effective Date
+              </label>
+              <Input
+                id="srp-effective-date"
+                type="date"
+                max={srpEdit.maxEffectiveDate}
+                value={srpEdit.effectiveDate}
+                disabled={!srpEdit.isEditing || srpEdit.isSaving}
+                hasError={Boolean(srpEdit.effectiveDateError)}
+                onChange={(event) => srpEdit.onEffectiveDateChange(event.target.value)}
+                className="disabled:cursor-not-allowed disabled:opacity-60"
+              />
+              <FieldError message={srpEdit.effectiveDateError ?? undefined} />
+            </div>
+            {/* sm:mt-6 drops the buttons past the date label so they line up with the field. */}
+            <div className="flex gap-2 sm:mt-6">
+              {srpEdit.isEditing ? (
+                <>
+                  <Button
+                    variant="secondary"
+                    onClick={srpEdit.onCancel}
+                    disabled={srpEdit.isSaving}
+                    className="flex-1 sm:flex-none"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={srpEdit.onSave}
+                    loading={srpEdit.isSaving}
+                    className="flex-1 sm:flex-none"
+                  >
+                    <MdSave size={18} />
+                    {srpEdit.isSaving
+                      ? "Saving..."
+                      : srpEdit.changedCount > 0
+                        ? `Save (${srpEdit.changedCount})`
+                        : "Save"}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  onClick={srpEdit.onStart}
+                  disabled={isLoading || Boolean(error) || commodityRows.length === 0}
+                  className="w-full sm:w-auto"
+                >
+                  <MdEdit size={18} />
+                  Edit SRP
+                </Button>
+              )}
+            </div>
+          </div>
+        ) : null}
       </div>
 
-      <div className="mb-4 rounded-xl border border-outline-variant bg-surface-container-low p-4">
-        <div className="relative w-full">
-          <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />
-          <input
-            className="w-full rounded-xl border border-outline-variant bg-surface py-2.5 pl-10 pr-4 text-body-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
-            placeholder="Filter by commodity name, category, or status..."
-            aria-label="Search commodities"
-            type="text"
-            value={searchTerm}
-            onChange={(event) => onSearchTermChange(event.target.value)}
-          />
+      <div
+        className={`mb-4 rounded-xl border border-outline-variant bg-surface-container-low p-4 ${isEditingSrp ? "opacity-60" : ""}`}
+        inert={isEditingSrp}
+      >
+        <div className="flex flex-col gap-3 md:flex-row">
+          <div className="relative w-full md:flex-1">
+            <MdSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" size={20} />
+            <input
+              className="w-full rounded-xl border border-outline-variant bg-surface py-3 pl-10 pr-4 text-body-sm outline-none transition-all focus:border-primary focus:ring-2 focus:ring-primary/20"
+              placeholder="Filter by commodity name, category, or status..."
+              aria-label="Search commodities"
+              type="text"
+              value={searchTerm}
+              onChange={(event) => onSearchTermChange(event.target.value)}
+            />
+          </div>
+          {categoryFilter ? (
+            <div className="w-full md:w-64 md:shrink-0">
+              <SearchableSelect
+                value={categoryFilter.value}
+                onChange={categoryFilter.onChange}
+                options={categoryFilter.options}
+                placeholder="All categories"
+                searchPlaceholder="Search category"
+                emptyLabel="No categories found."
+                clearLabel="All categories"
+                isLoading={categoryFilter.isLoading}
+                aria-label="Filter by category"
+              />
+            </div>
+          ) : null}
         </div>
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -104,17 +226,20 @@ export default function CommodityTable({
         </div>
       </div>
 
-      <div className="overflow-x-auto">
+      {/* `relative` keeps the Actions column's absolutely-positioned sr-only
+          labels inside the scroller; without it they escape and widen the page
+          once the SRP inputs make the table wider than a phone screen. */}
+      <div className="relative overflow-x-auto">
         <table className="min-w-full text-left">
           <thead>
             <tr className="border-b border-outline-variant/30">
-              <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">Commodity</th>
-              <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">Category</th>
-              <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">Status</th>
-              <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">SRP (PHP)</th>
-              <th className="pb-4 text-[10px] font-semibold uppercase tracking-wide text-outline">Effective Date</th>
+              <th className="whitespace-nowrap px-3 pb-4 first:pl-0 last:pr-0 text-[10px] font-semibold uppercase tracking-wide text-outline">Commodity</th>
+              <th className="whitespace-nowrap px-3 pb-4 first:pl-0 last:pr-0 text-[10px] font-semibold uppercase tracking-wide text-outline">Category</th>
+              <th className="whitespace-nowrap px-3 pb-4 first:pl-0 last:pr-0 text-[10px] font-semibold uppercase tracking-wide text-outline">Status</th>
+              <th className="whitespace-nowrap px-3 pb-4 first:pl-0 last:pr-0 text-[10px] font-semibold uppercase tracking-wide text-outline">SRP (PHP)</th>
+              <th className="whitespace-nowrap px-3 pb-4 first:pl-0 last:pr-0 text-[10px] font-semibold uppercase tracking-wide text-outline">Effective Date</th>
               {showActions ? (
-                <th className="pb-4 text-right text-[10px] font-semibold uppercase tracking-wide text-outline">Actions</th>
+                <th className="whitespace-nowrap px-3 pb-4 first:pl-0 last:pr-0 text-right text-[10px] font-semibold uppercase tracking-wide text-outline">Actions</th>
               ) : null}
             </tr>
           </thead>
@@ -122,26 +247,26 @@ export default function CommodityTable({
             {isLoading ? (
               Array.from({ length: 5 }, (_, index) => index).map((row) => (
                 <tr key={row}>
-                  <td className="py-4">
+                  <td className="px-3 py-4 first:pl-0 last:pr-0">
                     <div className="flex items-center gap-3">
                       <Skeleton className="h-9 w-9 rounded-lg" />
                       <Skeleton className="h-4 w-32" />
                     </div>
                   </td>
-                  <td className="py-4">
+                  <td className="px-3 py-4 first:pl-0 last:pr-0">
                     <Skeleton className="h-4 w-20" />
                   </td>
-                  <td className="py-4">
+                  <td className="px-3 py-4 first:pl-0 last:pr-0">
                     <Skeleton className="h-5 w-16 rounded-full" />
                   </td>
-                  <td className="py-4">
+                  <td className="px-3 py-4 first:pl-0 last:pr-0">
                     <Skeleton className="h-4 w-16" />
                   </td>
-                  <td className="py-4">
+                  <td className="px-3 py-4 first:pl-0 last:pr-0">
                     <Skeleton className="h-4 w-20" />
                   </td>
                   {showActions ? (
-                    <td className="py-4 text-right">
+                    <td className="px-3 py-4 first:pl-0 last:pr-0 text-right">
                       <Skeleton className="ml-auto h-8 w-8 rounded-lg" />
                     </td>
                   ) : null}
@@ -165,10 +290,14 @@ export default function CommodityTable({
                     key={item.id}
                     // Row click is a mouse shortcut; keyboard users get the explicit
                     // history button in the Actions column instead of a tab stop per row.
-                    onClick={onViewSrpHistory ? () => onViewSrpHistory(item) : undefined}
-                    className={onViewSrpHistory ? "cursor-pointer transition-colors hover:bg-surface-container-low" : undefined}
+                    onClick={onViewSrpHistory && !isEditingSrp ? () => onViewSrpHistory(item) : undefined}
+                    className={
+                      onViewSrpHistory && !isEditingSrp
+                        ? "cursor-pointer transition-colors hover:bg-surface-container-low"
+                        : undefined
+                    }
                   >
-                    <td className="py-4">
+                    <td className="px-3 py-4 first:pl-0 last:pr-0">
                       <div className="flex items-center gap-3">
                         <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${item.iconBg}`}>
                           <Icon size={18} />
@@ -176,8 +305,8 @@ export default function CommodityTable({
                         <span className="font-semibold text-on-surface">{item.name}</span>
                       </div>
                     </td>
-                    <td className="py-4 text-sm text-on-surface-variant">{item.category}</td>
-                    <td className="py-4">
+                    <td className="px-3 py-4 first:pl-0 last:pr-0 text-sm text-on-surface-variant">{item.category}</td>
+                    <td className="whitespace-nowrap px-3 py-4 first:pl-0 last:pr-0">
                       <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${item.statusClass}`}>
                         <span
                           className={`h-1.5 w-1.5 rounded-full ${
@@ -187,41 +316,66 @@ export default function CommodityTable({
                         {item.status}
                       </span>
                     </td>
-                    <td className="py-4 text-sm font-semibold text-primary">{item.srp}</td>
-                    <td className="py-4 text-sm text-on-surface-variant">{item.effectiveDate}</td>
-                    <td className="py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        {onViewSrpHistory ? (
-                          <button
-                            className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary"
-                            type="button"
-                            title="View SRP history"
-                            onClick={(event) => {
-                              event.stopPropagation();
-                              onViewSrpHistory(item);
-                            }}
-                          >
-                            <span className="sr-only">View SRP history for {item.name}</span>
-                            <MdHistory size={18} />
-                          </button>
-                        ) : null}
-                        {onEditCommodity ? (
-                          <button
-                            className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary"
-                            type="button"
-                            title="Edit commodity"
-                            onClick={(event) => {
-                              // Editing must not also open the history pop-up behind the dialog.
-                              event.stopPropagation();
-                              onEditCommodity({ id: item.id });
-                            }}
-                          >
-                            <span className="sr-only">Edit commodity</span>
-                            <MdEdit size={18} />
-                          </button>
-                        ) : null}
-                      </div>
+                    <td className="whitespace-nowrap px-3 py-4 text-sm font-semibold text-primary">
+                      {srpEdit?.isEditing ? (
+                        <div className="w-32">
+                          <Input
+                            type="number"
+                            inputMode="decimal"
+                            step="0.01"
+                            min="0"
+                            value={srpEdit.drafts[item.id] ?? ""}
+                            placeholder="No SRP"
+                            disabled={srpEdit.isSaving}
+                            hasError={Boolean(srpEdit.errors[item.id])}
+                            onChange={(event) => srpEdit.onDraftChange(item.id, event.target.value)}
+                            aria-label={`SRP for ${item.name}`}
+                          />
+                          <FieldError message={srpEdit.errors[item.id]} />
+                        </div>
+                      ) : (
+                        item.srp
+                      )}
                     </td>
+                    <td className="whitespace-nowrap px-3 py-4 first:pl-0 last:pr-0 text-sm text-on-surface-variant">{item.effectiveDate}</td>
+                    {showActions ? (
+                      <td className="px-3 py-4 first:pl-0 last:pr-0 text-right">
+                        <div
+                          className={`flex items-center justify-end gap-2 ${isEditingSrp ? "opacity-40" : ""}`}
+                          inert={isEditingSrp}
+                        >
+                          {onViewSrpHistory ? (
+                            <button
+                              className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary"
+                              type="button"
+                              title="View SRP history"
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onViewSrpHistory(item);
+                              }}
+                            >
+                              <span className="sr-only">View SRP history for {item.name}</span>
+                              <MdHistory size={18} />
+                            </button>
+                          ) : null}
+                          {onEditCommodity ? (
+                            <button
+                              className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary"
+                              type="button"
+                              title="Edit commodity"
+                              onClick={(event) => {
+                                // Editing must not also open the history pop-up behind the dialog.
+                                event.stopPropagation();
+                                onEditCommodity({ id: item.id });
+                              }}
+                            >
+                              <span className="sr-only">Edit commodity</span>
+                              <MdEdit size={18} />
+                            </button>
+                          ) : null}
+                        </div>
+                      </td>
+                    ) : null}
                   </tr>
                 );
               })
@@ -234,7 +388,9 @@ export default function CommodityTable({
         <p className="text-body-sm text-on-surface-variant">
           Showing {total === 0 ? 0 : `${startIndex}-${endIndex}`} of {total} commodities
         </p>
-        <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={onPageChange} />
+        <div className={isEditingSrp ? "opacity-60" : undefined} inert={isEditingSrp}>
+          <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={onPageChange} />
+        </div>
       </div>
     </div>
   );
