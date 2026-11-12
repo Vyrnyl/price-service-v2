@@ -5,20 +5,28 @@ import type { CommodityOption, StoreOption } from "../types/price-record.types";
 
 interface PriceRecordFiltersProps {
   storeFilter: string;
+  /** Category id, or "" for all categories. */
+  categoryFilter: string;
   commodityFilter: string;
   onStoreChange: (value: string) => void;
+  onCategoryChange: (value: string) => void;
   onCommodityChange: (value: string) => void;
   stores: StoreOption[];
+  categoryOptions: { value: string; label: string }[];
+  /** Already narrowed to the selected category by the caller. */
   commodities: CommodityOption[];
   commodityOptionsLoading?: boolean;
 }
 
 export default function PriceRecordFilters({
   storeFilter,
+  categoryFilter,
   commodityFilter,
   onStoreChange,
+  onCategoryChange,
   onCommodityChange,
   stores,
+  categoryOptions,
   commodities,
   commodityOptionsLoading = false,
 }: PriceRecordFiltersProps) {
@@ -41,6 +49,23 @@ export default function PriceRecordFilters({
                 </option>
               ))}
             </Select>
+          </FormGroup>
+        </div>
+
+        <div className="w-full max-w-80">
+          <FormGroup label="Category" htmlFor="price-record-category-filter">
+            <SearchableSelect
+              id="price-record-category-filter"
+              value={categoryFilter}
+              onChange={onCategoryChange}
+              options={categoryOptions}
+              placeholder="All categories"
+              searchPlaceholder="Search category"
+              emptyLabel="No categories found."
+              clearLabel="All categories"
+              isLoading={commodityOptionsLoading}
+              aria-label="Filter by category"
+            />
           </FormGroup>
         </div>
 

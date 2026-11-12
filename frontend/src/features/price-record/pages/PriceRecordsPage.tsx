@@ -161,6 +161,8 @@ export default function PriceRecordsPage({
 }) {
   const [storeFilter, setStoreFilter] = useState("");
   const [commodityFilter, setCommodityFilter] = useState("");
+  /** "" = all categories. Narrows the records and the Commodity filter's options. */
+  const [categoryFilter, setCategoryFilter] = useState("");
   const [stores, setStores] = useState<StoreOption[]>([]);
   const [commodities, setCommodities] = useState<CommodityOption[]>([]);
   const [optionsLoading, setOptionsLoading] = useState(true);
@@ -186,7 +188,7 @@ export default function PriceRecordsPage({
   const [bulkSaving, setBulkSaving] = useState(false);
   const { showToast } = useToast();
 
-  const bulkCategoryOptions = useMemo(() => {
+  const categoryOptions = useMemo(() => {
     const byId = new Map<string, string>();
     for (const commodity of commodities) {
       if (commodity.category) byId.set(commodity.category.id, commodity.category.name);
@@ -247,6 +249,7 @@ export default function PriceRecordsPage({
       const params = new URLSearchParams({ page: String(page), pageSize: String(PAGE_SIZE) });
       if (storeFilter) params.set("storeId", storeFilter);
       if (commodityFilter) params.set("commodityId", commodityFilter);
+      if (categoryFilter) params.set("categoryId", categoryFilter);
 
       const response = await apiFetch<PaginatedResponse<BackendPriceRecord>>(
         `/api/price-records?${params.toString()}`,
@@ -267,7 +270,7 @@ export default function PriceRecordsPage({
     }
     void run();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentPage, storeFilter, commodityFilter]);
+  }, [currentPage, storeFilter, commodityFilter, categoryFilter]);
 
   const records = useMemo(
     () => rawRecords.map((record) => mapBackendPriceRecord(record, commodities)),
@@ -504,9 +507,23 @@ export default function PriceRecordsPage({
           <div className="relative">
             <PriceRecordFilters
               storeFilter={storeFilter}
+              categoryFilter={categoryFilter}
               commodityFilter={commodityFilter}
               onStoreChange={(value) => {
                 setStoreFilter(value);
+                setCurrentPage(1);
+              }}
+              onCategoryChange={(value) => {
+                setCategoryFilter(value);
+                // A commodity outside the new category would leave the list
+                // empty for no visible reason, so that selection is cleared.
+                if (
+                  value &&
+                  commodityFilter &&
+                  commodities.find((commodity) => commodity.id === commodityFilter)?.category?.id !== value
+                ) {
+                  setCommodityFilter("");
+                }
                 setCurrentPage(1);
               }}
               onCommodityChange={(value) => {
@@ -514,7 +531,12 @@ export default function PriceRecordsPage({
                 setCurrentPage(1);
               }}
               stores={stores}
-              commodities={commodities}
+              categoryOptions={categoryOptions}
+              commodities={
+                categoryFilter
+                  ? commodities.filter((commodity) => commodity.category?.id === categoryFilter)
+                  : commodities
+              }
               commodityOptionsLoading={optionsLoading}
             />
           </div>
@@ -537,7 +559,7 @@ export default function PriceRecordsPage({
                 <PriceRecordBulkForm
                   stores={stores}
                   rows={bulkRows}
-                  categoryOptions={bulkCategoryOptions}
+                  categoryOptions={categoryOptions}
                   optionsLoading={optionsLoading}
                   storeId={bulkStoreId}
                   categoryId={bulkCategoryId}

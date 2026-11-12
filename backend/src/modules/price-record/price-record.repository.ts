@@ -61,13 +61,14 @@ export const priceRecordRepository = {
 
   findAll: async (authUser: AuthUser | undefined, query: ListPriceRecordsQuery) => {
     const scope = resolvePriceRecordScope(authUser);
-    const { page, pageSize, search, storeId, commodityId, status } = query;
+    const { page, pageSize, search, storeId, commodityId, categoryId, status } = query;
     const { skip, take } = toSkipTake({ page, pageSize });
 
     const where: Prisma.PriceRecordWhereInput = {
       ...scope,
       ...(storeId ? { storeId } : {}),
       ...(commodityId ? { commodityId } : {}),
+      ...(categoryId ? { commodity: { categoryId } } : {}),
       ...(status ? { status } : {}),
       ...(search
         ? {

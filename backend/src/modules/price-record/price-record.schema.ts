@@ -22,6 +22,8 @@ export const listPriceRecordsQuerySchema = paginationQuerySchema.extend({
   search: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
   storeId: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
   commodityId: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
+  // Records whose commodity is in this category (Price Records' category filter).
+  categoryId: z.preprocess(emptyToUndefined, z.string().uuid().optional()),
   status: z.preprocess(emptyToUndefined, priceStatusEnum.optional()),
 });
 
