@@ -10,7 +10,9 @@ import {
 import {
   getPublicCommodities,
   getPublicForecastByCommodityId,
+  getPublicPriceHistory,
   type PublicCommodityItem,
+  type PublicCommodityPriceRecord,
 } from "@/features/commodity";
 import PageShell from "@/shared/components/PageShell";
 import { DailyChangesPanel } from "../components/price-analysis/DailyChangesPanel";
@@ -288,6 +290,11 @@ export default function PriceAnalysisPage() {
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isForecastLoading, setIsForecastLoading] = useState(false);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
+  // The selected commodity's full price history, for the range chart only. The
+  // bulk payload above holds just the recent window (it decides current price
+  // and compliance), so 3M/6M/1Y/Custom had nothing older to draw from.
+  const [history, setHistory] = useState<{ commodityId: string; records: PublicCommodityPriceRecord[] } | null>(null);
+  const [historyError, setHistoryError] = useState(false);
   const categoryOptions = uniqueTrimmed(commodities.map((commodity) => commodity.category))
     .sort((a, b) => a.localeCompare(b));
   const commodityOptions = commodityNamesInCategory(commodities, selectedCategory);
@@ -328,10 +335,17 @@ export default function PriceAnalysisPage() {
     ? thirtyDayValues[0]! - thirtyDayValues[thirtyDayValues.length - 1]!
     : null;
 
+  // The range chart reads the full history once it has loaded for this
+  // commodity; until then (or if it fails) it falls back to the recent records.
+  const selectedCommodityId = selectedCommodityData?.id ?? null;
+  const historyReady = history != null && history.commodityId === selectedCommodityId;
+  const isHistoryLoading = selectedCommodityId != null && !historyReady && !historyError;
+  const chartSourceRecords = historyReady ? history.records : allRecords;
+
   const rangeDescriptor = RANGE_DESCRIPTORS[activeRange];
   const recordsInRange = rangeDescriptor.days != null
-    ? filterRecordsWithinRealWindow(allRecords, rangeDescriptor.days)
-    : filterRecordsWithinDateRange(allRecords, customStartDate, customEndDate);
+    ? filterRecordsWithinRealWindow(chartSourceRecords, rangeDescriptor.days)
+    : filterRecordsWithinDateRange(chartSourceRecords, customStartDate, customEndDate);
   const windowedRecords = recordsInRange.map((record) => ({
     price: record.price != null ? Number(record.price) : null,
     dateAndTime: record.dateAndTime,
@@ -429,6 +443,25 @@ export default function PriceAnalysisPage() {
     },
   ];
   
+  useEffect(() => {
+    if (!selectedCommodityId) return;
+    const controller = new AbortController();
+
+    const loadHistory = async () => {
+      setHistoryError(false);
+      try {
+        const data = await getPublicPriceHistory(selectedCommodityId, controller.signal);
+        if (!controller.signal.aborted) setHistory({ commodityId: data.commodityId, records: data.records });
+      } catch {
+        // The chart keeps the recent records it already has; nothing else depends on this.
+        if (!controller.signal.aborted) setHistoryError(true);
+      }
+    };
+
+    void loadHistory();
+    return () => controller.abort();
+  }, [selectedCommodityId]);
+
   useEffect(() => {
     let isMounted = true;
 
@@ -535,6 +568,7 @@ export default function PriceAnalysisPage() {
             rangeOptions={rangeOptions}
             rangeLabels={rangeLabels}
             points={trendPoints}
+            isLoading={isHistoryLoading && trendPoints.length === 0}
             selectedPointIndex={selectedPointIndex}
             customStartDate={customStartDate}
             customEndDate={customEndDate}

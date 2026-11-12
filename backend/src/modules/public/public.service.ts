@@ -282,3 +282,67 @@ export function buildSrpHistoryDto(commodity: RawCommodityWithSrpHistory): Publi
     })),
   };
 }
+
+/** Most price records the Price Trends history endpoint returns for one commodity. */
+export const PRICE_HISTORY_MAX_RECORDS = 5000;
+
+interface RawPriceHistoryRecord {
+  id: string;
+  price: unknown;
+  dateAndTime: Date;
+  status: string;
+  store: { name: string; location: string } | null;
+}
+
+interface RawCommodityWithPriceHistory {
+  id: string;
+  srps: RawSrpHistoryRow[];
+  prices: RawPriceHistoryRecord[];
+}
+
+export interface PublicPriceHistoryDto {
+  commodityId: string;
+  /** Newest first, the same order as `PublicCommodityDto.priceRecords`. */
+  records: PublicPriceRecordDto[];
+  /** True when the commodity has more records than PRICE_HISTORY_MAX_RECORDS (the oldest are left out). */
+  truncated: boolean;
+}
+
+/**
+ * One commodity's full price history for the Price Trends chart. Unlike the
+ * bulk payload — which labels every record with today's SRP — each record is
+ * judged against the SRP that was in force on its own date, so a history that
+ * spans an SRP change reads correctly.
+ */
+export function buildPriceHistoryDto(
+  commodity: RawCommodityWithPriceHistory,
+  maxRecords: number = PRICE_HISTORY_MAX_RECORDS,
+): PublicPriceHistoryDto {
+  const srpRevisions = latestPerEffectiveDate(commodity.srps); // oldest first
+
+  const srpInForceOn = (date: Date): number | null => {
+    let inForce: number | null = null;
+    for (const revision of srpRevisions) {
+      if (revision.effectiveDate.getTime() > date.getTime()) break;
+      inForce = toNumberOrNull(revision.price);
+    }
+    return inForce;
+  };
+
+  const records = commodity.prices.map((record) => {
+    const price = toNumberOrNull(record.price);
+    const srpPrice = srpInForceOn(record.dateAndTime);
+    return {
+      id: record.id,
+      price,
+      dateAndTime: record.dateAndTime,
+      status: record.status,
+      srpPrice,
+      storeName: record.store?.name ?? null,
+      storeLocation: record.store?.location ?? null,
+      complianceStatus: resolveComplianceStatus(price, srpPrice),
+    };
+  });
+
+  return { commodityId: commodity.id, records, truncated: commodity.prices.length >= maxRecords };
+}

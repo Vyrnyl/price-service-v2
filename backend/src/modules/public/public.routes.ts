@@ -6,6 +6,7 @@ const router = Router();
 
 router.get('/commodities', asyncHandler(publicController.getPublicCommodities));
 router.get('/commodities/:id/srp-history', asyncHandler(publicController.getPublicSrpHistory));
+router.get('/commodities/:id/price-history', asyncHandler(publicController.getPublicPriceHistory));
 router.get('/stats', asyncHandler(publicController.getPublicStats));
 router.get('/forecasts/:commodityId', asyncHandler(publicController.getPublicForecastByCommodityId));
 

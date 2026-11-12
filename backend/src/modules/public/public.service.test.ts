@@ -7,6 +7,7 @@ import {
   computePriceRange,
   buildPublicCommodityDto,
   buildSrpHistoryDto,
+  buildPriceHistoryDto,
 } from './public.service';
 
 test('resolveComplianceStatus: price above SRP', () => {
@@ -209,4 +210,46 @@ test('buildSrpHistoryDto: a commodity with no SRP returns an empty history', () 
   const dto = buildSrpHistoryDto({ ...srpHistoryCommodity, srps: [] });
 
   assert.deepEqual(dto.entries, []);
+});
+
+test('buildPriceHistoryDto: each record is judged against the SRP in force on its own date', () => {
+  const dto = buildPriceHistoryDto({
+    id: 'commodity-1',
+    srps: [
+      { id: 's1', price: '10', effectiveDate: new Date('2025-01-01T00:00:00Z'), createdAt: new Date('2025-01-01T00:00:00Z') },
+      { id: 's2', price: '12', effectiveDate: new Date('2025-07-01T00:00:00Z'), createdAt: new Date('2025-07-01T00:00:00Z') },
+    ],
+    prices: [
+      { id: 'r2', price: '11', dateAndTime: new Date('2025-08-15T01:00:00Z'), status: 'UNDERPRICE', store: { name: 'A', location: 'Virac' } },
+      { id: 'r1', price: '11', dateAndTime: new Date('2025-03-15T01:00:00Z'), status: 'OVERPRICE', store: null },
+    ],
+  });
+
+  assert.equal(dto.commodityId, 'commodity-1');
+  assert.deepEqual(dto.records.map((r) => [r.id, r.srpPrice, r.complianceStatus]), [
+    ['r2', 12, 'Below SRP'],
+    ['r1', 10, 'Above SRP'],
+  ]);
+  assert.equal(dto.records[0]?.storeName, 'A');
+  assert.equal(dto.records[1]?.storeName, null);
+  assert.equal(dto.truncated, false);
+});
+
+test('buildPriceHistoryDto: a record before the first SRP has no SRP and reads Unknown', () => {
+  const dto = buildPriceHistoryDto({
+    id: 'commodity-1',
+    srps: [{ id: 's1', price: '10', effectiveDate: new Date('2025-06-01T00:00:00Z'), createdAt: new Date('2025-06-01T00:00:00Z') }],
+    prices: [{ id: 'r1', price: '9', dateAndTime: new Date('2025-01-15T01:00:00Z'), status: 'COMPLIANT', store: null }],
+  });
+
+  assert.equal(dto.records[0]?.srpPrice, null);
+  assert.equal(dto.records[0]?.complianceStatus, 'Unknown');
+});
+
+test('buildPriceHistoryDto: flags a history that hit the record cap', () => {
+  const prices = [1, 2, 3].map((n) => ({
+    id: `r${n}`, price: '5', dateAndTime: new Date(`2025-0${n}-15T01:00:00Z`), status: 'COMPLIANT', store: null,
+  }));
+  assert.equal(buildPriceHistoryDto({ id: 'c', srps: [], prices }, 3).truncated, true);
+  assert.equal(buildPriceHistoryDto({ id: 'c', srps: [], prices }, 4).truncated, false);
 });

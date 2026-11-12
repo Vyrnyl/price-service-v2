@@ -150,6 +150,27 @@ export async function getPublicSrpHistory(commodityId: string) {
   return response.data;
 }
 
+export interface PublicPriceHistory {
+  commodityId: string;
+  /** Newest first. Each record carries the SRP in force on its own date. */
+  records: PublicCommodityPriceRecord[];
+  truncated: boolean;
+}
+
+/** One commodity's full price history — the Price Trends chart's data. */
+export async function getPublicPriceHistory(commodityId: string, signal?: AbortSignal) {
+  const response = await apiFetch<{ status: string; data: PublicPriceHistory }>(
+    `/api/public/commodities/${encodeURIComponent(commodityId)}/price-history`,
+    {
+      method: 'GET',
+      credentials: 'omit',
+      signal,
+    },
+  );
+
+  return response.data;
+}
+
 export async function getPublicStats() {
   const response = await apiFetch<{ status: string; data: PublicStats }>('/api/public/stats', {
     method: 'GET',

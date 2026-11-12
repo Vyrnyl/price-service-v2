@@ -38,6 +38,8 @@ type PriceTrendPanelProps = {
   rangeOptions: readonly PriceRange[];
   rangeLabels: Record<PriceRange, string>;
   points: TrendPoint[];
+  /** The price history is still loading — say so instead of "No price records". */
+  isLoading?: boolean;
   selectedPointIndex: number | null;
   customStartDate: string;
   customEndDate: string;
@@ -89,6 +91,7 @@ export function PriceTrendPanel({
   rangeOptions,
   rangeLabels,
   points,
+  isLoading = false,
   selectedPointIndex,
   customStartDate,
   customEndDate,
@@ -312,7 +315,7 @@ export function PriceTrendPanel({
           {points.length === 0 ? (
             <div className="absolute inset-0 flex items-center justify-center">
               <p className="rounded-xl border border-outline-variant/70 bg-surface-container-lowest px-4 py-2 text-sm text-on-surface-variant shadow-sm">
-                No price records in this range.
+                {isLoading ? "Loading price history..." : "No price records in this range."}
               </p>
             </div>
           ) : (

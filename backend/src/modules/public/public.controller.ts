@@ -4,6 +4,8 @@ import { forecastService } from '../forecast';
 import { publicRepository } from './public.repository';
 import { publicCommodityIdParamSchema } from './public.schema';
 import {
+  PRICE_HISTORY_MAX_RECORDS,
+  buildPriceHistoryDto,
   buildPublicCommoditiesPayload,
   buildPublicStatsDto,
   buildSrpHistoryDto,
@@ -44,6 +46,17 @@ export const publicController = {
     }
 
     res.json({ status: 'success', data: buildSrpHistoryDto(commodity) });
+  },
+
+  getPublicPriceHistory: async (req: Request, res: Response) => {
+    const { id } = publicCommodityIdParamSchema.parse(req.params);
+    const commodity = await publicRepository.findCommodityPriceHistory(id, PRICE_HISTORY_MAX_RECORDS);
+
+    if (!commodity) {
+      throw new AppError('Commodity not found', 404);
+    }
+
+    res.json({ status: 'success', data: buildPriceHistoryDto(commodity) });
   },
 
   getPublicStats: async (_req: Request, res: Response) => {

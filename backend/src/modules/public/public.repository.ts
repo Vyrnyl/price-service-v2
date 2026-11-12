@@ -48,6 +48,39 @@ export const publicRepository = {
     },
   }),
 
+  // One commodity's full price history for the Price Trends chart. The bulk
+  // `findCommoditiesForPublic` payload keeps its recent window (it decides
+  // current price and compliance); the chart's 3M/6M/1Y/Custom ranges need
+  // more than that. Capped so a commodity monitored for years cannot return an
+  // unbounded payload.
+  findCommodityPriceHistory: (id: string, take: number) => prisma.commodity.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      srps: {
+        orderBy: [
+          { effectiveDate: 'asc' },
+          { createdAt: 'asc' },
+        ],
+        select: { id: true, price: true, effectiveDate: true, createdAt: true },
+      },
+      prices: {
+        orderBy: [
+          { dateAndTime: 'desc' },
+          { createdAt: 'desc' },
+        ],
+        take,
+        select: {
+          id: true,
+          price: true,
+          dateAndTime: true,
+          status: true,
+          store: { select: { name: true, location: true } },
+        },
+      },
+    },
+  }),
+
   countMonitoredStores: () => prisma.store.count(),
 
   countPriceUpdatesSince: (cutoff: Date) => prisma.priceRecord.count({
