@@ -8,6 +8,7 @@ import {
   buildPublicCommodityDto,
   buildSrpHistoryDto,
   buildPriceHistoryDto,
+  buildPublicCommoditiesPayload,
 } from './public.service';
 
 test('resolveComplianceStatus: price above SRP', () => {
@@ -109,7 +110,7 @@ test('buildPublicCommodityDto: one compliant store and one overpricing store rea
   assert.equal(dto.srpPrice, 50);
   assert.equal(dto.currentPrice, 50);
   assert.equal(dto.complianceStatus, 'Above SRP');
-  assert.equal(dto.lastUpdatedAt.getTime(), commodity.prices[0]!.dateAndTime.getTime());
+  assert.equal(dto.lastUpdatedAt?.getTime(), commodity.prices[0]!.dateAndTime.getTime());
   assert.equal(dto.storeName, 'Store B');
   assert.deepEqual(dto.priceRange, { min: 40, max: 60, minStoreName: null, maxStoreName: 'Store B' });
   assert.equal(dto.perStorePrices.length, 2);
@@ -158,7 +159,8 @@ test('buildPublicCommodityDto handles a commodity with no price history yet', ()
   assert.equal(dto.currentPrice, null);
   assert.equal(dto.srpPrice, null);
   assert.equal(dto.complianceStatus, 'Unknown');
-  assert.equal(dto.lastUpdatedAt.getTime(), commodity.createdAt.getTime());
+  // No price recorded yet: no date, rather than the commodity's creation date posing as an update.
+  assert.equal(dto.lastUpdatedAt, null);
   assert.equal(dto.storeName, null);
   assert.equal(dto.priceRange, null);
   assert.equal(dto.perStorePrices.length, 0);
@@ -252,4 +254,41 @@ test('buildPriceHistoryDto: flags a history that hit the record cap', () => {
   }));
   assert.equal(buildPriceHistoryDto({ id: 'c', srps: [], prices }, 3).truncated, true);
   assert.equal(buildPriceHistoryDto({ id: 'c', srps: [], prices }, 4).truncated, false);
+});
+
+test('buildPublicCommodityDto: current price is the average of each store\'s latest price, however old', () => {
+  const commodity = {
+    id: 'c-old',
+    name: 'Vinegar 350ml',
+    category: { name: 'Vinegar' },
+    status: 'Active',
+    createdAt: new Date('2026-11-12T00:00:00Z'),
+    srps: [{ price: '12', effectiveDate: new Date('2025-01-01'), createdAt: new Date('2025-01-01') }],
+    prices: [], // nothing in the recent window
+  };
+  const latest = [
+    { commodityId: 'c-old', storeId: 'a', price: '12.5', dateAndTime: new Date('2025-11-15T01:00:00Z'), storeName: 'ARDCIMART', storeLocation: 'Virac' },
+    { commodityId: 'c-old', storeId: 'b', price: '13', dateAndTime: new Date('2025-12-15T01:00:00Z'), storeName: 'ACC HYPERMART', storeLocation: 'Virac' },
+  ];
+
+  const dto = buildPublicCommodityDto(commodity, latest);
+
+  assert.equal(dto.currentPrice, 12.75);
+  assert.deepEqual(dto.priceRange, { min: 12.5, max: 13, minStoreName: 'ARDCIMART', maxStoreName: 'ACC HYPERMART' });
+  assert.equal(dto.complianceStatus, 'Above SRP');
+  assert.equal(dto.lastUpdatedAt?.toISOString(), '2025-12-15T01:00:00.000Z'); // the newest of the store prices
+  assert.equal(dto.storeName, 'ACC HYPERMART');
+  assert.equal(dto.priceRecords.length, 0); // the record list keeps the recent window
+});
+
+test('buildPublicCommoditiesPayload: latest store prices are matched to their own commodity', () => {
+  const base = { category: { name: 'X' }, status: 'Active', createdAt: new Date('2026-01-01'), srps: [], prices: [] };
+  const payload = buildPublicCommoditiesPayload(
+    [{ ...base, id: 'c1', name: 'One' }, { ...base, id: 'c2', name: 'Two' }],
+    [{ commodityId: 'c2', storeId: 's', price: '5', dateAndTime: new Date('2025-06-15'), storeName: 'S', storeLocation: 'L' }],
+  );
+
+  assert.equal(payload[0]?.currentPrice, null);
+  assert.equal(payload[0]?.lastUpdatedAt, null);
+  assert.equal(payload[1]?.currentPrice, 5);
 });

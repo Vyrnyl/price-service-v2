@@ -60,18 +60,21 @@ function formatPriceRange(range: PublicPriceRange | null, fallback: number | nul
 }
 
 function formatLastUpdated(value: string | null) {
+  // No date = no price has been recorded for this item yet.
   if (!value) {
-    return "Recently updated";
+    return "No price yet";
   }
 
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) {
-    return "Recently updated";
+    return "No price yet";
   }
 
+  // The year matters: the latest price can be months old.
   return new Intl.DateTimeFormat("en-PH", {
     month: "short",
     day: "numeric",
+    year: "numeric",
     hour: "numeric",
     minute: "2-digit",
   }).format(date);

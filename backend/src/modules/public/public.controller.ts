@@ -31,8 +31,11 @@ export const publicController = {
   },
 
   getPublicCommodities: async (_req: Request, res: Response) => {
-    const commodities = await publicRepository.findCommoditiesForPublic(resolveHistoryWindowStart());
-    const payload = buildPublicCommoditiesPayload(commodities);
+    const [commodities, latestStorePrices] = await Promise.all([
+      publicRepository.findCommoditiesForPublic(resolveHistoryWindowStart()),
+      publicRepository.findLatestPricePerStore(),
+    ]);
+    const payload = buildPublicCommoditiesPayload(commodities, latestStorePrices);
 
     res.json({ status: 'success', data: payload });
   },

@@ -1,4 +1,5 @@
 import { prisma } from '../../prisma';
+import type { LatestStorePriceRow } from './public.service';
 
 export const publicRepository = {
   findCommoditiesForPublic: (windowStart: Date) => prisma.commodity.findMany({
@@ -80,6 +81,20 @@ export const publicRepository = {
       },
     },
   }),
+
+  // Each store's newest price for every commodity, however old — what "Current
+  // price", the price range and compliance are built from. One row per
+  // commodity × store (DISTINCT ON keeps the first row of each group under the
+  // ORDER BY), so this stays ~commodities × stores rows however long the
+  // history grows. Ties on dateAndTime go to the record saved last.
+  findLatestPricePerStore: () => prisma.$queryRaw<LatestStorePriceRow[]>`
+    SELECT DISTINCT ON (pr."commodityId", pr."storeId")
+      pr."commodityId", pr."storeId", pr."price", pr."dateAndTime",
+      s."name" AS "storeName", s."location" AS "storeLocation"
+    FROM "PriceRecord" pr
+    LEFT JOIN "Store" s ON s."id" = pr."storeId"
+    ORDER BY pr."commodityId", pr."storeId", pr."dateAndTime" DESC, pr."createdAt" DESC
+  `,
 
   countMonitoredStores: () => prisma.store.count(),
 

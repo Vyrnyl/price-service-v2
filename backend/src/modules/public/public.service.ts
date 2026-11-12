@@ -66,7 +66,8 @@ export interface PublicCommodityDto {
   currentPrice: number | null;
   srpPrice: number | null;
   complianceStatus: ComplianceStatus;
-  lastUpdatedAt: Date;
+  /** Date of the newest of the per-store prices behind currentPrice; null = no price recorded yet. */
+  lastUpdatedAt: Date | null;
   storeName: string | null;
   storeLocation: string | null;
   priceRange: PublicPriceRangeDto | null;
@@ -128,7 +129,9 @@ export function resolveComplianceStatusFromRange(
  * Records with no attributed store each count as their own entry rather than being merged,
  * since two null-store records can't be assumed to be the same store.
  */
-export function buildPerStorePrices(prices: RawPriceRecord[]): PublicStorePriceDto[] {
+export function buildPerStorePrices(
+  prices: Array<Pick<RawPriceRecord, 'price' | 'dateAndTime' | 'storeId' | 'store'>>,
+): PublicStorePriceDto[] {
   const seenStoreIds = new Set<string>();
   const result: PublicStorePriceDto[] = [];
   let unknownStoreIndex = 0;
@@ -180,12 +183,42 @@ export function computePriceRange(storePrices: PublicStorePriceDto[]): PublicPri
   };
 }
 
-export function buildPublicCommodityDto(commodity: RawCommodity): PublicCommodityDto {
+/** One row per commodity × store: that store's newest price, however old (see findLatestPricePerStore). */
+export interface LatestStorePriceRow {
+  commodityId: string;
+  storeId: string | null;
+  price: unknown;
+  dateAndTime: Date;
+  storeName: string | null;
+  storeLocation: string | null;
+}
+
+/**
+ * `latestStorePrices`, when given, decides current price, range, compliance
+ * and lastUpdatedAt: each store's newest price of any age, so an item last
+ * monitored months ago still shows its latest prices (dated) instead of
+ * nothing. Without it, the newest price per store in `commodity.prices` is
+ * used. `priceRecords` always comes from `commodity.prices` (the recent window).
+ */
+export function buildPublicCommodityDto(
+  commodity: RawCommodity,
+  latestStorePrices?: LatestStorePriceRow[],
+): PublicCommodityDto {
   const latestSrp = commodity.srps[0];
-  const latestPriceRecord = commodity.prices[0];
   const srpPrice = toNumberOrNull(latestSrp?.price);
 
-  const perStorePrices = buildPerStorePrices(commodity.prices);
+  const perStoreSource = latestStorePrices
+    ? [...latestStorePrices]
+        .sort((a, b) => b.dateAndTime.getTime() - a.dateAndTime.getTime())
+        .map((row) => ({
+          price: row.price,
+          dateAndTime: row.dateAndTime,
+          storeId: row.storeId,
+          store: row.storeName != null ? { name: row.storeName, location: row.storeLocation ?? '' } : null,
+        }))
+    : commodity.prices;
+  const perStorePrices = buildPerStorePrices(perStoreSource);
+  const newestStorePrice = perStorePrices[0];
   const priceRange = computePriceRange(perStorePrices);
   const currentPrice = perStorePrices.length > 0
     ? perStorePrices.reduce((sum, entry) => sum + entry.price, 0) / perStorePrices.length
@@ -216,17 +249,28 @@ export function buildPublicCommodityDto(commodity: RawCommodity): PublicCommodit
     currentPrice,
     srpPrice,
     complianceStatus,
-    lastUpdatedAt: latestPriceRecord?.dateAndTime ?? commodity.createdAt,
-    storeName: latestPriceRecord?.store?.name ?? null,
-    storeLocation: latestPriceRecord?.store?.location ?? null,
+    lastUpdatedAt: newestStorePrice?.dateAndTime ?? null,
+    storeName: newestStorePrice?.storeName ?? null,
+    storeLocation: newestStorePrice?.storeLocation ?? null,
     priceRange,
     perStorePrices,
     priceRecords,
   };
 }
 
-export function buildPublicCommoditiesPayload(commodities: RawCommodity[]): PublicCommodityDto[] {
-  return commodities.map(buildPublicCommodityDto);
+export function buildPublicCommoditiesPayload(
+  commodities: RawCommodity[],
+  latestStorePrices?: LatestStorePriceRow[],
+): PublicCommodityDto[] {
+  if (!latestStorePrices) return commodities.map((commodity) => buildPublicCommodityDto(commodity));
+
+  const byCommodity = new Map<string, LatestStorePriceRow[]>();
+  for (const row of latestStorePrices) {
+    const rows = byCommodity.get(row.commodityId);
+    if (rows) rows.push(row);
+    else byCommodity.set(row.commodityId, [row]);
+  }
+  return commodities.map((commodity) => buildPublicCommodityDto(commodity, byCommodity.get(commodity.id) ?? []));
 }
 
 export function resolveHistoryWindowStart(now: Date = new Date()): Date {

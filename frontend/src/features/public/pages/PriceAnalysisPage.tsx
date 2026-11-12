@@ -406,13 +406,13 @@ export default function PriceAnalysisPage() {
       title: "Current price",
       value: formatCurrency(selectedCommodityData?.currentPrice),
       detail: selectedCommodityData?.lastUpdatedAt
-        ? `Updated ${new Date(selectedCommodityData.lastUpdatedAt).toLocaleDateString("en-PH", {
+        ? `As of ${new Date(selectedCommodityData.lastUpdatedAt).toLocaleDateString("en-PH", {
             month: "short",
             day: "numeric",
+            year: "numeric",
           })}`
-        : "No recent price data",
-      explanation:
-        "The most recent price a monitoring officer recorded for this item in a store.",
+        : "No price recorded yet",
+      explanation: "Average of each store's latest recorded price.",
       icon: MdMonetizationOn,
       accent: "text-primary",
     },

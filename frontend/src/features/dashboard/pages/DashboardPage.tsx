@@ -37,13 +37,14 @@ function formatCurrency(value: number | null) {
 }
 
 function formatRelativeTime(value: string | null) {
+  // No date = no price has been recorded for this item yet.
   if (!value) {
-    return "Recently updated";
+    return "No price yet";
   }
 
   const updatedAt = new Date(value);
   if (Number.isNaN(updatedAt.getTime())) {
-    return "Recently updated";
+    return "No price yet";
   }
 
   const diffMinutes = Math.max(1, Math.floor((Date.now() - updatedAt.getTime()) / 60000));
