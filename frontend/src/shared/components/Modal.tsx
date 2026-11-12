@@ -96,7 +96,9 @@ export default function Modal({
         aria-labelledby={title ? "modal-title" : undefined}
         aria-describedby={description ? "modal-description" : undefined}
         tabIndex={-1}
-        className={`w-full ${maxWidth} rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow outline-none`}
+        // max-h + overflow: a dialog taller than the screen (e.g. the bulk
+        // price-record form on a phone) scrolls instead of losing its top edge.
+        className={`max-h-[calc(100dvh-2rem)] w-full overflow-y-auto ${maxWidth} rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow outline-none`}
         onClick={(event) => event.stopPropagation()}
       >
         {title ? (
