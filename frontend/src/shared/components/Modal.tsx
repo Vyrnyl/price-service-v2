@@ -85,45 +85,49 @@ export default function Modal({
   if (!open) return null;
 
   return (
+    // The backdrop scrolls, not the dialog: a dialog taller than the screen
+    // (e.g. the bulk price-record form on a phone) keeps its top edge reachable,
+    // and dropdowns inside it (SearchableSelect) are not clipped at its border —
+    // which they were when the dialog itself had overflow-y-auto.
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-inverse-surface/40 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 overflow-y-auto bg-inverse-surface/40 backdrop-blur-sm"
       onClick={onClose}
     >
-      <div
-        ref={dialogRef}
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby={title ? "modal-title" : undefined}
-        aria-describedby={description ? "modal-description" : undefined}
-        tabIndex={-1}
-        // max-h + overflow: a dialog taller than the screen (e.g. the bulk
-        // price-record form on a phone) scrolls instead of losing its top edge.
-        className={`max-h-[calc(100dvh-2rem)] w-full overflow-y-auto ${maxWidth} rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow outline-none`}
-        onClick={(event) => event.stopPropagation()}
-      >
-        {title ? (
-          <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-            <div>
-              <h2 id="modal-title" className="text-h3-desktop font-semibold text-on-surface">
-                {title}
-              </h2>
-              {description ? (
-                <p id="modal-description" className="mt-2 text-body-sm text-on-surface-variant">
-                  {description}
-                </p>
-              ) : null}
+      <div className="flex min-h-full items-center justify-center p-4">
+        <div
+          ref={dialogRef}
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby={title ? "modal-title" : undefined}
+          aria-describedby={description ? "modal-description" : undefined}
+          tabIndex={-1}
+          className={`w-full ${maxWidth} rounded-xl border border-outline-variant bg-surface-container-lowest p-6 data-card-shadow outline-none`}
+          onClick={(event) => event.stopPropagation()}
+        >
+          {title ? (
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 id="modal-title" className="text-h3-desktop font-semibold text-on-surface">
+                  {title}
+                </h2>
+                {description ? (
+                  <p id="modal-description" className="mt-2 text-body-sm text-on-surface-variant">
+                    {description}
+                  </p>
+                ) : null}
+              </div>
+              <button
+                type="button"
+                onClick={onClose}
+                aria-label="Close"
+                className="inline-flex rounded-full bg-surface px-3 py-2 text-on-surface transition hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              >
+                Close
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Close"
-              className="inline-flex rounded-full bg-surface px-3 py-2 text-on-surface transition hover:bg-surface-container-high focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-            >
-              Close
-            </button>
-          </div>
-        ) : null}
-        {children}
+          ) : null}
+          {children}
+        </div>
       </div>
     </div>
   );
