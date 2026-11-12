@@ -10,6 +10,11 @@ import Modal from "@/shared/components/Modal";
 import Pagination from "@/shared/components/Pagination";
 import { SkeletonTableRows } from "@/shared/components/Skeleton";
 import PriceRecordForm from "../components/PriceRecordForm";
+import PriceRecordBulkForm, {
+  type BulkCommodityRow,
+  type PriceRecordBulkErrors,
+} from "../components/PriceRecordBulkForm";
+import { PRICE_RECORD_BULK_ENTRY_ENABLED } from "../price-record-form.config";
 import PriceRecordFilters from "../components/PriceRecordFilters";
 import PriceRecordsTable from "../components/PriceRecordsTable";
 import type {
@@ -171,7 +176,40 @@ export default function PriceRecordsPage({
   const [submitLoading, setSubmitLoading] = useState(false);
   const [newRecord, setNewRecord] = useState<CreatePriceRecordPayload>(createDefaultRecord);
   const [currentPage, setCurrentPage] = useState(1);
+  // Bulk Add form (PRICE_RECORD_BULK_ENTRY_ENABLED). Prices are keyed by
+  // commodity id, so switching category keeps what was already typed.
+  const [bulkStoreId, setBulkStoreId] = useState("");
+  const [bulkCategoryId, setBulkCategoryId] = useState("");
+  const [bulkDateAndTime, setBulkDateAndTime] = useState("");
+  const [bulkPrices, setBulkPrices] = useState<Record<string, string>>({});
+  const [bulkErrors, setBulkErrors] = useState<PriceRecordBulkErrors>({});
+  const [bulkSaving, setBulkSaving] = useState(false);
   const { showToast } = useToast();
+
+  const bulkCategoryOptions = useMemo(() => {
+    const byId = new Map<string, string>();
+    for (const commodity of commodities) {
+      if (commodity.category) byId.set(commodity.category.id, commodity.category.name);
+    }
+    return [...byId]
+      .map(([value, label]) => ({ value, label }))
+      .sort((a, b) => a.label.localeCompare(b.label));
+  }, [commodities]);
+
+  const bulkRows: BulkCommodityRow[] = useMemo(
+    () =>
+      commodities
+        .filter((commodity) => !bulkCategoryId || commodity.category?.id === bulkCategoryId)
+        .map((commodity) => ({
+          id: commodity.id,
+          name: commodity.name,
+          categoryName: commodity.category?.name ?? "",
+          srp: getLatestSrpPrice(commodity),
+        })),
+    [commodities, bulkCategoryId],
+  );
+
+  const bulkEnteredIds = Object.keys(bulkPrices).filter((id) => bulkPrices[id]?.trim());
 
   // Reference data for the form/filter dropdowns — commodities and stores are
   // registry data that can exceed the backend's per-request pagination ceiling,
@@ -262,7 +300,103 @@ export default function PriceRecordsPage({
     setFormError(null);
     setFormErrors({});
     setNewRecord(createDefaultRecord());
+    setBulkStoreId("");
+    setBulkCategoryId("");
+    // Local time, not UTC — the field is a datetime-local.
+    setBulkDateAndTime(formatInputDateTime(new Date().toISOString()));
+    setBulkPrices({});
+    setBulkErrors({});
     setFormOpen(true);
+  };
+
+  const handleBulkPriceChange = (commodityId: string, value: string) => {
+    setBulkPrices((current) => ({ ...current, [commodityId]: value }));
+    setBulkErrors((current) => {
+      if (!current.list && !current.prices?.[commodityId]) return current;
+      const prices = { ...current.prices };
+      delete prices[commodityId];
+      return { ...current, list: undefined, prices };
+    });
+  };
+
+  const handleBulkSave = async () => {
+    setFormError(null);
+    // Same rules as the single-record form and createPriceRecordSchema.
+    const nextErrors: PriceRecordBulkErrors = {};
+    if (!bulkStoreId) nextErrors.storeId = "Please select a store.";
+    if (!bulkDateAndTime) nextErrors.dateAndTime = "Please choose a date and time.";
+    if (bulkEnteredIds.length === 0) nextErrors.list = "Enter a price for at least one commodity.";
+    const priceErrors: Record<string, string> = {};
+    for (const id of bulkEnteredIds) {
+      const price = Number(bulkPrices[id]);
+      if (!Number.isFinite(price) || price <= 0) priceErrors[id] = "Enter a valid price.";
+    }
+    if (Object.keys(priceErrors).length > 0) {
+      nextErrors.prices = priceErrors;
+      // A bad price can sit in a category that is filtered out of view.
+      const hidden = Object.keys(priceErrors).filter((id) => !bulkRows.some((row) => row.id === id));
+      if (hidden.length > 0) nextErrors.list = "Some prices in other categories are invalid. Switch to All categories to see them.";
+    }
+    setBulkErrors(nextErrors);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    // One record per entered commodity through the existing POST /price-records
+    // (same validation, status calculation and ownership as a single entry).
+    // allSettled, not all: one failure must not hide that the others saved.
+    setBulkSaving(true);
+    const entryIds = [...bulkEnteredIds];
+    const dateAndTime = new Date(bulkDateAndTime).toISOString();
+    const results = await Promise.allSettled(
+      entryIds.map((commodityId) =>
+        apiFetch<{ status: string; data: BackendPriceRecord }>("/api/price-records", {
+          method: "POST",
+          body: {
+            commodityId,
+            storeId: bulkStoreId,
+            price: Number(bulkPrices[commodityId]),
+            dateAndTime,
+          },
+        }),
+      ),
+    );
+    const failed: Record<string, string> = {};
+    results.forEach((result, index) => {
+      if (result.status === "rejected") {
+        const reason = result.reason;
+        failed[entryIds[index]!] =
+          reason instanceof Error && reason.message ? reason.message : "Unable to save this price.";
+      }
+    });
+    const failedCount = Object.keys(failed).length;
+    const savedCount = entryIds.length - failedCount;
+
+    if (savedCount > 0) {
+      setCurrentPage(1);
+      await loadRecords(1);
+    }
+    setBulkSaving(false);
+
+    if (failedCount === 0) {
+      showToast(`${savedCount} price record${savedCount === 1 ? "" : "s"} saved.`, "success");
+      handleCloseForm();
+      return;
+    }
+
+    // Keep the form open on what failed: saved prices are cleared so a retry
+    // cannot record them twice.
+    setBulkPrices((current) =>
+      Object.fromEntries(Object.entries(current).filter(([id]) => id in failed)),
+    );
+    setBulkErrors({
+      prices: failed,
+      list: savedCount > 0 ? `${savedCount} saved. The prices below were not — fix and save again.` : undefined,
+    });
+    showToast(
+      savedCount > 0
+        ? `Saved ${savedCount} of ${entryIds.length} price records. ${failedCount} failed.`
+        : "Unable to save the price records.",
+      "error",
+    );
   };
 
   const handleEditRecord = (record: PriceRecord) => {
@@ -393,23 +527,53 @@ export default function PriceRecordsPage({
               description={
                 editingRecord
                   ? "Update the selected commodity price entry from your assigned inspection route."
-                  : "Record a new commodity price entry from your assigned inspection route."
+                  : PRICE_RECORD_BULK_ENTRY_ENABLED
+                    ? "Pick the store and when you checked it, then enter the price of each commodity you found."
+                    : "Record a new commodity price entry from your assigned inspection route."
               }
               maxWidth="max-w-3xl"
             >
-              <PriceRecordForm
-                stores={stores}
-                commodities={commodities}
-                commodityOptionsLoading={optionsLoading}
-                formError={formError}
-                formErrors={formErrors}
-                submitLoading={submitLoading}
-                newRecord={newRecord}
-                mode={editingRecord ? "edit" : "create"}
-                onChange={handleFieldChange}
-                onCancel={handleCloseForm}
-                onSubmit={handleSubmitRecord}
-              />
+              {!editingRecord && PRICE_RECORD_BULK_ENTRY_ENABLED ? (
+                <PriceRecordBulkForm
+                  stores={stores}
+                  rows={bulkRows}
+                  categoryOptions={bulkCategoryOptions}
+                  optionsLoading={optionsLoading}
+                  storeId={bulkStoreId}
+                  categoryId={bulkCategoryId}
+                  dateAndTime={bulkDateAndTime}
+                  prices={bulkPrices}
+                  enteredCount={bulkEnteredIds.length}
+                  errors={bulkErrors}
+                  formError={formError}
+                  isSaving={bulkSaving}
+                  onStoreChange={(value) => {
+                    setBulkStoreId(value);
+                    setBulkErrors((current) => ({ ...current, storeId: undefined }));
+                  }}
+                  onCategoryChange={setBulkCategoryId}
+                  onDateAndTimeChange={(value) => {
+                    setBulkDateAndTime(value);
+                    setBulkErrors((current) => ({ ...current, dateAndTime: undefined }));
+                  }}
+                  onPriceChange={handleBulkPriceChange}
+                  onSave={() => void handleBulkSave()}
+                />
+              ) : (
+                <PriceRecordForm
+                  stores={stores}
+                  commodities={commodities}
+                  commodityOptionsLoading={optionsLoading}
+                  formError={formError}
+                  formErrors={formErrors}
+                  submitLoading={submitLoading}
+                  newRecord={newRecord}
+                  mode={editingRecord ? "edit" : "create"}
+                  onChange={handleFieldChange}
+                  onCancel={handleCloseForm}
+                  onSubmit={handleSubmitRecord}
+                />
+              )}
             </Modal>
           ) : null}
 

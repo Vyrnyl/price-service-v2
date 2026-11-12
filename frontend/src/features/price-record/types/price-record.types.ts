@@ -26,6 +26,8 @@ export interface StoreOption {
 export interface CommodityOption {
   id: string;
   name: string;
+  /** Present on GET /commodities; the bulk Add form groups by it. */
+  category?: { id: string; name: string };
   srps?: Array<{ id: string; price: string; effectiveDate: string }>;
 }
 
