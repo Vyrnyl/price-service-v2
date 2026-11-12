@@ -245,6 +245,25 @@ function filterRecordsWithinDateRange<T extends { dateAndTime: string | null }>(
   });
 }
 
+function uniqueTrimmed(values: Array<string | null | undefined>): string[] {
+  return Array.from(
+    new Set(
+      values
+        .map((value) => value?.trim())
+        .filter((value): value is string => Boolean(value)),
+    ),
+  );
+}
+
+/** Commodity names in API order, narrowed to `category` unless it is "" (all categories). */
+function commodityNamesInCategory(commodities: PublicCommodityItem[], category: string): string[] {
+  return uniqueTrimmed(
+    commodities
+      .filter((commodity) => !category || commodity.category?.trim() === category)
+      .map((commodity) => commodity.name),
+  );
+}
+
 function getTodayDateString(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -259,15 +278,32 @@ export default function PriceAnalysisPage() {
   const [activeRange, setActiveRange] = useState<RangeKey>("Week");
   const [customStartDate, setCustomStartDate] = useState<string>(getDefaultCustomStartDate());
   const [customEndDate, setCustomEndDate] = useState<string>(getTodayDateString());
-  const [commodityOptions, setCommodityOptions] = useState<string[]>([]);
   const [commodityOptionsLoading, setCommodityOptionsLoading] = useState(true);
   const [commodities, setCommodities] = useState<PublicCommodityItem[]>([]);
+  /** "" means "All categories" — the category only narrows the commodity picker; the chart always plots one commodity. */
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [forecastPrice, setForecastPrice] = useState<number | null>(null);
   const [forecastConfidence, setForecastConfidence] = useState<number | null>(null);
   const [selectedCommodity, setSelectedCommodity] = useState("");
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [isForecastLoading, setIsForecastLoading] = useState(false);
   const [selectedPointIndex, setSelectedPointIndex] = useState<number | null>(null);
+  const categoryOptions = uniqueTrimmed(commodities.map((commodity) => commodity.category))
+    .sort((a, b) => a.localeCompare(b));
+  const commodityOptions = commodityNamesInCategory(commodities, selectedCategory);
+
+  const handleSelectCategory = (category: string) => {
+    setSelectedCategory(category);
+    // Keep the current commodity when it belongs to the new category, so
+    // narrowing the list never changes the graph needlessly. Otherwise switch
+    // to the category's first item — the graph then redraws for that one.
+    const namesInCategory = commodityNamesInCategory(commodities, category);
+    setSelectedCommodity((current) =>
+      namesInCategory.includes(current) ? current : namesInCategory[0] ?? "",
+    );
+    setSelectedPointIndex(null);
+  };
+
   const selectedCommodityData = commodities.find(
     (commodity) => commodity.name === selectedCommodity,
   );
@@ -400,18 +436,11 @@ export default function PriceAnalysisPage() {
       try {
         setCommodityOptionsLoading(true);
         const fetchedCommodities = await getPublicCommodities();
-        const fetchedCommodityNames = Array.from(
-          new Set(
-            fetchedCommodities
-              .map((commodity) => commodity.name?.trim())
-              .filter((name): name is string => Boolean(name)),
-          ),
-        );
+        const fetchedCommodityNames = commodityNamesInCategory(fetchedCommodities, "");
 
         if (!isMounted) return;
 
         setCommodities(fetchedCommodities);
-        setCommodityOptions(fetchedCommodityNames);
         setSelectedCommodity((current) => {
           if (current && fetchedCommodityNames.includes(current)) {
             return current;
@@ -488,6 +517,9 @@ export default function PriceAnalysisPage() {
     <PageShell className="bg-surface-container-low">
       <section className="mx-auto flex w-full max-w-7xl flex-col gap-6 px-container-margin-mobile py-8 md:px-container-margin-desktop md:py-10">
         <PriceAnalysisHeader
+          selectedCategory={selectedCategory}
+          categoryOptions={categoryOptions}
+          onSelectCategory={handleSelectCategory}
           selectedCommodity={selectedCommodity}
           commodityOptions={commodityOptions}
           commodityOptionsLoading={commodityOptionsLoading}
