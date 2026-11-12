@@ -14,6 +14,7 @@ import {
   type CategoryItem,
 } from "../services/category.api";
 import type { CreateCategoryFormSchema } from "../schemas/category.schema";
+import { isCategoryIconKey } from "../category-icons";
 import type { UserRole } from "@/shared/services/auth";
 import { useToast } from "@/shared/components/Toast";
 import { ApiError } from "@/shared/services/api";
@@ -47,6 +48,10 @@ export default function CategoryManagementPage({ userRole }: CategoryManagementP
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { showToast } = useToast();
+  // MOCK (visual-verify step): the icon chosen on the form is held here, per
+  // category id, until the `iconKey` column exists. Wiring sends it to the API
+  // and removes this.
+  const [previewIconKeys, setPreviewIconKeys] = useState<Record<string, string>>({});
 
   const loadCategories = async () => {
     try {
@@ -68,11 +73,21 @@ export default function CategoryManagementPage({ userRole }: CategoryManagementP
     void run();
   }, []);
 
+  const categoriesWithPreview = useMemo(
+    () =>
+      categories.map((category) =>
+        category.id in previewIconKeys
+          ? { ...category, iconKey: previewIconKeys[category.id] || null }
+          : category,
+      ),
+    [categories, previewIconKeys],
+  );
+
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    if (!term) return categories;
-    return categories.filter((category) => category.name.toLowerCase().includes(term));
-  }, [categories, searchTerm]);
+    if (!term) return categoriesWithPreview;
+    return categoriesWithPreview.filter((category) => category.name.toLowerCase().includes(term));
+  }, [categoriesWithPreview, searchTerm]);
 
   const paginated = useMemo(() => {
     const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -85,14 +100,24 @@ export default function CategoryManagementPage({ userRole }: CategoryManagementP
     setSubmitLoading(true);
 
     try {
+      const iconNote = " The icon is a preview only — it is not saved yet.";
       if (editingCategory) {
-        await updateCategory(editingCategory.id, data.name);
+        const nameChanged = data.name.trim() !== editingCategory.name;
+        const iconChanged = data.iconKey !== (editingCategory.iconKey ?? "");
+        if (nameChanged) await updateCategory(editingCategory.id, data.name);
+        setPreviewIconKeys((current) => ({ ...current, [editingCategory.id]: data.iconKey }));
         setFormSuccess("Category updated successfully.");
-        showToast("Category updated successfully.", "success");
+        showToast(
+          nameChanged
+            ? `Category updated successfully.${iconChanged ? iconNote : ""}`
+            : "Icon changed for preview only — it is not saved yet.",
+          nameChanged ? "success" : "primary",
+        );
       } else {
-        await createCategory(data.name);
+        const created = await createCategory(data.name);
+        if (data.iconKey) setPreviewIconKeys((current) => ({ ...current, [created.id]: data.iconKey }));
         setFormSuccess("Category created successfully.");
-        showToast("Category created successfully.", "success");
+        showToast(`Category created successfully.${data.iconKey ? iconNote : ""}`, "success");
         setCurrentPage(1);
       }
 
@@ -131,7 +156,14 @@ export default function CategoryManagementPage({ userRole }: CategoryManagementP
           <AddCategoryDialog
             open={formOpen}
             mode={editingCategory ? "edit" : "create"}
-            defaultValues={editingCategory ? { name: editingCategory.name } : undefined}
+            defaultValues={
+              editingCategory
+                ? {
+                    name: editingCategory.name,
+                    iconKey: isCategoryIconKey(editingCategory.iconKey) ? editingCategory.iconKey : "",
+                  }
+                : undefined
+            }
             formError={formError}
             formSuccess={formSuccess}
             submitLoading={submitLoading}

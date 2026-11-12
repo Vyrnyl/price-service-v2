@@ -6,10 +6,12 @@ import Modal from "@/shared/components/Modal";
 import FormGroup from "@/shared/components/FormGroup";
 import Input from "@/shared/components/Input";
 import Button from "@/shared/components/Button";
+import SearchableSelect from "@/shared/components/SearchableSelect";
 import {
   createCategorySchema,
   type CreateCategoryFormSchema,
 } from "../schemas/category.schema";
+import { CATEGORY_ICONS, CATEGORY_ICON_OPTIONS, getCategoryIconKey } from "../category-icons";
 
 type AddCategoryDialogProps = {
   open: boolean;
@@ -22,7 +24,7 @@ type AddCategoryDialogProps = {
   onSubmit: (data: CreateCategoryFormSchema) => Promise<void> | void;
 };
 
-const emptyFormValues: CreateCategoryFormSchema = { name: "" };
+const emptyFormValues: CreateCategoryFormSchema = { name: "", iconKey: "" };
 
 export default function AddCategoryDialog({
   open,
@@ -41,10 +43,18 @@ export default function AddCategoryDialog({
     reset,
     setError,
     clearErrors,
+    watch,
+    setValue,
   } = useForm<CreateCategoryFormSchema>({
-    defaultValues: defaultValues ?? emptyFormValues,
+    defaultValues: { ...emptyFormValues, ...defaultValues },
     mode: "onSubmit",
   });
+
+  const iconKey = watch("iconKey");
+  const name = watch("name");
+  // What "Automatic" resolves to for the name typed so far, so the officer can
+  // see whether picking one by hand is even needed.
+  const automaticIcon = CATEGORY_ICONS[getCategoryIconKey(name)];
 
   // Reset only on the open transition. `defaultValues` is a fresh object
   // literal from the parent on every render, so depending on it re-ran reset()
@@ -53,7 +63,7 @@ export default function AddCategoryDialog({
   const wasOpen = useRef(false);
   useEffect(() => {
     if (open && !wasOpen.current) {
-      reset(defaultValues ?? emptyFormValues);
+      reset({ ...emptyFormValues, ...defaultValues });
     }
     wasOpen.current = open;
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +99,7 @@ export default function AddCategoryDialog({
       title={mode === "edit" ? "Edit Category" : "Add New Category"}
       description={
         mode === "edit"
-          ? "Rename this category. It stays applied to every commodity that already uses it."
+          ? "Rename this category or change its icon. It stays applied to every commodity that already uses it."
           : "Add a new commodity category. It will be available on the Add Commodity form immediately."
       }
     >
@@ -102,6 +112,29 @@ export default function AddCategoryDialog({
             hasError={Boolean(errors.name)}
             placeholder="e.g."
           />
+        </FormGroup>
+
+        <FormGroup label="Icon" htmlFor="iconKey" error={errors.iconKey?.message}>
+          <SearchableSelect
+            id="iconKey"
+            value={iconKey}
+            onChange={(value) =>
+              setValue("iconKey", value as CreateCategoryFormSchema["iconKey"], {
+                shouldDirty: true,
+                shouldValidate: true,
+              })
+            }
+            options={CATEGORY_ICON_OPTIONS}
+            placeholder={`Automatic — ${automaticIcon.label}`}
+            searchPlaceholder="Search icon"
+            emptyLabel="No icons found."
+            clearLabel={`Automatic (from the name) — ${automaticIcon.label}`}
+            hasError={Boolean(errors.iconKey)}
+            aria-label="Icon"
+          />
+          <p className="mt-1.5 text-xs text-on-surface-variant">
+            Shown beside this category&apos;s commodities in the Commodities lists.
+          </p>
         </FormGroup>
 
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-end">

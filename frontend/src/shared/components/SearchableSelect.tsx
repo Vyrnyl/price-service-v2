@@ -1,10 +1,12 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ComponentType } from "react";
 import { MdKeyboardArrowDown, MdSearch } from "react-icons/md";
 import Skeleton from "./Skeleton";
 
 export interface SearchableSelectOption {
   value: string;
   label: string;
+  /** Optional icon shown before the label, in the list and on the trigger. */
+  icon?: ComponentType<{ size?: number; className?: string }>;
 }
 
 interface SearchableSelectProps {
@@ -51,7 +53,9 @@ export default function SearchableSelect({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [isOpen]);
 
-  const selectedLabel = options.find((option) => option.value === value)?.label;
+  const selectedOption = options.find((option) => option.value === value);
+  const selectedLabel = selectedOption?.label;
+  const SelectedIcon = selectedOption?.icon;
 
   const filteredOptions = options.filter((option) =>
     option.label.toLowerCase().includes(search.trim().toLowerCase()),
@@ -73,7 +77,8 @@ export default function SearchableSelect({
           setSearch("");
         }}
       >
-        <span className={selectedLabel ? "text-on-surface" : "text-on-surface-variant"}>
+        <span className={`flex items-center gap-2 ${selectedLabel ? "text-on-surface" : "text-on-surface-variant"}`}>
+          {SelectedIcon ? <SelectedIcon size={18} className="shrink-0 text-primary" /> : null}
           {selectedLabel ?? placeholder}
         </span>
         <MdKeyboardArrowDown className={`shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`} />
@@ -119,11 +124,11 @@ export default function SearchableSelect({
                   </button>
                 ) : null}
                 {filteredOptions.length > 0 ? (
-                  filteredOptions.map((option) => (
+                  filteredOptions.map(({ icon: OptionIcon, ...option }) => (
                     <button
                       key={option.value}
                       type="button"
-                      className={`flex w-full items-center rounded-xl px-3 py-2 text-left text-sm transition-colors ${
+                      className={`flex w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-sm transition-colors ${
                         value === option.value
                           ? "bg-primary/10 text-primary"
                           : "text-on-surface hover:bg-surface-container-high"
@@ -133,6 +138,7 @@ export default function SearchableSelect({
                         setIsOpen(false);
                       }}
                     >
+                      {OptionIcon ? <OptionIcon size={18} className="shrink-0 text-primary" /> : null}
                       {option.label}
                     </button>
                   ))

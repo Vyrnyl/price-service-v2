@@ -1,9 +1,10 @@
 "use client";
 
-import { MdEdit, MdDeleteOutline, MdKitchen, MdSearch } from "react-icons/md";
+import { MdEdit, MdDeleteOutline, MdSearch } from "react-icons/md";
 import Pagination from "@/shared/components/Pagination";
 import Skeleton from "@/shared/components/Skeleton";
 import type { CategoryItem } from "../services/category.api";
+import { getCategoryIcon } from "../category-icons";
 
 const PAGE_SIZE = 8;
 
@@ -108,43 +109,46 @@ export default function CategoryTable({
                 </td>
               </tr>
             ) : (
-              categoryRows.map((category) => (
-                <tr key={category.id}>
-                  <td className="py-4">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-secondary-container/10 text-secondary">
-                        <MdKitchen size={18} />
-                      </div>
-                      <span className="font-semibold text-on-surface">{category.name}</span>
-                    </div>
-                  </td>
-                  <td className="py-4 text-sm text-on-surface-variant">{category.commodityCount}</td>
-                  {canManage ? (
-                    <td className="py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                          type="button"
-                          title="Edit category"
-                          onClick={() => onEditCategory?.(category)}
-                        >
-                          <span className="sr-only">Edit category</span>
-                          <MdEdit size={18} />
-                        </button>
-                        <button
-                          className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
-                          type="button"
-                          title="Delete category"
-                          onClick={() => onDeleteCategory?.(category)}
-                        >
-                          <span className="sr-only">Delete category</span>
-                          <MdDeleteOutline size={18} />
-                        </button>
+              categoryRows.map((category) => {
+                const Icon = getCategoryIcon(category.name, category.iconKey);
+                return (
+                  <tr key={category.id}>
+                    <td className="py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-container/10 text-primary">
+                          <Icon size={18} />
+                        </div>
+                        <span className="font-semibold text-on-surface">{category.name}</span>
                       </div>
                     </td>
-                  ) : null}
-                </tr>
-              ))
+                    <td className="py-4 text-sm text-on-surface-variant">{category.commodityCount}</td>
+                    {canManage ? (
+                      <td className="py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                            type="button"
+                            title="Edit category"
+                            onClick={() => onEditCategory?.(category)}
+                          >
+                            <span className="sr-only">Edit category</span>
+                            <MdEdit size={18} />
+                          </button>
+                          <button
+                            className="rounded-lg p-2 text-on-surface-variant transition-colors hover:text-error focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                            type="button"
+                            title="Delete category"
+                            onClick={() => onDeleteCategory?.(category)}
+                          >
+                            <span className="sr-only">Delete category</span>
+                            <MdDeleteOutline size={18} />
+                          </button>
+                        </div>
+                      </td>
+                    ) : null}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>

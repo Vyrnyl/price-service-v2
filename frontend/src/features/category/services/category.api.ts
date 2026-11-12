@@ -3,6 +3,8 @@ import { apiFetch } from "@/shared/services/api";
 export interface CategoryItem {
   id: string;
   name: string;
+  /** Icon chosen on the Category form; null/absent = matched from the name. */
+  iconKey?: string | null;
   commodityCount: number;
   createdAt: string;
 }
