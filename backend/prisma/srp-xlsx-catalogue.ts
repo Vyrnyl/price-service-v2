@@ -8,10 +8,12 @@
  * - 3 exact repeats within a section dropped; 3 names shared across sections get the section in brackets;
  * - name = item + unit, unless the item text already ends with the unit;
  * - row 272 ("Coffee") is a section heading, not an item.
- * SRPs take effect on SRP_EFFECTIVE_DATE — the DTI bulletin they match.
+ * SRPs take effect on SRP_EFFECTIVE_DATE. First imported as 2026-05-11 (the DTI
+ * bulletin they match), then moved to 2025-01-01 by import-price-records-2025.ts
+ * so the forms' 2025 monthly prices are judged against them (user-approved).
  */
 
-export const SRP_EFFECTIVE_DATE = "2026-05-11";
+export const SRP_EFFECTIVE_DATE = "2025-01-01";
 
 export type SrpXlsxItem = { name: string; category: string; srp: number | null; row: number };
 
