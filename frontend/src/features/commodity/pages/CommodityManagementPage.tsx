@@ -5,8 +5,6 @@ import {
   MdAddCircle,
   MdEdit,
   MdKitchen,
-  MdLocalDining,
-  MdLocalGroceryStore,
   MdOutlineInventory2,
   MdOutlineTrendingUp,
   MdOutlineWarning,
@@ -40,6 +38,7 @@ import {
   type CreateCommodityPayload,
 } from "../services/commodity.api";
 import { getCategories } from "@/features/category/services/category.api";
+import { getCategoryIcon } from "@/features/category/category-icons";
 import { ApiError, fetchAllPages } from "@/shared/services/api";
 import { formatCurrency } from "@/shared/utils/currency";
 import { createSrp } from "../services/srp.api";
@@ -55,7 +54,7 @@ function formatEffectiveDate(value: string) {
   });
 }
 
-function mapCommodityToRow(item: CommodityItem, index: number) {
+function mapCommodityToRow(item: CommodityItem) {
   const latestSrp = item.srps?.[0];
   return {
     id: item.id,
@@ -67,7 +66,7 @@ function mapCommodityToRow(item: CommodityItem, index: number) {
     srpValue: latestSrp ? Number(latestSrp.price).toFixed(2) : null,
     effectiveDate: latestSrp ? formatEffectiveDate(latestSrp.effectiveDate) : "_",
     statusClass: "border border-primary text-primary",
-    icon: index % 2 === 0 ? MdLocalDining : MdLocalGroceryStore,
+    icon: getCategoryIcon(item.category.name),
     iconBg: "bg-primary-container/10 text-primary",
   };
 }

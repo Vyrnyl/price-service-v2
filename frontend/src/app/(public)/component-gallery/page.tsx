@@ -15,6 +15,7 @@ import { useToast } from "@/shared/components/Toast";
 import { SrpHistoryModal } from "@/features/commodity/components/SrpHistoryModal";
 import { mockSrpProjection, SAMPLE_SINGLE_SRP_HISTORY, SAMPLE_SRP_HISTORY } from "@/shared/mocks/srp-history.mock";
 import type { SrpHistoryEntry } from "@/shared/types/srp-history.types";
+import { CATEGORY_ICONS } from "@/features/category/category-icons";
 
 type SrpHistoryDemo = "full" | "single" | "empty" | "loading" | "error" | "outlookLoading" | "outlookError";
 
@@ -232,6 +233,23 @@ export default function ComponentGalleryPage() {
             onRetry: () => setSrpDemo("full"),
           }}
         />
+      </Section>
+
+      <Section title="Category icons">
+        <p className="mb-4 text-body-sm text-on-surface-variant">
+          The stored icon set for commodity categories (<code>features/category/category-icons.ts</code>). A
+          category gets its icon from keywords in its name; anything unmatched falls back to Other.
+        </p>
+        <ul className="grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
+          {Object.entries(CATEGORY_ICONS).map(([key, { label, icon: Icon }]) => (
+            <li key={key} className="flex flex-col items-center gap-2 rounded-lg border border-outline-variant p-3 text-center">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary-container/10 text-primary">
+                <Icon size={18} />
+              </div>
+              <span className="text-xs text-on-surface-variant">{label}</span>
+            </li>
+          ))}
+        </ul>
       </Section>
     </PageShell>
   );

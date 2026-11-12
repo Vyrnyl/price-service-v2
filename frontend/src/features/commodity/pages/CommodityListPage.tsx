@@ -2,7 +2,8 @@
 
 import { useEffect, useMemo, useState, type ComponentType, type KeyboardEvent } from "react";
 import Link from "next/link";
-import { MdChevronRight, MdLocalDining, MdLocalGroceryStore } from "react-icons/md";
+import { MdChevronRight } from "react-icons/md";
+import { getCategoryIcon } from "@/features/category/category-icons";
 import Badge from "@/shared/components/Badge";
 import DataProvenanceStrip from "@/shared/components/DataProvenanceStrip";
 import PageShell from "@/shared/components/PageShell";
@@ -77,7 +78,7 @@ function formatLastUpdated(value: string | null) {
 }
 
 function mapCommoditiesToRows(commodities: PublicCommodityItem[]): CommodityRow[] {
-  return commodities.map((commodity, index) => ({
+  return commodities.map((commodity) => ({
     id: commodity.id,
     name: commodity.name,
     category: commodity.category,
@@ -88,7 +89,7 @@ function mapCommoditiesToRows(commodities: PublicCommodityItem[]): CommodityRow[
     lastUpdated: formatLastUpdated(commodity.lastUpdatedAt),
     storeName: commodity.storeName || "N/A",
     municipality: commodity.storeLocation || "N/A",
-    icon: index % 2 === 0 ? MdLocalDining : MdLocalGroceryStore,
+    icon: getCategoryIcon(commodity.category),
     iconBg: "bg-primary-container/10 text-primary",
   }));
 }
