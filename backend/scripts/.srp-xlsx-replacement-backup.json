@@ -1,0 +1,2075 @@
+{
+  "takenAt": "2026-11-12T03:07:29.446Z",
+  "status": "applied",
+  "categories": [
+    {
+      "id": "a01b6c5e-c98a-4c46-8dce-a5ff932fd235",
+      "name": "Canned Sardines in Tomato Sauce",
+      "createdAt": "2026-11-07T03:23:07.341Z",
+      "updatedAt": "2026-11-07T03:23:07.341Z"
+    },
+    {
+      "id": "0de47439-3700-404b-8f5d-02003f1e7331",
+      "name": "Condensed Milk",
+      "createdAt": "2026-11-07T03:23:07.341Z",
+      "updatedAt": "2026-11-07T03:23:07.341Z"
+    },
+    {
+      "id": "e1aed534-0239-45d8-9f92-126f7baafb87",
+      "name": "Bread",
+      "createdAt": "2026-11-07T03:23:07.341Z",
+      "updatedAt": "2026-11-07T03:23:07.341Z"
+    },
+    {
+      "id": "1c7eaadb-6be8-41ad-acf2-b45dd215c687",
+      "name": "Instant Mami Noodles",
+      "createdAt": "2026-11-07T03:23:07.341Z",
+      "updatedAt": "2026-11-07T03:23:07.341Z"
+    },
+    {
+      "id": "a7b50a9c-535c-4779-9178-b805a553846a",
+      "name": "Corned Beef",
+      "createdAt": "2026-11-07T03:23:07.341Z",
+      "updatedAt": "2026-11-07T03:23:07.341Z"
+    },
+    {
+      "id": "b18e2293-2144-48f9-aec4-befc5fec4723",
+      "name": "Vinegar",
+      "createdAt": "2026-11-07T03:23:07.341Z",
+      "updatedAt": "2026-11-07T03:23:07.341Z"
+    }
+  ],
+  "commodities": [
+    {
+      "id": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "name": "Sallenas Sardines Regular Lid 155g",
+      "status": "Active",
+      "categoryId": "a01b6c5e-c98a-4c46-8dce-a5ff932fd235",
+      "createdAt": "2026-11-07T03:23:07.457Z",
+      "updatedAt": "2026-11-07T03:23:07.457Z"
+    },
+    {
+      "id": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "name": "Jersey Sweetened Condensed Creamer 390g",
+      "status": "Active",
+      "categoryId": "0de47439-3700-404b-8f5d-02003f1e7331",
+      "createdAt": "2026-11-07T03:23:07.457Z",
+      "updatedAt": "2026-11-07T03:23:07.457Z"
+    },
+    {
+      "id": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "name": "Pinoy Tasty 450g",
+      "status": "Active",
+      "categoryId": "e1aed534-0239-45d8-9f92-126f7baafb87",
+      "createdAt": "2026-11-07T03:23:07.457Z",
+      "updatedAt": "2026-11-07T03:23:07.457Z"
+    },
+    {
+      "id": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "name": "Lucky Me! Instant Mami (Chicken na Chicken, Beef na Beef) 55g",
+      "status": "Active",
+      "categoryId": "1c7eaadb-6be8-41ad-acf2-b45dd215c687",
+      "createdAt": "2026-11-07T03:23:07.457Z",
+      "updatedAt": "2026-11-07T03:23:07.457Z"
+    },
+    {
+      "id": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "name": "Star Corned Beef 150g",
+      "status": "Active",
+      "categoryId": "a7b50a9c-535c-4779-9178-b805a553846a",
+      "createdAt": "2026-11-07T03:23:07.457Z",
+      "updatedAt": "2026-11-07T03:23:07.457Z"
+    },
+    {
+      "id": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "name": "Datu Puti White Vinegar 350mL",
+      "status": "Active",
+      "categoryId": "b18e2293-2144-48f9-aec4-befc5fec4723",
+      "createdAt": "2026-11-07T03:23:07.457Z",
+      "updatedAt": "2026-11-07T03:23:07.457Z"
+    }
+  ],
+  "srps": [
+    {
+      "id": "75683ba9-1719-41a2-9226-34c477e6b1ae",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "price": "18.5",
+      "effectiveDate": "2026-02-02T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "0b910934-b686-4217-bb90-016f30533e18",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "price": "24.75",
+      "effectiveDate": "2026-05-11T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "b6d5bd53-0300-4ed9-ac7e-50d06a989f09",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "price": "44.5",
+      "effectiveDate": "2026-02-02T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "9de68e9b-41d0-4aaf-bb1f-6551a7456886",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "price": "44.5",
+      "effectiveDate": "2026-05-11T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "48a9481e-a6cd-48b7-9d21-b5d52eed2a03",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "price": "44",
+      "effectiveDate": "2026-02-02T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "08590bdd-a4d3-40a0-8856-aa90c1688954",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "price": "44",
+      "effectiveDate": "2026-05-11T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "b17598d3-2f80-4409-8c51-fed6f66a21c8",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "price": "8.75",
+      "effectiveDate": "2026-02-02T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "1dcf2e2f-04f2-43b1-ac25-5fc9f11a17ef",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "price": "9",
+      "effectiveDate": "2026-05-11T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "53e882b2-9e50-4f31-ad3a-dc2f1b67458f",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "price": "34",
+      "effectiveDate": "2026-02-02T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "3bbfd59b-d264-425b-982a-387c87c1dfa8",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "price": "34",
+      "effectiveDate": "2026-05-11T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "7c6b8427-7da1-4a6d-ad10-604a8703bf1a",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "price": "18",
+      "effectiveDate": "2026-02-02T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "5540bdb2-bf81-4047-ae27-5ac5ee16c95a",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "price": "19.25",
+      "effectiveDate": "2026-05-11T00:00:00.000Z",
+      "createdAt": "2026-11-07T03:23:07.505Z",
+      "updatedAt": "2026-11-07T03:23:07.505Z"
+    },
+    {
+      "id": "98c19ab3-46d9-47a6-9b83-3961a4633b24",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "price": "45",
+      "effectiveDate": "2026-11-12T00:00:00.000Z",
+      "createdAt": "2026-11-12T01:53:49.769Z",
+      "updatedAt": "2026-11-12T01:53:49.769Z"
+    },
+    {
+      "id": "e0387913-d954-49a4-9f0f-ac78fe2c7f05",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "price": "44",
+      "effectiveDate": "2026-11-12T00:00:00.000Z",
+      "createdAt": "2026-11-12T01:53:54.395Z",
+      "updatedAt": "2026-11-12T01:53:54.395Z"
+    },
+    {
+      "id": "8fea4f92-d9e1-4aa3-953b-3f87716e2715",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "price": "44.7",
+      "effectiveDate": "2026-11-12T00:00:00.000Z",
+      "createdAt": "2026-11-12T01:55:16.344Z",
+      "updatedAt": "2026-11-12T01:55:16.344Z"
+    },
+    {
+      "id": "aa1b7901-7190-422f-9708-b17570375acd",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "price": "9.5",
+      "effectiveDate": "2026-11-12T00:00:00.000Z",
+      "createdAt": "2026-11-12T01:55:16.356Z",
+      "updatedAt": "2026-11-12T01:55:16.356Z"
+    },
+    {
+      "id": "14acc75f-b50a-43c5-a902-3bf7b51fc887",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "price": "44.3",
+      "effectiveDate": "2026-11-12T00:00:00.000Z",
+      "createdAt": "2026-11-12T02:01:40.206Z",
+      "updatedAt": "2026-11-12T02:01:40.206Z"
+    },
+    {
+      "id": "924e5229-f65f-4aa6-b487-bde2332c1bd7",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "price": "44.6",
+      "effectiveDate": "2026-11-12T00:00:00.000Z",
+      "createdAt": "2026-11-12T02:01:40.210Z",
+      "updatedAt": "2026-11-12T02:01:40.210Z"
+    },
+    {
+      "id": "2e041e07-ee8b-47d2-8bfc-64c962957740",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "price": "9.52",
+      "effectiveDate": "2026-11-12T00:00:00.000Z",
+      "createdAt": "2026-11-12T02:01:40.280Z",
+      "updatedAt": "2026-11-12T02:01:40.280Z"
+    }
+  ],
+  "priceRecords": [
+    {
+      "id": "0bd6fca6-0715-4d2f-b037-af289f61707d",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "23.06",
+      "dateAndTime": "2026-10-08T00:53:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "b1fbe199-1680-4a4e-acfe-422757090a7d",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "23.68",
+      "dateAndTime": "2026-10-10T01:53:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "783e6a01-7048-445f-96de-dd29d9f321fd",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "23.47",
+      "dateAndTime": "2026-10-10T02:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "c7b3336c-28e6-4459-ad31-0efa344c6232",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.16",
+      "dateAndTime": "2026-10-12T02:53:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "cb3fb38b-b8de-4035-93a9-a784de4283f3",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.35",
+      "dateAndTime": "2026-10-14T03:53:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "4caf7a1f-878a-430c-b812-6c7e220cc5cf",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "23.65",
+      "dateAndTime": "2026-10-14T04:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "fd1dcc8f-3a51-4f4a-a1c6-47b9b9074618",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.4",
+      "dateAndTime": "2026-10-16T04:53:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "fe39fa6d-0cdc-49fd-a4ee-a5037600f7a1",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "23.91",
+      "dateAndTime": "2026-10-18T05:53:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "464511a2-0058-47e8-bfdd-3ccca8b17184",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.05",
+      "dateAndTime": "2026-10-18T06:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "fdc383cd-48f6-42ec-b4c6-4c8c1deb3b9c",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.82",
+      "dateAndTime": "2026-10-20T06:53:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "73fc4f0c-40f3-4e11-b593-57eb72e99c94",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.59",
+      "dateAndTime": "2026-10-22T07:53:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "18721090-9412-4a6e-ad03-cb32648fb682",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.31",
+      "dateAndTime": "2026-10-22T00:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "4ca20419-af73-4927-985e-0c441f4d48d5",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.6",
+      "dateAndTime": "2026-10-24T00:53:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "0a4d1a67-bc57-4482-8ac4-eecdeaf01a9b",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "25.15",
+      "dateAndTime": "2026-10-26T01:53:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "bf28827c-8809-42ba-bc56-c7534d58ab46",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "25.3",
+      "dateAndTime": "2026-10-26T02:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "787847de-ce09-4d2c-a26d-ff629d793a8e",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "24.99",
+      "dateAndTime": "2026-10-28T02:53:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "429a343d-6d28-4558-8b9e-5fa0f504ba67",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "25.82",
+      "dateAndTime": "2026-10-30T03:53:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "70cf3535-0b25-453d-a80d-128b191cd42b",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "25.15",
+      "dateAndTime": "2026-10-30T04:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "0c560c1b-2920-4567-be56-c2d2bbd05168",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "25.43",
+      "dateAndTime": "2026-11-01T04:53:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "cd43b796-da21-49b0-bcae-98ca20e02cd7",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "25.54",
+      "dateAndTime": "2026-11-03T05:53:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "fea6828a-a0ae-44eb-a413-27ecdc39d37e",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "26.08",
+      "dateAndTime": "2026-11-03T06:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "4a878533-5d5a-42b7-96c5-fdb90ac0e79d",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "26.37",
+      "dateAndTime": "2026-11-05T06:53:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "f7cc30e8-0082-4686-871f-f6f41be48c5a",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "26.57",
+      "dateAndTime": "2026-11-07T00:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "3f1f6f70-e21f-4c8c-91f6-fc85bc390ab7",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "46.33",
+      "dateAndTime": "2026-10-08T00:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "2dbb10f8-b1d4-4952-9d54-d29a4be2340e",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "46.42",
+      "dateAndTime": "2026-10-10T01:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "51a42e63-51db-4274-88c0-b3489033cf7b",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "46.11",
+      "dateAndTime": "2026-10-10T02:40:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "7f04a3ee-1405-4c2d-9f43-2928c60ebfb2",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.63",
+      "dateAndTime": "2026-10-12T02:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "1373ad95-3a60-4ae2-9e53-beda3bc0f963",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.17",
+      "dateAndTime": "2026-10-14T03:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "41f0d1d7-1830-4085-b969-9175c913eaf4",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "46.81",
+      "dateAndTime": "2026-10-14T04:40:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "b87a60b8-d173-414d-9edf-13567d2ffc61",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.83",
+      "dateAndTime": "2026-10-16T04:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "470c6821-3fdd-4e5c-8189-40e09cf12a9c",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.37",
+      "dateAndTime": "2026-10-18T05:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "6b646430-e9db-4b0d-a7a2-9bfff59afb38",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.23",
+      "dateAndTime": "2026-10-18T06:40:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "6029978f-4127-4a73-b303-b349e9377140",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "44.31",
+      "dateAndTime": "2026-10-20T06:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "30b11bf7-0b71-43ed-ace2-c06bfda58159",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "44.4",
+      "dateAndTime": "2026-10-22T07:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "9312aefa-7147-4ce1-98c8-e5c5a471f89b",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.4",
+      "dateAndTime": "2026-10-22T00:40:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "ca101208-bb8d-4d3b-9740-1aee186ba6fe",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.13",
+      "dateAndTime": "2026-10-24T00:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "4cc12285-810f-429f-8a68-baa043502634",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "43.48",
+      "dateAndTime": "2026-10-26T01:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "c3add45c-bf8b-4699-8dd1-693f0209d796",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "44.02",
+      "dateAndTime": "2026-10-26T02:40:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "f71213e2-596a-4120-add6-9b47d5717129",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "43.82",
+      "dateAndTime": "2026-10-28T02:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "366ab0d4-eede-4ecc-9d16-3ecc882a6a49",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.51",
+      "dateAndTime": "2026-10-30T03:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "b2219c75-e4f1-485d-bf4f-1539335f302a",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.57",
+      "dateAndTime": "2026-10-30T04:40:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "bb8d1553-6c81-48a6-a4a8-574b92e0702e",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.72",
+      "dateAndTime": "2026-11-01T04:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "a1c7e27a-a455-460e-8e47-0b2e5673e8dd",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.38",
+      "dateAndTime": "2026-11-03T05:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "d4311e75-35c2-4b26-ac91-c384d05f8e67",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "43.18",
+      "dateAndTime": "2026-11-03T06:40:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "71f98828-a0d6-4d84-8264-41e239553821",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.15",
+      "dateAndTime": "2026-11-05T06:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "2d5803a5-e2ed-4e12-835e-be4717a038b5",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.42",
+      "dateAndTime": "2026-11-07T00:40:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "66aad0f7-fd2f-48b6-a03c-f8acb2a1131d",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "43.44",
+      "dateAndTime": "2026-10-08T00:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "32f492f4-b93f-4a1f-b2fe-e17c6e382f3a",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "44.64",
+      "dateAndTime": "2026-10-10T01:30:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "51cac896-0ec9-4e28-8531-b832b6836fb3",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.39",
+      "dateAndTime": "2026-10-10T02:47:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "174d2dd8-6957-466e-9b9c-5e36821b43cc",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "46.7",
+      "dateAndTime": "2026-10-12T02:30:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "d64fed61-8e9f-4e95-9945-300dac882939",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.93",
+      "dateAndTime": "2026-10-14T03:30:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "77b8f23a-c2cf-4b07-84e9-a47e660c312d",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "46.52",
+      "dateAndTime": "2026-10-14T04:47:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "200d4e27-b9c9-46ea-a490-78bc191eca46",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "47.12",
+      "dateAndTime": "2026-10-16T04:30:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "311a1091-fb71-433e-bac8-97ad3d813b03",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "47.19",
+      "dateAndTime": "2026-10-18T05:30:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "0e27de4f-f6e4-4f89-8e93-bb506f428ef5",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "47.32",
+      "dateAndTime": "2026-10-18T06:47:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "1c21a3b2-2da2-4b48-8fa7-d2916748db85",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "45.47",
+      "dateAndTime": "2026-10-20T06:30:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "abb5474c-cdb0-4abf-96b8-76b9df11ab12",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "43.83",
+      "dateAndTime": "2026-10-22T07:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "789ab050-2822-4288-92d2-b8bd510bbc3f",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "44.3",
+      "dateAndTime": "2026-10-22T00:47:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "ab674d64-2d9d-45bc-9d00-77924edae0c0",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "43.69",
+      "dateAndTime": "2026-10-24T00:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "d210bf83-f804-487f-8e5b-195aae40fe04",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.95",
+      "dateAndTime": "2026-10-26T01:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "90c64a06-794d-422c-9649-03bcd2844587",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.4",
+      "dateAndTime": "2026-10-26T02:47:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "f9379a7e-3cc4-4c21-a5ab-aee1b8dce0a6",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "41.64",
+      "dateAndTime": "2026-10-28T02:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "60e0b02e-f469-49d8-bd88-d489235738e9",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "40.51",
+      "dateAndTime": "2026-10-30T03:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "d4e41622-e86d-4716-a50b-370c197f9b0a",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "41.25",
+      "dateAndTime": "2026-10-30T04:47:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "cb9462f9-3dc3-465b-9994-f1115caeb873",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "41.78",
+      "dateAndTime": "2026-11-01T04:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "4b428c49-4410-4204-9bf2-01cfda915f9e",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.72",
+      "dateAndTime": "2026-11-03T05:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "597516f1-f345-4ff5-a06b-d2784bfa42ad",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.47",
+      "dateAndTime": "2026-11-03T06:47:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "b91f3cdf-0903-480e-aca7-a9dce0e1c488",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "43.55",
+      "dateAndTime": "2026-11-07T00:47:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "0ec0094b-07f9-40e8-9c80-1e5c2676d307",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.28",
+      "dateAndTime": "2026-10-08T00:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "79ebddfa-4b53-47ad-b656-05d422cc75e0",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.2",
+      "dateAndTime": "2026-10-10T01:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "e74b51b5-e0f1-46aa-bf70-bb6e29a3bc20",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.27",
+      "dateAndTime": "2026-10-10T02:27:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "4f12cafc-37f1-4d31-88fa-28004d1854b7",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.02",
+      "dateAndTime": "2026-10-12T02:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "46fe46c2-4d10-4584-9ec1-b1a2fbae2f59",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.94",
+      "dateAndTime": "2026-10-14T03:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "36a7cad8-0a78-4e88-b83a-91ac8b8113e3",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.11",
+      "dateAndTime": "2026-10-14T04:27:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "3b2baa47-2f40-4c5a-a4e2-fa2f3eba71d4",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.78",
+      "dateAndTime": "2026-10-16T04:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "1c72a627-f23d-4821-85a5-ec9e93c3c8d0",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.62",
+      "dateAndTime": "2026-10-18T05:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "2008c916-5dea-49d6-84b4-1bd2c222746b",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.74",
+      "dateAndTime": "2026-10-18T06:27:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "5baf966e-0249-4952-8a05-7544b4e41671",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.71",
+      "dateAndTime": "2026-10-20T06:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "edd4b7a0-9986-4588-b100-a3c198feb25e",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.65",
+      "dateAndTime": "2026-10-22T07:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "0438818c-cee5-4c9f-8e62-ce09d291490c",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.65",
+      "dateAndTime": "2026-10-22T00:27:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "178d54e0-0561-4238-85be-bc54cd04c207",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.85",
+      "dateAndTime": "2026-10-24T00:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "a385ab3d-923c-4a38-8eca-e29d0b0ca62b",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.57",
+      "dateAndTime": "2026-10-26T01:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "8e36aab6-8a03-41e6-8620-0414f4d611ee",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.86",
+      "dateAndTime": "2026-10-26T02:27:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "f56a34c5-a236-46c5-8f8d-e8071c32e477",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.63",
+      "dateAndTime": "2026-10-28T02:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "8a0389c9-9b42-41cf-a3e4-38fa41d0d4ec",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.7",
+      "dateAndTime": "2026-10-30T03:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "d77f89dc-bbdb-4faa-9ace-cb7ded1f24a7",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.97",
+      "dateAndTime": "2026-10-30T04:27:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "f4b3ce27-264e-49c4-8a12-ab1e2c29f952",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.08",
+      "dateAndTime": "2026-11-01T04:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "caf647e9-8d23-4223-a094-2d90067197ae",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "8.93",
+      "dateAndTime": "2026-11-03T05:10:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "af569744-6b84-42c8-88c9-3405d529a69f",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.16",
+      "dateAndTime": "2026-11-03T06:27:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "4e75334d-0e85-454e-94e9-49d7c3a63f15",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.31",
+      "dateAndTime": "2026-11-05T06:10:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "29e80178-7635-4b88-8c15-d708f3eedcb1",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.46",
+      "dateAndTime": "2026-11-07T00:27:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "92ac1ac0-bd59-49e6-b5b0-7b319c980573",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "32.01",
+      "dateAndTime": "2026-10-08T00:52:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "9d6a1a67-5e48-45df-9fd5-37f17343053a",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "32.69",
+      "dateAndTime": "2026-10-10T01:52:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "f87a98f1-874f-48b9-a863-d48f17ba4874",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33.57",
+      "dateAndTime": "2026-10-10T02:09:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "c9ed923f-252e-4d4f-a659-950d0a6c950f",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "34.02",
+      "dateAndTime": "2026-10-12T02:52:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "879c4e8f-6456-4a84-b9f8-e52538b1c333",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "34.52",
+      "dateAndTime": "2026-10-14T03:52:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "af7ff9e2-0156-495d-97a6-80b6ff8c869a",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "34.55",
+      "dateAndTime": "2026-10-14T04:09:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "1bf77fbd-d8ba-47bc-8a00-616a716fdb6a",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33.78",
+      "dateAndTime": "2026-10-16T04:52:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "0c364e13-e8ed-43de-a50b-0e76fd0393ee",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33.47",
+      "dateAndTime": "2026-10-18T05:52:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "d5915321-8b49-422e-a403-88441e77e840",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33.35",
+      "dateAndTime": "2026-10-18T06:09:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "5a0b4fb1-6806-4bfb-901f-89fe15e35dbc",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33.29",
+      "dateAndTime": "2026-10-20T06:52:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "daa478ec-e0b5-40a2-8cf5-13b11d3ba51e",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33.16",
+      "dateAndTime": "2026-10-22T07:52:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "112c3533-65d1-4f2e-b935-9c955592d055",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33",
+      "dateAndTime": "2026-10-22T00:09:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "5438495d-0746-482d-8d0c-fd8f5a063a79",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33.96",
+      "dateAndTime": "2026-10-24T00:52:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "35866ffe-7222-456d-8960-74f6671eb599",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "34.29",
+      "dateAndTime": "2026-10-26T01:52:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "0ed83906-98b2-455c-add8-ef0f067830a7",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "33.41",
+      "dateAndTime": "2026-10-26T02:09:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "6ec54edb-b575-4f14-bedc-ba5e4d173dcb",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "34.08",
+      "dateAndTime": "2026-10-28T02:52:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "3834c61f-6cdf-4a98-958f-0146b0544561",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "35.26",
+      "dateAndTime": "2026-10-30T03:52:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "f8ae2514-e94d-4200-a9b8-0d8d6311e3ad",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "35.2",
+      "dateAndTime": "2026-10-30T04:09:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "9987194c-e0c7-4e0a-9b63-e86ef4529dda",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "36",
+      "dateAndTime": "2026-11-01T04:52:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "e804c964-6855-44ee-b946-bd277556d8ee",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "36.23",
+      "dateAndTime": "2026-11-03T05:52:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "bc3d9d42-e764-4474-b742-4f5f22fadd0e",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "35.35",
+      "dateAndTime": "2026-11-03T06:09:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "9a95b67f-8441-4ade-9877-defdbfad6776",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "36.22",
+      "dateAndTime": "2026-11-05T06:52:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "6d17ec7d-8854-4efe-b996-b791361f1446",
+      "commodityId": "451e6ed4-5c4b-4804-a0de-59024db78c57",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "34.8",
+      "dateAndTime": "2026-11-07T00:09:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "a1ca5011-c934-41ea-9cc7-155dde8e7fc5",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.19",
+      "dateAndTime": "2026-10-08T00:20:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "2e3661b0-eeb0-4004-80b5-9563932d39f3",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.34",
+      "dateAndTime": "2026-10-10T01:20:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "845ddc57-ef75-43d2-8a00-b9b2d62e026c",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.71",
+      "dateAndTime": "2026-10-10T02:37:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "b0376c2d-7d5b-437d-b1f4-b45b00d0922d",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "20.02",
+      "dateAndTime": "2026-10-12T02:20:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "413cc29e-1893-4efe-844f-17fe5a833378",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.49",
+      "dateAndTime": "2026-10-14T03:20:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "938cdf57-a2dd-46f0-a648-90251de470f4",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.31",
+      "dateAndTime": "2026-10-14T04:37:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "371c311f-3aa8-47cd-8a5a-dddddbe85b43",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "18.88",
+      "dateAndTime": "2026-10-16T04:20:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "91bc2a73-9acb-4387-8cfe-cad681e78589",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "18.4",
+      "dateAndTime": "2026-10-18T05:20:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "ade0b96a-8e27-4b34-b58d-de9839bd4c3c",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "18.79",
+      "dateAndTime": "2026-10-18T06:37:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "7cc70ab7-393d-415d-a381-17d0fa6a77c3",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "18.46",
+      "dateAndTime": "2026-10-20T06:20:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "fc5877cb-05c9-4753-a1a3-c2146f38b6bb",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.01",
+      "dateAndTime": "2026-10-22T07:20:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "0144c205-847a-41e5-b7c6-dffdf443b8dd",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.28",
+      "dateAndTime": "2026-10-22T00:37:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "3fb098f8-da0d-4a63-9b6d-66506339a23e",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.26",
+      "dateAndTime": "2026-10-24T00:20:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "1349b916-0c2c-4b0b-9503-510000e7c9ac",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.87",
+      "dateAndTime": "2026-10-26T01:20:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "29bce793-1743-4e53-a89d-c2b9efd4ffb2",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.48",
+      "dateAndTime": "2026-10-26T02:37:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "04552003-ace1-48a7-863f-259978c54f5d",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.56",
+      "dateAndTime": "2026-10-28T02:20:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "af95a58f-a2ee-472d-a7a1-2ebc7b1615c5",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.34",
+      "dateAndTime": "2026-10-30T03:20:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "699dd5b2-a451-4b64-9169-50318cc790a0",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.28",
+      "dateAndTime": "2026-10-30T04:37:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "9f54eb48-1180-45a8-a17b-057709200703",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "18.83",
+      "dateAndTime": "2026-11-01T04:20:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "172129b7-5fd7-4bbd-8de0-e6c1bde7d863",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.06",
+      "dateAndTime": "2026-11-03T05:20:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "dae5a346-cdb6-4875-a4f4-c3101ce83d2a",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.05",
+      "dateAndTime": "2026-11-03T06:37:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "fd3a1cac-9d2e-4048-bec7-816d5c795ec6",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "18.68",
+      "dateAndTime": "2026-11-05T06:20:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "17c14236-f13a-4a43-a42d-15c6b93c01f9",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.61",
+      "dateAndTime": "2026-11-07T00:37:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-07T03:23:07.594Z"
+    },
+    {
+      "id": "612567b6-90b0-49f9-b0d7-a6860f20da32",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "storeId": "4835bb76-fa4e-4db6-868b-28bc6f865c90",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "42.07",
+      "dateAndTime": "2026-11-12T06:30:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-07T03:23:07.594Z",
+      "updatedAt": "2026-11-12T01:14:28.297Z"
+    },
+    {
+      "id": "39e74dde-889a-4288-8254-f7a2ee223463",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.22",
+      "dateAndTime": "2026-11-12T02:21:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-12T02:22:16.966Z",
+      "updatedAt": "2026-11-12T02:22:16.966Z"
+    },
+    {
+      "id": "5afbd26b-ada1-41c7-8ee2-a73c6b1168bc",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "44.5",
+      "dateAndTime": "2026-11-12T02:21:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-12T02:22:16.984Z",
+      "updatedAt": "2026-11-12T02:22:16.984Z"
+    },
+    {
+      "id": "daf85008-1f70-4920-adda-d661bca70cf2",
+      "commodityId": "8494abac-8081-4f5b-8e29-8806b0e0cde9",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "9.58",
+      "dateAndTime": "2026-11-12T02:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-12T02:24:03.824Z",
+      "updatedAt": "2026-11-12T02:24:03.824Z"
+    },
+    {
+      "id": "d6c9f3b9-1785-4fa3-8b6b-0433a52c3b93",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "44.45",
+      "dateAndTime": "2026-11-12T02:23:00.000Z",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-12T02:24:03.834Z",
+      "updatedAt": "2026-11-12T02:24:03.834Z"
+    },
+    {
+      "id": "bafd837b-9e58-47dc-bfa6-1ff62ff6c082",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "storeId": "1ac8995e-7148-47de-bc85-50680f025a3c",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "19.35",
+      "dateAndTime": "2026-11-12T02:23:00.000Z",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-12T02:24:03.911Z",
+      "updatedAt": "2026-11-12T02:24:03.911Z"
+    }
+  ],
+  "forecasts": [
+    {
+      "id": "5b2d829c-aef0-4eb8-9563-59b589793c04",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "predictedPrice": "19.28",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-13T02:23:00.000Z",
+      "createdAt": "2026-11-12T02:56:51.793Z",
+      "updatedAt": "2026-11-12T02:56:51.793Z"
+    },
+    {
+      "id": "e37b3eec-0a74-4d16-a93a-b14d804c79ac",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "predictedPrice": "19.25",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-14T02:23:00.000Z",
+      "createdAt": "2026-11-12T02:56:51.793Z",
+      "updatedAt": "2026-11-12T02:56:51.793Z"
+    },
+    {
+      "id": "97be55bf-d5e5-4d9d-b84e-db9e82609ff3",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "predictedPrice": "19.24",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-15T02:23:00.000Z",
+      "createdAt": "2026-11-12T02:56:51.793Z",
+      "updatedAt": "2026-11-12T02:56:51.793Z"
+    },
+    {
+      "id": "27e7117b-8532-470a-8b61-ca40bda17ad8",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "predictedPrice": "19.23",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-16T02:23:00.000Z",
+      "createdAt": "2026-11-12T02:56:51.793Z",
+      "updatedAt": "2026-11-12T02:56:51.793Z"
+    },
+    {
+      "id": "de7b24c5-84aa-4d46-a13e-eb09798eaa54",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "predictedPrice": "19.22",
+      "confidence": 0.98,
+      "forecastDate": "2026-11-17T02:23:00.000Z",
+      "createdAt": "2026-11-12T02:56:51.793Z",
+      "updatedAt": "2026-11-12T02:56:51.793Z"
+    },
+    {
+      "id": "cc2ea196-53fe-4631-a257-e78fbe436b8a",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "predictedPrice": "19.22",
+      "confidence": 0.98,
+      "forecastDate": "2026-11-18T02:23:00.000Z",
+      "createdAt": "2026-11-12T02:56:51.793Z",
+      "updatedAt": "2026-11-12T02:56:51.793Z"
+    },
+    {
+      "id": "82a87ad2-c2e6-45e9-be1b-7c9eb9599915",
+      "commodityId": "bae5467c-1c57-49fc-80c1-3fd243611503",
+      "predictedPrice": "19.22",
+      "confidence": 0.98,
+      "forecastDate": "2026-11-19T02:23:00.000Z",
+      "createdAt": "2026-11-12T02:56:51.793Z",
+      "updatedAt": "2026-11-12T02:56:51.793Z"
+    },
+    {
+      "id": "3132149f-27c0-407c-914d-3d664887b9e3",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "predictedPrice": "42.41",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-08T00:40:00.000Z",
+      "createdAt": "2026-11-08T10:40:09.110Z",
+      "updatedAt": "2026-11-08T10:40:09.110Z"
+    },
+    {
+      "id": "c58f023e-04d4-404c-89c9-0d4b1da1b086",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "predictedPrice": "42.4",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-09T00:40:00.000Z",
+      "createdAt": "2026-11-08T10:40:09.110Z",
+      "updatedAt": "2026-11-08T10:40:09.110Z"
+    },
+    {
+      "id": "1a321f11-1e6d-47b0-9db3-65346bd24a13",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "predictedPrice": "42.39",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-10T00:40:00.000Z",
+      "createdAt": "2026-11-08T10:40:09.110Z",
+      "updatedAt": "2026-11-08T10:40:09.110Z"
+    },
+    {
+      "id": "d2217beb-d479-4ac3-80c8-54b5ac0b81e0",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "predictedPrice": "42.37",
+      "confidence": 0.97,
+      "forecastDate": "2026-11-11T00:40:00.000Z",
+      "createdAt": "2026-11-08T10:40:09.110Z",
+      "updatedAt": "2026-11-08T10:40:09.110Z"
+    },
+    {
+      "id": "1049a962-6d37-4392-83cb-999da047ac1b",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "predictedPrice": "42.36",
+      "confidence": 0.94,
+      "forecastDate": "2026-11-12T00:40:00.000Z",
+      "createdAt": "2026-11-08T10:40:09.110Z",
+      "updatedAt": "2026-11-08T10:40:09.110Z"
+    },
+    {
+      "id": "0852f235-8959-4d3c-a4dc-3cfa61bf0fd6",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "predictedPrice": "42.35",
+      "confidence": 0.94,
+      "forecastDate": "2026-11-13T00:40:00.000Z",
+      "createdAt": "2026-11-08T10:40:09.110Z",
+      "updatedAt": "2026-11-08T10:40:09.110Z"
+    },
+    {
+      "id": "8872a90e-2563-4444-b4a3-ca02130be9b6",
+      "commodityId": "ae5f56d0-43ca-492d-b4d4-4489e4edb36c",
+      "predictedPrice": "42.34",
+      "confidence": 0.94,
+      "forecastDate": "2026-11-14T00:40:00.000Z",
+      "createdAt": "2026-11-08T10:40:09.110Z",
+      "updatedAt": "2026-11-08T10:40:09.110Z"
+    },
+    {
+      "id": "f0269c3d-f2bc-4963-b2ee-dc28963697e7",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "predictedPrice": "42.18",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-13T06:30:00.000Z",
+      "createdAt": "2026-11-12T02:02:15.920Z",
+      "updatedAt": "2026-11-12T02:02:15.920Z"
+    },
+    {
+      "id": "37a369da-bad3-41ad-8cfc-6126beb47ab7",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "predictedPrice": "42.28",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-14T06:30:00.000Z",
+      "createdAt": "2026-11-12T02:02:15.920Z",
+      "updatedAt": "2026-11-12T02:02:15.920Z"
+    },
+    {
+      "id": "f9251aa8-1429-4e1e-9c77-0494028f1ee2",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "predictedPrice": "42.37",
+      "confidence": 0.98,
+      "forecastDate": "2026-11-15T06:30:00.000Z",
+      "createdAt": "2026-11-12T02:02:15.920Z",
+      "updatedAt": "2026-11-12T02:02:15.920Z"
+    },
+    {
+      "id": "b518c1aa-0e2d-4bc1-94bd-07f227d4924a",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "predictedPrice": "42.45",
+      "confidence": 0.95,
+      "forecastDate": "2026-11-16T06:30:00.000Z",
+      "createdAt": "2026-11-12T02:02:15.920Z",
+      "updatedAt": "2026-11-12T02:02:15.920Z"
+    },
+    {
+      "id": "810aa23d-ab6c-426b-91c8-1aa66d2a1d1e",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "predictedPrice": "42.53",
+      "confidence": 0.92,
+      "forecastDate": "2026-11-17T06:30:00.000Z",
+      "createdAt": "2026-11-12T02:02:15.920Z",
+      "updatedAt": "2026-11-12T02:02:15.920Z"
+    },
+    {
+      "id": "4148daba-b514-48db-80f9-2a2d1a4a28bf",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "predictedPrice": "42.6",
+      "confidence": 0.92,
+      "forecastDate": "2026-11-18T06:30:00.000Z",
+      "createdAt": "2026-11-12T02:02:15.920Z",
+      "updatedAt": "2026-11-12T02:02:15.920Z"
+    },
+    {
+      "id": "c01730c9-bf60-4c96-8030-b7b0afd978d8",
+      "commodityId": "b3f4588a-fa3f-456e-8db4-752bf0a6e011",
+      "predictedPrice": "42.66",
+      "confidence": 0.92,
+      "forecastDate": "2026-11-19T06:30:00.000Z",
+      "createdAt": "2026-11-12T02:02:15.920Z",
+      "updatedAt": "2026-11-12T02:02:15.920Z"
+    },
+    {
+      "id": "cd5c0cc2-36b3-4db3-afee-f8d8c8fec1d8",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "predictedPrice": "26.74",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-08T00:10:00.000Z",
+      "createdAt": "2026-11-12T02:02:18.208Z",
+      "updatedAt": "2026-11-12T02:02:18.208Z"
+    },
+    {
+      "id": "7bad98ae-ecfe-4f56-89bf-b630e5a2e86b",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "predictedPrice": "26.92",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-09T00:10:00.000Z",
+      "createdAt": "2026-11-12T02:02:18.208Z",
+      "updatedAt": "2026-11-12T02:02:18.208Z"
+    },
+    {
+      "id": "c95d4ce3-c81d-4754-b9e5-7033e703d48e",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "predictedPrice": "27.11",
+      "confidence": 0.99,
+      "forecastDate": "2026-11-10T00:10:00.000Z",
+      "createdAt": "2026-11-12T02:02:18.208Z",
+      "updatedAt": "2026-11-12T02:02:18.208Z"
+    },
+    {
+      "id": "6a50ce84-b50f-40ad-ab92-f01f8d0a25d6",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "predictedPrice": "27.31",
+      "confidence": 0.97,
+      "forecastDate": "2026-11-11T00:10:00.000Z",
+      "createdAt": "2026-11-12T02:02:18.208Z",
+      "updatedAt": "2026-11-12T02:02:18.208Z"
+    },
+    {
+      "id": "57c2e7eb-4370-459b-a73b-218d3da5fa7c",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "predictedPrice": "27.52",
+      "confidence": 0.94,
+      "forecastDate": "2026-11-12T00:10:00.000Z",
+      "createdAt": "2026-11-12T02:02:18.208Z",
+      "updatedAt": "2026-11-12T02:02:18.208Z"
+    },
+    {
+      "id": "1308edfa-c7b2-477a-b297-b7d7b788307d",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "predictedPrice": "27.74",
+      "confidence": 0.94,
+      "forecastDate": "2026-11-13T00:10:00.000Z",
+      "createdAt": "2026-11-12T02:02:18.208Z",
+      "updatedAt": "2026-11-12T02:02:18.208Z"
+    },
+    {
+      "id": "1e78ce37-40c8-492a-832c-ccedf4bff3bf",
+      "commodityId": "2826a54a-0816-472e-9b0d-9a42f57d6922",
+      "predictedPrice": "27.97",
+      "confidence": 0.94,
+      "forecastDate": "2026-11-14T00:10:00.000Z",
+      "createdAt": "2026-11-12T02:02:18.208Z",
+      "updatedAt": "2026-11-12T02:02:18.208Z"
+    }
+  ]
+}
