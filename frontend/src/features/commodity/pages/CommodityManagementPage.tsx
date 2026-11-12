@@ -66,7 +66,7 @@ function mapCommodityToRow(item: CommodityItem) {
     srpValue: latestSrp ? Number(latestSrp.price).toFixed(2) : null,
     effectiveDate: latestSrp ? formatEffectiveDate(latestSrp.effectiveDate) : "_",
     statusClass: "border border-primary text-primary",
-    icon: getCategoryIcon(item.category.name),
+    icon: getCategoryIcon(item.category.name, item.category.iconKey),
     iconBg: "bg-primary-container/10 text-primary",
   };
 }

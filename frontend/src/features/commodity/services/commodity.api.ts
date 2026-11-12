@@ -6,6 +6,8 @@ import type { SrpHistoryResponse, SrpProjectionResponse } from "@/shared/types/s
 export interface CommodityCategory {
   id: string;
   name: string;
+  /** Icon chosen on the Category form; null = matched from the name. */
+  iconKey?: string | null;
 }
 
 export interface CommodityItem {
@@ -46,6 +48,8 @@ export interface PublicCommodityItem {
   id: string;
   name: string;
   category: string;
+  /** Icon chosen for the category; null = matched from the name. */
+  categoryIconKey?: string | null;
   status: string;
   currentPrice: number | null;
   srpPrice: number | null;

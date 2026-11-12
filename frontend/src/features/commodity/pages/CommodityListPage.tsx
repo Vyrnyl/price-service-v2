@@ -89,7 +89,7 @@ function mapCommoditiesToRows(commodities: PublicCommodityItem[]): CommodityRow[
     lastUpdated: formatLastUpdated(commodity.lastUpdatedAt),
     storeName: commodity.storeName || "N/A",
     municipality: commodity.storeLocation || "N/A",
-    icon: getCategoryIcon(commodity.category),
+    icon: getCategoryIcon(commodity.category, commodity.categoryIconKey),
     iconBg: "bg-primary-container/10 text-primary",
   }));
 }

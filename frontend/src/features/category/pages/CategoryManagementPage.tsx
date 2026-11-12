@@ -48,10 +48,6 @@ export default function CategoryManagementPage({ userRole }: CategoryManagementP
   const [deleteLoading, setDeleteLoading] = useState(false);
 
   const { showToast } = useToast();
-  // MOCK (visual-verify step): the icon chosen on the form is held here, per
-  // category id, until the `iconKey` column exists. Wiring sends it to the API
-  // and removes this.
-  const [previewIconKeys, setPreviewIconKeys] = useState<Record<string, string>>({});
 
   const loadCategories = async () => {
     try {
@@ -73,21 +69,11 @@ export default function CategoryManagementPage({ userRole }: CategoryManagementP
     void run();
   }, []);
 
-  const categoriesWithPreview = useMemo(
-    () =>
-      categories.map((category) =>
-        category.id in previewIconKeys
-          ? { ...category, iconKey: previewIconKeys[category.id] || null }
-          : category,
-      ),
-    [categories, previewIconKeys],
-  );
-
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    if (!term) return categoriesWithPreview;
-    return categoriesWithPreview.filter((category) => category.name.toLowerCase().includes(term));
-  }, [categoriesWithPreview, searchTerm]);
+    if (!term) return categories;
+    return categories.filter((category) => category.name.toLowerCase().includes(term));
+  }, [categories, searchTerm]);
 
   const paginated = useMemo(() => {
     const startIndex = (currentPage - 1) * PAGE_SIZE;
@@ -100,24 +86,15 @@ export default function CategoryManagementPage({ userRole }: CategoryManagementP
     setSubmitLoading(true);
 
     try {
-      const iconNote = " The icon is a preview only — it is not saved yet.";
+      const payload = { name: data.name, iconKey: data.iconKey };
       if (editingCategory) {
-        const nameChanged = data.name.trim() !== editingCategory.name;
-        const iconChanged = data.iconKey !== (editingCategory.iconKey ?? "");
-        if (nameChanged) await updateCategory(editingCategory.id, data.name);
-        setPreviewIconKeys((current) => ({ ...current, [editingCategory.id]: data.iconKey }));
+        await updateCategory(editingCategory.id, payload);
         setFormSuccess("Category updated successfully.");
-        showToast(
-          nameChanged
-            ? `Category updated successfully.${iconChanged ? iconNote : ""}`
-            : "Icon changed for preview only — it is not saved yet.",
-          nameChanged ? "success" : "primary",
-        );
+        showToast("Category updated successfully.", "success");
       } else {
-        const created = await createCategory(data.name);
-        if (data.iconKey) setPreviewIconKeys((current) => ({ ...current, [created.id]: data.iconKey }));
+        await createCategory(payload);
         setFormSuccess("Category created successfully.");
-        showToast(`Category created successfully.${data.iconKey ? iconNote : ""}`, "success");
+        showToast("Category created successfully.", "success");
         setCurrentPage(1);
       }
 

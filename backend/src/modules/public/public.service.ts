@@ -23,7 +23,7 @@ interface RawSrp {
 interface RawCommodity {
   id: string;
   name: string;
-  category: { name: string };
+  category: { name: string; iconKey?: string | null };
   status: string;
   createdAt: Date;
   srps: RawSrp[];
@@ -60,6 +60,8 @@ export interface PublicCommodityDto {
   id: string;
   name: string;
   category: string;
+  /** Icon chosen for the category; null = the list matches one from the name. */
+  categoryIconKey: string | null;
   status: string;
   currentPrice: number | null;
   srpPrice: number | null;
@@ -209,6 +211,7 @@ export function buildPublicCommodityDto(commodity: RawCommodity): PublicCommodit
     id: commodity.id,
     name: commodity.name,
     category: commodity.category.name,
+    categoryIconKey: commodity.category.iconKey ?? null,
     status: commodity.status,
     currentPrice,
     srpPrice,

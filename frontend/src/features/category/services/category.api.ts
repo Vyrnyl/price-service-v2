@@ -28,20 +28,23 @@ export async function getCategories() {
   return response.data;
 }
 
-export async function createCategory(name: string) {
+/** `iconKey` "" = Automatic (the backend stores null and the icon is matched from the name). */
+export type CategoryPayload = { name: string; iconKey: string };
+
+export async function createCategory(payload: CategoryPayload) {
   const response = await apiFetch<CategoryDetailResponse>("/api/categories", {
     method: "POST",
-    body: { name },
+    body: payload,
     credentials: "include",
   });
 
   return response.data;
 }
 
-export async function updateCategory(id: string, name: string) {
+export async function updateCategory(id: string, payload: CategoryPayload) {
   const response = await apiFetch<CategoryDetailResponse>(`/api/categories/${id}`, {
     method: "PUT",
-    body: { name },
+    body: payload,
     credentials: "include",
   });
 
