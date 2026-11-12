@@ -44,6 +44,8 @@ export const commodityIdParamSchema = z.object({
 export const listCommoditiesQuerySchema = paginationQuerySchema.extend({
   search: z.preprocess(emptyToUndefined, z.string().trim().min(1).optional()),
   status: z.preprocess(emptyToUndefined, commodityStatusEnum.optional()),
+  // Narrows the list to one category (the Commodities table's category filter).
+  categoryId: z.preprocess(emptyToUndefined, z.string().uuid('Invalid category ID').optional()),
 });
 
 export type CreateCommodityInput = z.infer<typeof createCommoditySchema>;

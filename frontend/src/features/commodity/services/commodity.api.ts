@@ -89,6 +89,7 @@ export interface GetCommoditiesParams {
   pageSize?: number;
   search?: string;
   status?: CommodityStatus;
+  categoryId?: string;
 }
 
 export interface CommodityCreateResponse {
@@ -115,6 +116,7 @@ export async function getCommodities(params: GetCommoditiesParams = {}) {
   if (params.pageSize) query.set("pageSize", String(params.pageSize));
   if (params.search) query.set("search", params.search);
   if (params.status) query.set("status", params.status);
+  if (params.categoryId) query.set("categoryId", params.categoryId);
 
   const queryString = query.toString();
   return apiFetch<CommodityApiResponse>(queryString ? `/api/commodities?${queryString}` : "/api/commodities", {

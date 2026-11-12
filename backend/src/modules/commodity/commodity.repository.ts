@@ -30,11 +30,12 @@ export const commodityRepository = {
   },
 
   findAll: async (query: ListCommoditiesQuery) => {
-    const { page, pageSize, search, status } = query;
+    const { page, pageSize, search, status, categoryId } = query;
     const { skip, take } = toSkipTake({ page, pageSize });
 
     const where: Prisma.CommodityWhereInput = {
       ...(status ? { status } : {}),
+      ...(categoryId ? { categoryId } : {}),
       ...(search
         ? {
             OR: [
