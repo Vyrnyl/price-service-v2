@@ -20,6 +20,7 @@ import {
 } from "../price-record-form.config";
 import {
   isoToInputDate,
+  isoToRangeDate,
   isValidDateRange,
   rangeEndIso,
   rangeStartIso,
@@ -447,9 +448,16 @@ export default function PriceRecordsPage({
       price: Number(record.price.replace(/[^\d.]/g, "")) || 0,
       ...(PRICE_RECORD_DATE_RANGE_ENABLED
         ? {
-            // A record without a range opens as a one-day range on its own date.
-            dateAndTime: record.dateAndTime ? isoToInputDate(record.dateAndTime) : "",
-            periodEnd: isoToInputDate(record.periodEnd ?? record.dateAndTime ?? ""),
+            ...(record.periodEnd
+              ? {
+                  dateAndTime: record.dateAndTime ? isoToRangeDate(record.dateAndTime) : "",
+                  periodEnd: isoToRangeDate(record.periodEnd),
+                }
+              : {
+                  // A record without a range opens as a one-day range on the date the list shows.
+                  dateAndTime: record.dateAndTime ? isoToInputDate(record.dateAndTime) : "",
+                  periodEnd: record.dateAndTime ? isoToInputDate(record.dateAndTime) : "",
+                }),
           }
         : { dateAndTime: record.dateAndTime ? formatInputDateTime(record.dateAndTime) : "" }),
     });
@@ -457,18 +465,16 @@ export default function PriceRecordsPage({
   };
 
   /**
-   * dateAndTime/periodEnd as sent to the API. With a range, an edit that keeps
-   * the start day keeps the record's original time (and so its SRP status);
-   * a new start day saves local midnight.
+   * dateAndTime/periodEnd as sent to the API. With a range both are calendar
+   * dates at 00:00 UTC, the same convention as SRP effective dates, so status
+   * is judged against the SRP DTI set for that day.
    */
   const toRecordDates = (): { dateAndTime: string; periodEnd?: string } => {
     if (!PRICE_RECORD_DATE_RANGE_ENABLED) {
       return { dateAndTime: new Date(newRecord.dateAndTime).toISOString() };
     }
-    const keepsStart =
-      editingRecord?.dateAndTime && isoToInputDate(editingRecord.dateAndTime) === newRecord.dateAndTime;
     return {
-      dateAndTime: keepsStart ? editingRecord.dateAndTime! : (rangeStartIso(newRecord.dateAndTime) as string),
+      dateAndTime: rangeStartIso(newRecord.dateAndTime) as string,
       periodEnd: rangeEndIso(newRecord.periodEnd ?? "") as string,
     };
   };

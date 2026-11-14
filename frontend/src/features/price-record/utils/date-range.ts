@@ -17,24 +17,29 @@ export function todayInputDate(): string {
   return `${now.getFullYear()}-${month}-${day}`;
 }
 
-/** Local midnight of the range start, as an ISO string — stored as `dateAndTime`. */
+// Range ends are calendar dates stored the way SRP effective dates are: the
+// date at 00:00 UTC (what the API makes of "YYYY-MM-DD"). So a range starting
+// on the day an SRP takes effect is judged against that SRP — local midnight
+// in Manila would be 8 hours before it — and the stored date reads back the
+// same in any time zone.
+
+/** The range start as stored in `dateAndTime`: that date at 00:00 UTC. */
 export function rangeStartIso(from: string): string | null {
-  return parseLocalDate(from)?.toISOString() ?? null;
+  return parseLocalDate(from) ? `${from}T00:00:00.000Z` : null;
 }
 
-/**
- * The last moment of the range's final day (local 23:59:59.999), as an ISO
- * string — stored as `periodEnd`. End of day, not midnight, so a one-day range
- * on a record checked at 9:00 AM doesn't end before it starts.
- */
+/** The range end as stored in `periodEnd`: that date at 00:00 UTC. */
 export function rangeEndIso(to: string): string | null {
-  const date = parseLocalDate(to);
-  if (!date) return null;
-  date.setHours(23, 59, 59, 999);
-  return date.toISOString();
+  return parseLocalDate(to) ? `${to}T00:00:00.000Z` : null;
 }
 
-/** A stored timestamp as the "YYYY-MM-DD" local date a date input expects. */
+/** A stored range end (or start) back to its "YYYY-MM-DD" calendar date. */
+export function isoToRangeDate(iso: string): string {
+  const date = new Date(iso);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString().slice(0, 10);
+}
+
+/** A single date & time record's "YYYY-MM-DD" local date, as the list shows it. */
 export function isoToInputDate(iso: string): string {
   const date = new Date(iso);
   if (Number.isNaN(date.getTime())) return "";
@@ -90,8 +95,8 @@ export function toRecordDateRange(
   endIso: string | null | undefined,
 ): { periodEnd: string; dateRange: { label: string; days: number } } | Record<string, never> {
   if (!startIso || !endIso) return {};
-  const from = isoToInputDate(startIso);
-  const to = isoToInputDate(endIso);
+  const from = isoToRangeDate(startIso);
+  const to = isoToRangeDate(endIso);
   return {
     periodEnd: endIso,
     dateRange: { label: formatDateRange(from, to), days: countRangeDays(from, to) },
