@@ -30,3 +30,12 @@ export const NEW_COMMODITY_ENABLED = false;
 //   single Effective Date and saves no end date; SRPs that already have one
 //   keep showing their range.
 export const SRP_DATE_RANGE_ENABLED = true;
+
+// SRP_EDIT_BROWSE_ENABLED — 2026-11-14 client revision. While "ADD NEW SRP" is
+//   on, the search, category and status filters and the pagination stay usable,
+//   and the prices typed on one page or filter are kept when the officer moves
+//   to another. Save records every typed price, wherever it was typed, under the
+//   one Effective Date range. `false` locks the filters and pagination again
+//   while editing (the earlier behaviour); typed prices are still kept by
+//   commodity, so nothing else changes.
+export const SRP_EDIT_BROWSE_ENABLED = true;

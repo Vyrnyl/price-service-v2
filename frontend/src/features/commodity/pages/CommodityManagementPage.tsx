@@ -21,6 +21,7 @@ import {
   INLINE_SRP_EDIT_ENABLED,
   NEW_COMMODITY_ENABLED,
   SRP_DATE_RANGE_ENABLED,
+  SRP_EDIT_BROWSE_ENABLED,
 } from "../commodity-list.config";
 import {
   SRP_EFFECTIVE_DATE_MAX_DAYS_AHEAD,
@@ -82,15 +83,31 @@ function mapCommoditiesToRows(commodities: CommodityItem[]): CommodityRow[] {
 }
 
 /**
- * Rows whose typed SRP differs from the current one. A blank draft counts as
- * "no change" — an SRP can be replaced, never removed.
+ * What a commodity's SRP was when the officer first typed into it. Kept per
+ * commodity so a price typed on page 1 still counts after paging or filtering
+ * that row out of view.
  */
-function getChangedSrpRows(rows: CommodityRow[], drafts: Record<string, string>) {
-  return rows.filter((row) => {
-    const draft = drafts[row.id]?.trim() ?? "";
+type SrpDraftBase = { id: string; name: string; srpValue: string | null };
+
+/**
+ * Commodities whose typed SRP differs from the one they had, on any page. A
+ * blank draft counts as "no change" — an SRP can be replaced, never removed.
+ */
+function getChangedSrpRows(bases: Record<string, SrpDraftBase>, drafts: Record<string, string>) {
+  return Object.values(bases).filter((base) => {
+    const draft = drafts[base.id]?.trim() ?? "";
     if (!draft) return false;
-    return row.srpValue === null || Number(draft) !== Number(row.srpValue);
+    return base.srpValue === null || Number(draft) !== Number(base.srpValue);
   });
+}
+
+/** "A, B and C" / "A, B, C and 2 more" — names of rows with errors that aren't on screen. */
+function formatOffPageNames(names: string[]) {
+  const shown = names.slice(0, 3);
+  const rest = names.length - shown.length;
+  if (rest > 0) return `${shown.join(", ")} and ${rest} more`;
+  if (shown.length === 1) return shown[0]!;
+  return `${shown.slice(0, -1).join(", ")} and ${shown[shown.length - 1]}`;
 }
 
 const PAGE_SIZE = 5;
@@ -134,7 +151,10 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [categoryFilter, setCategoryFilter] = useState("");
   const [isEditingSrp, setIsEditingSrp] = useState(false);
   const [isSavingSrp, setIsSavingSrp] = useState(false);
+  // Only the commodities the officer actually typed into; any other row shows
+  // its current SRP. Keyed by commodity id, so drafts survive paging/filtering.
   const [srpDrafts, setSrpDrafts] = useState<Record<string, string>>({});
+  const [srpDraftBases, setSrpDraftBases] = useState<Record<string, SrpDraftBase>>({});
   const [srpErrors, setSrpErrors] = useState<Record<string, string>>({});
   const [srpEffectiveDate, setSrpEffectiveDate] = useState(() => getManilaDateString());
   const [srpEffectiveDateError, setSrpEffectiveDateError] = useState<string | null>(null);
@@ -302,7 +322,8 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   };
 
   const startSrpEdit = () => {
-    setSrpDrafts(Object.fromEntries(commodityRows.map((row) => [row.id, row.srpValue ?? ""])));
+    setSrpDrafts({});
+    setSrpDraftBases({});
     setSrpErrors({});
     setSrpEffectiveDate(getManilaDateString());
     setSrpEffectiveDateError(null);
@@ -312,12 +333,23 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const cancelSrpEdit = () => {
     setIsEditingSrp(false);
     setSrpDrafts({});
+    setSrpDraftBases({});
     setSrpErrors({});
     setSrpEffectiveDateError(null);
     setSrpEffectiveEndDateError(null);
   };
 
   const handleSrpDraftChange = (commodityId: string, value: string) => {
+    // The row is on screen while it is typed into; remember its SRP as it was,
+    // so the change still counts once it is paged or filtered out of view.
+    const row = commodityRows.find((item) => item.id === commodityId);
+    if (row) {
+      setSrpDraftBases((current) =>
+        current[commodityId]
+          ? current
+          : { ...current, [commodityId]: { id: row.id, name: row.name, srpValue: row.srpValue } },
+      );
+    }
     setSrpDrafts((current) => ({ ...current, [commodityId]: value }));
     setSrpErrors((current) => {
       if (!current[commodityId]) return current;
@@ -339,7 +371,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   };
 
   const handleSaveSrps = async () => {
-    const changedRows = getChangedSrpRows(commodityRows, srpDrafts);
+    const changedRows = getChangedSrpRows(srpDraftBases, srpDrafts);
     if (changedRows.length === 0) {
       showToast("No SRP changes to save.", "neutral");
       cancelSrpEdit();
@@ -396,8 +428,18 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     const failedCount = Object.keys(failedErrors).length;
     const savedCount = changedRows.length - failedCount;
 
-    // Reload so the table shows what the database now holds. Saved rows come
-    // back with their new SRP, so their drafts no longer count as changes.
+    // Drop the saved rows' drafts (they may be on other pages, which the reload
+    // below doesn't refresh); only the failed ones stay typed in.
+    const savedIds = changedRows.filter((row) => !failedErrors[row.id]).map((row) => row.id);
+    const omitSaved = <T,>(current: Record<string, T>) => {
+      const next = { ...current };
+      for (const id of savedIds) delete next[id];
+      return next;
+    };
+    setSrpDrafts(omitSaved);
+    setSrpDraftBases(omitSaved);
+
+    // Reload so the table shows what the database now holds.
     await loadCommodities(currentPage);
     setIsSavingSrp(false);
 
@@ -421,6 +463,18 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   // dialog's category dropdown, so gating on it means the form can never open
   // with an empty category list.
   const pageLoading = statsLoading || isLoading || categoryOptionsLoading;
+
+  // A price that failed validation or saving may sit on a page or filter the
+  // officer has moved away from; name those rows so the error isn't invisible.
+  const visibleIds = new Set(commodityRows.map((row) => row.id));
+  const offPageErrorNames = Object.keys(srpErrors)
+    .filter((id) => !visibleIds.has(id))
+    .map((id) => srpDraftBases[id]?.name)
+    .filter((name): name is string => Boolean(name));
+  const offPageErrorNotice =
+    offPageErrorNames.length > 0
+      ? `Check the SRP for ${formatOffPageNames(offPageErrorNames)} — not shown with the current page or filters.`
+      : null;
 
   const totalListed = summaryStats.total;
   const activeCount = summaryStats.active;
@@ -579,7 +633,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
                       effectiveDate: srpEffectiveDate,
                       effectiveDateError: srpEffectiveDateError,
                       maxEffectiveDate: getMaxSrpEffectiveDateString(),
-                      changedCount: getChangedSrpRows(commodityRows, srpDrafts).length,
+                      changedCount: getChangedSrpRows(srpDraftBases, srpDrafts).length,
+                      offPageErrorNotice,
+                      canBrowse: SRP_EDIT_BROWSE_ENABLED,
                       onStart: startSrpEdit,
                       onCancel: cancelSrpEdit,
                       onSave: () => void handleSaveSrps(),

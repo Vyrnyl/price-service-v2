@@ -38,10 +38,17 @@ export type CategoryFilterControl = {
 export type SrpEditControl = {
   isEditing: boolean;
   isSaving: boolean;
-  /** Draft SRP per commodity id, as typed. */
+  /** Draft SRP per commodity id, as typed. A row without one shows its current SRP. */
   drafts: Record<string, string>;
   /** Validation message per commodity id. */
   errors: Record<string, string>;
+  /** Errors on rows not in the current page/filters, named so they aren't lost. */
+  offPageErrorNotice?: string | null;
+  /**
+   * Filters and pagination stay usable while editing (SRP_EDIT_BROWSE_ENABLED).
+   * They are always locked during a save.
+   */
+  canBrowse?: boolean;
   effectiveDate: string;
   effectiveDateError: string | null;
   maxEffectiveDate: string;
@@ -96,10 +103,11 @@ export default function CommodityTable({
   srpEdit,
 }: CommodityTableProps) {
   const showActions = Boolean(onEditCommodity || onViewSrpHistory);
-  // While SRPs are being edited, filters and paging are locked (`inert`) so
-  // the visible rows — and the drafts typed into them — cannot change under
-  // the officer. Save or Cancel unlocks them.
   const isEditingSrp = Boolean(srpEdit?.isEditing);
+  // Drafts are kept per commodity, so with `canBrowse` the officer may page and
+  // filter while editing. Filters and paging are locked (`inert`) only during a
+  // save — or for the whole edit when `canBrowse` is off.
+  const lockBrowsing = isEditingSrp && (!srpEdit?.canBrowse || Boolean(srpEdit?.isSaving));
   const columnCount = showActions ? 6 : 5;
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
@@ -225,9 +233,20 @@ export default function CommodityTable({
         ) : null}
       </div>
 
+      {srpEdit?.isEditing && (srpEdit.canBrowse || srpEdit.offPageErrorNotice) ? (
+        <div className="mb-4 space-y-1">
+          {srpEdit.canBrowse ? (
+            <p className="text-body-sm text-on-surface-variant">
+              Prices you type are kept when you search, filter or change page. Save records all of them.
+            </p>
+          ) : null}
+          <FieldError message={srpEdit.offPageErrorNotice ?? undefined} />
+        </div>
+      ) : null}
+
       <div
-        className={`mb-4 rounded-xl border border-outline-variant bg-surface-container-low p-4 ${isEditingSrp ? "opacity-60" : ""}`}
-        inert={isEditingSrp}
+        className={`mb-4 rounded-xl border border-outline-variant bg-surface-container-low p-4 ${lockBrowsing ? "opacity-60" : ""}`}
+        inert={lockBrowsing}
       >
         <div className="flex flex-col gap-3 md:flex-row">
           <div className="relative w-full md:flex-1">
@@ -377,7 +396,7 @@ export default function CommodityTable({
                             inputMode="decimal"
                             step="0.01"
                             min="0"
-                            value={srpEdit.drafts[item.id] ?? ""}
+                            value={srpEdit.drafts[item.id] ?? item.srpValue ?? ""}
                             placeholder="No SRP"
                             disabled={srpEdit.isSaving}
                             hasError={Boolean(srpEdit.errors[item.id])}
@@ -441,7 +460,7 @@ export default function CommodityTable({
         <p className="text-body-sm text-on-surface-variant">
           Showing {total === 0 ? 0 : `${startIndex}-${endIndex}`} of {total} commodities
         </p>
-        <div className={isEditingSrp ? "opacity-60" : undefined} inert={isEditingSrp}>
+        <div className={lockBrowsing ? "opacity-60" : undefined} inert={lockBrowsing}>
           <Pagination currentPage={safeCurrentPage} totalPages={totalPages} onPageChange={onPageChange} />
         </div>
       </div>
