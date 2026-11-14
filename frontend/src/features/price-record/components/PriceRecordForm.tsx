@@ -16,6 +16,8 @@ interface PriceRecordFormProps {
   stores: StoreOption[];
   commodities: CommodityOption[];
   commodityOptionsLoading?: boolean;
+  /** Label commodities without an SRP "(no SRP yet)" (PRICE_RECORD_REQUIRE_SRP_ENABLED). */
+  markNoSrp?: boolean;
   formError: string | null;
   formErrors: Partial<Record<keyof CreatePriceRecordPayload, string>>;
   submitLoading: boolean;
@@ -32,6 +34,7 @@ export default function PriceRecordForm({
   stores,
   commodities,
   commodityOptionsLoading = false,
+  markNoSrp = false,
   formError,
   formErrors,
   submitLoading,
@@ -67,7 +70,11 @@ export default function PriceRecordForm({
               id="record-commodity"
               value={newRecord.commodityId}
               onChange={(value) => onChange("commodityId", value)}
-              options={commodities.map((commodity) => ({ value: commodity.id, label: commodity.name }))}
+              options={commodities.map((commodity) => ({
+                value: commodity.id,
+                label:
+                  markNoSrp && !commodity.srps?.length ? `${commodity.name} (no SRP yet)` : commodity.name,
+              }))}
               placeholder="Select commodity"
               searchPlaceholder="Search commodity"
               emptyLabel="No commodities found."

@@ -20,3 +20,14 @@ export const PRICE_RECORD_BULK_ENTRY_ENABLED = true;
 //   range keep showing it in the list either way, and editing one with the
 //   flag off leaves its `periodEnd` untouched.
 export const PRICE_RECORD_DATE_RANGE_ENABLED = true;
+
+// PRICE_RECORD_REQUIRE_SRP_ENABLED — 2026-11-14 client revision. A price can
+//   only be added for a commodity that has an SRP. The bulk Add form greys out
+//   the price box of every commodity without one ("No SRP yet"), and the single
+//   form lists them as "(no SRP yet)" and refuses them on save. The backend's
+//   REQUIRE_SRP_FOR_PRICE_RECORDS (price-record.repository.ts) enforces the
+//   same rule against the SRP in force on the record's start date, so an SRP
+//   that only takes effect later is refused there with its own row error.
+//   Roll back both flags together; `false` here alone only removes the hints.
+//   Price-only edits of older records without an SRP stay allowed.
+export const PRICE_RECORD_REQUIRE_SRP_ENABLED = true;

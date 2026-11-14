@@ -17,6 +17,8 @@ export type BulkCommodityRow = {
   name: string;
   categoryName: string;
   srp: number | null;
+  /** No SRP yet, so no price can be added (PRICE_RECORD_REQUIRE_SRP_ENABLED). */
+  locked?: boolean;
 };
 
 export type PriceRecordBulkErrors = {
@@ -135,7 +137,13 @@ export default function PriceRecordBulkForm({
             <p className="text-xs text-on-surface-variant">
               {optionsLoading
                 ? "Loading commodities..."
-                : `${rows.length} listed · ${enteredCount} with a price`}
+                : [
+                    `${rows.length} listed`,
+                    ...(rows.some((row) => row.locked)
+                      ? [`${rows.filter((row) => row.locked).length} without SRP`]
+                      : []),
+                    `${enteredCount} with a price`,
+                  ].join(" · ")}
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
@@ -243,6 +251,11 @@ export default function PriceRecordBulkForm({
                     <p className="text-xs text-on-surface-variant">
                       {row.categoryName} · SRP {row.srp != null ? formatCurrency(row.srp) : "not set"}
                     </p>
+                    {row.locked ? (
+                      <p className="text-xs text-on-surface-variant">
+                        Add its SRP on Commodities before recording a price.
+                      </p>
+                    ) : null}
                   </div>
                   <div className="w-32 shrink-0">
                     <Input
@@ -250,12 +263,15 @@ export default function PriceRecordBulkForm({
                       inputMode="decimal"
                       step="0.01"
                       min="0"
-                      placeholder="Price"
-                      value={prices[row.id] ?? ""}
+                      placeholder={row.locked ? "No SRP yet" : "Price"}
+                      value={row.locked ? "" : (prices[row.id] ?? "")}
                       onChange={(event) => onPriceChange(row.id, event.target.value)}
                       hasError={Boolean(error)}
-                      disabled={isSaving}
-                      aria-label={`Price for ${row.name}`}
+                      disabled={isSaving || row.locked}
+                      aria-label={
+                        row.locked ? `Price for ${row.name} (no SRP yet)` : `Price for ${row.name}`
+                      }
+                      className="disabled:cursor-not-allowed disabled:opacity-60"
                     />
                     <FieldError message={error} />
                   </div>

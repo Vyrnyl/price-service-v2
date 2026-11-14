@@ -9,12 +9,52 @@ import type { CreatePriceRecordWithUserInput } from './price-record.types';
 
 type PriceStatus = 'COMPLIANT' | 'OVERPRICE' | 'UNDERPRICE';
 
+/**
+ * 2026-11-14 client revision: a price can only be recorded for a commodity
+ * that has an SRP in force on the record's (start) date. `false` restores the
+ * old rule — such a record saves as COMPLIANT. The frontend's
+ * PRICE_RECORD_REQUIRE_SRP_ENABLED (price-record-form.config.ts) is the
+ * matching UI flag; roll back both together.
+ */
+export const REQUIRE_SRP_FOR_PRICE_RECORDS = true;
+
+/**
+ * Status of a price against the SRP in force (`srpPrice`, null when none).
+ * With `requireSrp`, a missing SRP is refused instead of saved as COMPLIANT.
+ */
+export function resolvePriceStatus(
+  price: number,
+  srpPrice: number | null,
+  dateAndTime: Date,
+  requireSrp: boolean,
+): PriceStatus {
+  if (srpPrice === null) {
+    if (requireSrp) {
+      const day = dateAndTime.toLocaleDateString('en-US', {
+        timeZone: 'Asia/Manila',
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      });
+      throw new AppError(
+        `No SRP in force on ${day} yet. Add the SRP on Commodities first.`,
+        400,
+      );
+    }
+    return 'COMPLIANT';
+  }
+  if (price > srpPrice) return 'OVERPRICE';
+  if (price < srpPrice) return 'UNDERPRICE';
+  return 'COMPLIANT';
+}
+
 async function calculatePriceStatus(
   commodityId: string,
   price: number,
   dateAndTime: Date,
+  requireSrp: boolean,
 ): Promise<PriceStatus> {
-  // Fetch the most recent effective SRP for the commodity
+  // The SRP in force on that date: the most recent one already effective.
   const srp = await prisma.sRP.findFirst({
     where: {
       commodityId,
@@ -23,28 +63,27 @@ async function calculatePriceStatus(
     orderBy: { effectiveDate: 'desc' },
   });
 
-  // If no SRP is found, default to COMPLIANT
-  if (!srp) {
-    return 'COMPLIANT';
-  }
-
-  const srpPrice = parseFloat(srp.price.toString());
-
-  if (price > srpPrice) {
-    return 'OVERPRICE';
-  } else if (price < srpPrice) {
-    return 'UNDERPRICE';
-  } else {
-    return 'COMPLIANT';
-  }
+  return resolvePriceStatus(
+    price,
+    srp ? parseFloat(srp.price.toString()) : null,
+    dateAndTime,
+    requireSrp,
+  );
 }
 
 export const priceRecordRepository = {
   create: async (data: CreatePriceRecordWithUserInput) => {
     const { commodityId, storeId, userId, status, price, dateAndTime, ...rest } = data;
 
-    // Calculate status if not provided
-    const finalStatus = status ?? (await calculatePriceStatus(commodityId, price, dateAndTime));
+    // Always look up the SRP so the "SRP required" rule can't be skipped by
+    // sending a status; a sent status still wins, as before.
+    const computedStatus = await calculatePriceStatus(
+      commodityId,
+      price,
+      dateAndTime,
+      REQUIRE_SRP_FOR_PRICE_RECORDS,
+    );
+    const finalStatus = status ?? computedStatus;
 
     return prisma.priceRecord.create({
       data: {
@@ -125,10 +164,24 @@ export const priceRecordRepository = {
       throw new AppError("End date can't be before the start date", 400);
     }
 
-    // Calculate status if not explicitly provided and price or dateAndTime is being updated
+    // The SRP rule applies when an edit moves the record to another commodity
+    // or start date. A price-only edit of an older record that never had an SRP
+    // (e.g. the 2025 import) stays allowed and keeps saving as COMPLIANT.
+    const commodityChanged = Boolean(commodityId) && commodityId !== currentRecord.commodityId;
+    const dateChanged =
+      dateAndTime !== undefined && dateAndTime.getTime() !== currentRecord.dateAndTime.getTime();
+    const requireSrp = REQUIRE_SRP_FOR_PRICE_RECORDS && (commodityChanged || dateChanged);
+
+    // Recalculate status when price, date or commodity changes, unless one was sent.
     let finalStatus = status;
-    if (finalStatus === undefined && (price !== undefined || dateAndTime !== undefined)) {
-      finalStatus = await calculatePriceStatus(finalCommodityId, finalPrice, finalDateAndTime);
+    if (requireSrp || (finalStatus === undefined && (price !== undefined || dateChanged || commodityChanged))) {
+      const computedStatus = await calculatePriceStatus(
+        finalCommodityId,
+        finalPrice,
+        finalDateAndTime,
+        requireSrp,
+      );
+      finalStatus = finalStatus ?? computedStatus;
     }
 
     const updateData: Prisma.PriceRecordUpdateInput = {

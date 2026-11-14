@@ -17,6 +17,7 @@ import PriceRecordBulkForm, {
 import {
   PRICE_RECORD_BULK_ENTRY_ENABLED,
   PRICE_RECORD_DATE_RANGE_ENABLED,
+  PRICE_RECORD_REQUIRE_SRP_ENABLED,
 } from "../price-record-form.config";
 import {
   isoToInputDate,
@@ -228,6 +229,7 @@ export default function PriceRecordsPage({
           name: commodity.name,
           categoryName: commodity.category?.name ?? "",
           srp: getLatestSrpPrice(commodity),
+          locked: PRICE_RECORD_REQUIRE_SRP_ENABLED && getLatestSrpPrice(commodity) === null,
         })),
     [commodities, bulkCategoryId],
   );
@@ -491,6 +493,13 @@ export default function PriceRecordsPage({
     }
     if (!newRecord.commodityId) {
       nextErrors.commodityId = "Please select a commodity.";
+    } else if (
+      PRICE_RECORD_REQUIRE_SRP_ENABLED &&
+      // A price-only edit of an older record without an SRP stays allowed.
+      (!editingRecord || newRecord.commodityId !== editingRecord.commodityId) &&
+      getLatestSrpPrice(commodities.find((item) => item.id === newRecord.commodityId)) === null
+    ) {
+      nextErrors.commodityId = "This commodity has no SRP yet. Add its SRP on Commodities first.";
     }
     if (PRICE_RECORD_DATE_RANGE_ENABLED) {
       if (!newRecord.dateAndTime) nextErrors.dateAndTime = "Choose a start date.";
@@ -675,6 +684,7 @@ export default function PriceRecordsPage({
                 <PriceRecordForm
                   stores={stores}
                   commodities={commodities}
+                  markNoSrp={PRICE_RECORD_REQUIRE_SRP_ENABLED}
                   commodityOptionsLoading={optionsLoading}
                   formError={formError}
                   formErrors={formErrors}
