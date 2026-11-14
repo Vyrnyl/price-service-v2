@@ -8,3 +8,15 @@
 //   (store, commodity, date & time, price). Editing an existing record always
 //   uses the single-record form. No schema or API change is involved.
 export const PRICE_RECORD_BULK_ENTRY_ENABLED = true;
+
+// PRICE_RECORD_DATE_RANGE_ENABLED — 2026-11-14 client revision (update.txt).
+//   The Add forms (bulk and single) and the Edit form ask for a date range
+//   (From – To, e.g. Jan 5 – Feb 20) instead of one date & time. The start is
+//   saved as `dateAndTime` (local midnight; an edit that keeps the start day
+//   keeps the original time) and the end as `periodEnd` (end of that day).
+//   Nothing happens when a range ends — it is a label, not a schedule; status,
+//   charts and forecasts keep using `dateAndTime`. `false` restores the single
+//   Date & Time field and saves no `periodEnd`. Records that already have a
+//   range keep showing it in the list either way, and editing one with the
+//   flag off leaves its `periodEnd` untouched.
+export const PRICE_RECORD_DATE_RANGE_ENABLED = true;

@@ -1,4 +1,5 @@
 import { prisma } from '../../prisma';
+import AppError from '../../shared/utils/AppError';
 import type { Prisma } from '@prisma/client';
 import type { ListPriceRecordsQuery, UpdatePriceRecordInput } from './price-record.schema';
 import type { AuthUser } from '../../shared/types/express';
@@ -116,6 +117,13 @@ export const priceRecordRepository = {
     const finalPrice = price !== undefined ? price : currentRecord.price.toNumber();
     const finalDateAndTime = dateAndTime !== undefined ? dateAndTime : currentRecord.dateAndTime;
     const finalCommodityId = commodityId || currentRecord.commodityId;
+
+    // The schema compares the range ends only when both are sent; when one
+    // side is omitted, compare against what is stored.
+    const finalPeriodEnd = rest.periodEnd !== undefined ? rest.periodEnd : currentRecord.periodEnd;
+    if (finalPeriodEnd && finalPeriodEnd.getTime() < finalDateAndTime.getTime()) {
+      throw new AppError("End date can't be before the start date", 400);
+    }
 
     // Calculate status if not explicitly provided and price or dateAndTime is being updated
     let finalStatus = status;

@@ -79,8 +79,19 @@ export default function PriceRecordsTable({
             {records.map((record) => (
               <tr key={record.id}>
                 <td className={`${compact ? "py-2" : "py-3"} align-top`}>
-                  <div className={`font-semibold text-on-surface ${compact ? "text-xs" : "text-sm"}`}>{record.date}</div>
-                  <div className={`${compact ? "text-[10px]" : "text-body-xs"} text-on-surface-variant`}>{record.time}</div>
+                  {record.dateRange ? (
+                    <>
+                      <div className={`font-semibold text-on-surface ${compact ? "text-xs" : "text-sm"}`}>{record.dateRange.label}</div>
+                      <div className={`${compact ? "text-[10px]" : "text-body-xs"} text-on-surface-variant`}>
+                        {record.dateRange.days} {record.dateRange.days === 1 ? "day" : "days"}
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className={`font-semibold text-on-surface ${compact ? "text-xs" : "text-sm"}`}>{record.date}</div>
+                      <div className={`${compact ? "text-[10px]" : "text-body-xs"} text-on-surface-variant`}>{record.time}</div>
+                    </>
+                  )}
                 </td>
                 <td className={`${compact ? "py-2" : "py-3"} align-top`}>
                   <div className={`font-semibold text-on-surface ${compact ? "text-xs" : "text-sm"}`}>{record.store}</div>

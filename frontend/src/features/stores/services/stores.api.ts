@@ -1,10 +1,13 @@
 import type { StoreFormData, Store } from "../types/stores.types";
 import { apiFetch, fetchAllPages } from "@/shared/services/api";
 import type { CommodityOption, PriceRecord } from "@/features/price-record/types/price-record.types";
+import { toRecordDateRange } from "@/features/price-record/utils/date-range";
 
 export interface BackendPriceRecord {
   id: string;
   dateAndTime?: string | null;
+  /** End of the date range the price covers; null = a single date & time. */
+  periodEnd?: string | null;
   createdAt?: string | null;
   price: number | string;
   srp?: number | string | null;
@@ -122,6 +125,7 @@ export function mapBackendPriceRecord(record: BackendPriceRecord, commodities: C
     srp: latestSrpPrice != null ? formatNumber(latestSrpPrice) : record.srp ? formatNumber(record.srp) : undefined,
     officerInitials,
     officerName,
+    ...toRecordDateRange(record.dateAndTime, record.periodEnd),
   };
 }
 

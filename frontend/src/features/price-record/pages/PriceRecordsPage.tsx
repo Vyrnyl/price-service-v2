@@ -14,7 +14,18 @@ import PriceRecordBulkForm, {
   type BulkCommodityRow,
   type PriceRecordBulkErrors,
 } from "../components/PriceRecordBulkForm";
-import { PRICE_RECORD_BULK_ENTRY_ENABLED } from "../price-record-form.config";
+import {
+  PRICE_RECORD_BULK_ENTRY_ENABLED,
+  PRICE_RECORD_DATE_RANGE_ENABLED,
+} from "../price-record-form.config";
+import {
+  isoToInputDate,
+  isValidDateRange,
+  rangeEndIso,
+  rangeStartIso,
+  todayInputDate,
+  toRecordDateRange,
+} from "../utils/date-range";
 import PriceRecordFilters from "../components/PriceRecordFilters";
 import PriceRecordsTable from "../components/PriceRecordsTable";
 import type {
@@ -34,6 +45,9 @@ function formatInputDateTime(value: string) {
 }
 
 function createDefaultRecord(): CreatePriceRecordPayload {
+  if (PRICE_RECORD_DATE_RANGE_ENABLED) {
+    return { commodityId: "", storeId: "", price: 0, dateAndTime: todayInputDate(), periodEnd: todayInputDate() };
+  }
   return {
     commodityId: "",
     storeId: "",
@@ -88,6 +102,8 @@ function getLatestSrpPrice(commodity?: CommodityOption) {
 type BackendPriceRecord = {
   id: string;
   dateAndTime: string;
+  /** End of the date range the price covers; null/absent = a single date & time. */
+  periodEnd?: string | null;
   price: number | string;
   srp?: number | string;
   status: "COMPLIANT" | "OVERPRICE" | "UNDERPRICE" | string;
@@ -149,6 +165,7 @@ function mapBackendPriceRecord(record: BackendPriceRecord, commodities: Commodit
     srp: srpText,
     officerInitials,
     officerName,
+    ...toRecordDateRange(record.dateAndTime, record.periodEnd),
   };
 }
 
@@ -186,6 +203,9 @@ export default function PriceRecordsPage({
   const [bulkPrices, setBulkPrices] = useState<Record<string, string>>({});
   const [bulkErrors, setBulkErrors] = useState<PriceRecordBulkErrors>({});
   const [bulkSaving, setBulkSaving] = useState(false);
+  // Date range (PRICE_RECORD_DATE_RANGE_ENABLED), "YYYY-MM-DD" local dates.
+  const [bulkDateFrom, setBulkDateFrom] = useState("");
+  const [bulkDateTo, setBulkDateTo] = useState("");
   const { showToast } = useToast();
 
   const categoryOptions = useMemo(() => {
@@ -272,13 +292,13 @@ export default function PriceRecordsPage({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPage, storeFilter, commodityFilter, categoryFilter]);
 
+  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const safePage = Math.min(currentPage, totalPages);
+
   const records = useMemo(
     () => rawRecords.map((record) => mapBackendPriceRecord(record, commodities)),
     [rawRecords, commodities],
   );
-
-  const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
-  const safePage = Math.min(currentPage, totalPages);
 
   const handleFieldChange = (
     field: keyof CreatePriceRecordPayload,
@@ -307,6 +327,8 @@ export default function PriceRecordsPage({
     setBulkCategoryId("");
     // Local time, not UTC — the field is a datetime-local.
     setBulkDateAndTime(formatInputDateTime(new Date().toISOString()));
+    setBulkDateFrom(todayInputDate());
+    setBulkDateTo(todayInputDate());
     setBulkPrices({});
     setBulkErrors({});
     setFormOpen(true);
@@ -327,7 +349,15 @@ export default function PriceRecordsPage({
     // Same rules as the single-record form and createPriceRecordSchema.
     const nextErrors: PriceRecordBulkErrors = {};
     if (!bulkStoreId) nextErrors.storeId = "Please select a store.";
-    if (!bulkDateAndTime) nextErrors.dateAndTime = "Please choose a date and time.";
+    if (PRICE_RECORD_DATE_RANGE_ENABLED) {
+      if (!bulkDateFrom) nextErrors.dateFrom = "Choose a start date.";
+      if (!bulkDateTo) nextErrors.dateTo = "Choose an end date.";
+      if (bulkDateFrom && bulkDateTo && !isValidDateRange(bulkDateFrom, bulkDateTo)) {
+        nextErrors.dateTo = "End date can't be before the start date.";
+      }
+    } else if (!bulkDateAndTime) {
+      nextErrors.dateAndTime = "Please choose a date and time.";
+    }
     if (bulkEnteredIds.length === 0) nextErrors.list = "Enter a price for at least one commodity.";
     const priceErrors: Record<string, string> = {};
     for (const id of bulkEnteredIds) {
@@ -348,7 +378,11 @@ export default function PriceRecordsPage({
     // allSettled, not all: one failure must not hide that the others saved.
     setBulkSaving(true);
     const entryIds = [...bulkEnteredIds];
-    const dateAndTime = new Date(bulkDateAndTime).toISOString();
+    // With a range, the start is the record's dateAndTime and the end its periodEnd.
+    const dateAndTime = PRICE_RECORD_DATE_RANGE_ENABLED
+      ? (rangeStartIso(bulkDateFrom) as string)
+      : new Date(bulkDateAndTime).toISOString();
+    const periodEnd = PRICE_RECORD_DATE_RANGE_ENABLED ? rangeEndIso(bulkDateTo) : undefined;
     const results = await Promise.allSettled(
       entryIds.map((commodityId) =>
         apiFetch<{ status: string; data: BackendPriceRecord }>("/api/price-records", {
@@ -358,6 +392,7 @@ export default function PriceRecordsPage({
             storeId: bulkStoreId,
             price: Number(bulkPrices[commodityId]),
             dateAndTime,
+            ...(periodEnd ? { periodEnd } : {}),
           },
         }),
       ),
@@ -410,9 +445,32 @@ export default function PriceRecordsPage({
       commodityId: record.commodityId,
       storeId: record.storeId,
       price: Number(record.price.replace(/[^\d.]/g, "")) || 0,
-      dateAndTime: record.dateAndTime ? formatInputDateTime(record.dateAndTime) : "",
+      ...(PRICE_RECORD_DATE_RANGE_ENABLED
+        ? {
+            // A record without a range opens as a one-day range on its own date.
+            dateAndTime: record.dateAndTime ? isoToInputDate(record.dateAndTime) : "",
+            periodEnd: isoToInputDate(record.periodEnd ?? record.dateAndTime ?? ""),
+          }
+        : { dateAndTime: record.dateAndTime ? formatInputDateTime(record.dateAndTime) : "" }),
     });
     setFormOpen(true);
+  };
+
+  /**
+   * dateAndTime/periodEnd as sent to the API. With a range, an edit that keeps
+   * the start day keeps the record's original time (and so its SRP status);
+   * a new start day saves local midnight.
+   */
+  const toRecordDates = (): { dateAndTime: string; periodEnd?: string } => {
+    if (!PRICE_RECORD_DATE_RANGE_ENABLED) {
+      return { dateAndTime: new Date(newRecord.dateAndTime).toISOString() };
+    }
+    const keepsStart =
+      editingRecord?.dateAndTime && isoToInputDate(editingRecord.dateAndTime) === newRecord.dateAndTime;
+    return {
+      dateAndTime: keepsStart ? editingRecord.dateAndTime! : (rangeStartIso(newRecord.dateAndTime) as string),
+      periodEnd: rangeEndIso(newRecord.periodEnd ?? "") as string,
+    };
   };
 
   const handleSubmitRecord = async (event: FormEvent<HTMLFormElement>) => {
@@ -428,7 +486,13 @@ export default function PriceRecordsPage({
     if (!newRecord.commodityId) {
       nextErrors.commodityId = "Please select a commodity.";
     }
-    if (!newRecord.dateAndTime) {
+    if (PRICE_RECORD_DATE_RANGE_ENABLED) {
+      if (!newRecord.dateAndTime) nextErrors.dateAndTime = "Choose a start date.";
+      if (!newRecord.periodEnd) nextErrors.periodEnd = "Choose an end date.";
+      if (newRecord.dateAndTime && newRecord.periodEnd && !isValidDateRange(newRecord.dateAndTime, newRecord.periodEnd)) {
+        nextErrors.periodEnd = "End date can't be before the start date.";
+      }
+    } else if (!newRecord.dateAndTime) {
       nextErrors.dateAndTime = "Please choose a date and time.";
     }
     if (newRecord.price <= 0) {
@@ -443,8 +507,10 @@ export default function PriceRecordsPage({
     try {
       setSubmitLoading(true);
       const payload = {
-        ...newRecord,
-        dateAndTime: new Date(newRecord.dateAndTime).toISOString(),
+        commodityId: newRecord.commodityId,
+        storeId: newRecord.storeId,
+        price: newRecord.price,
+        ...toRecordDates(),
       };
       await apiFetch<{ status: string; data: BackendPriceRecord }>(
         editingRecord ? `/api/price-records/${editingRecord.id}` : "/api/price-records",
@@ -550,7 +616,9 @@ export default function PriceRecordsPage({
                 editingRecord
                   ? "Update the selected commodity price entry from your assigned inspection route."
                   : PRICE_RECORD_BULK_ENTRY_ENABLED
-                    ? "Pick the store and when you checked it, then enter the price of each commodity you found."
+                    ? PRICE_RECORD_DATE_RANGE_ENABLED
+                      ? "Pick the store and the dates the prices cover, then enter the price of each commodity you found."
+                      : "Pick the store and when you checked it, then enter the price of each commodity you found."
                     : "Record a new commodity price entry from your assigned inspection route."
               }
               maxWidth="max-w-3xl"
@@ -579,6 +647,22 @@ export default function PriceRecordsPage({
                     setBulkErrors((current) => ({ ...current, dateAndTime: undefined }));
                   }}
                   onPriceChange={handleBulkPriceChange}
+                  dateRange={
+                    PRICE_RECORD_DATE_RANGE_ENABLED
+                      ? {
+                          from: bulkDateFrom,
+                          to: bulkDateTo,
+                          onFromChange: (value) => {
+                            setBulkDateFrom(value);
+                            setBulkErrors((current) => ({ ...current, dateFrom: undefined, dateTo: undefined }));
+                          },
+                          onToChange: (value) => {
+                            setBulkDateTo(value);
+                            setBulkErrors((current) => ({ ...current, dateTo: undefined }));
+                          },
+                        }
+                      : undefined
+                  }
                   onSave={() => void handleBulkSave()}
                 />
               ) : (
@@ -591,6 +675,7 @@ export default function PriceRecordsPage({
                   submitLoading={submitLoading}
                   newRecord={newRecord}
                   mode={editingRecord ? "edit" : "create"}
+                  dateRange={PRICE_RECORD_DATE_RANGE_ENABLED}
                   onChange={handleFieldChange}
                   onCancel={handleCloseForm}
                   onSubmit={handleSubmitRecord}

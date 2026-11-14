@@ -22,6 +22,9 @@ export type BulkCommodityRow = {
 export type PriceRecordBulkErrors = {
   storeId?: string;
   dateAndTime?: string;
+  /** Date range mode (PRICE_RECORD_DATE_RANGE_ENABLED). */
+  dateFrom?: string;
+  dateTo?: string;
   /** Shown above the list, e.g. "Enter at least one price." */
   list?: string;
   /** Per commodity id. */
@@ -49,6 +52,16 @@ interface PriceRecordBulkFormProps {
   onDateAndTimeChange: (value: string) => void;
   onPriceChange: (commodityId: string, value: string) => void;
   onSave: () => void;
+  /**
+   * When set, the form asks for a From – To date range instead of one date &
+   * time (PRICE_RECORD_DATE_RANGE_ENABLED); `dateAndTime` is then unused.
+   */
+  dateRange?: {
+    from: string;
+    to: string;
+    onFromChange: (value: string) => void;
+    onToChange: (value: string) => void;
+  };
 }
 
 /**
@@ -74,6 +87,7 @@ export default function PriceRecordBulkForm({
   onDateAndTimeChange,
   onPriceChange,
   onSave,
+  dateRange,
 }: PriceRecordBulkFormProps) {
   return (
     <div className="grid gap-4">
@@ -125,6 +139,41 @@ export default function PriceRecordBulkForm({
             </p>
           </div>
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
+            {dateRange ? (
+              <fieldset className="min-w-0">
+                <legend className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-outline">
+                  Date Range
+                </legend>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="min-w-0 sm:w-40">
+                    <Input
+                      id="bulk-record-date-from"
+                      type="date"
+                      value={dateRange.from}
+                      max={dateRange.to || undefined}
+                      onChange={(event) => dateRange.onFromChange(event.target.value)}
+                      hasError={Boolean(errors.dateFrom)}
+                      disabled={isSaving}
+                      aria-label="From date"
+                    />
+                    <FieldError message={errors.dateFrom} />
+                  </div>
+                  <div className="min-w-0 sm:w-40">
+                    <Input
+                      id="bulk-record-date-to"
+                      type="date"
+                      value={dateRange.to}
+                      min={dateRange.from || undefined}
+                      onChange={(event) => dateRange.onToChange(event.target.value)}
+                      hasError={Boolean(errors.dateTo)}
+                      disabled={isSaving}
+                      aria-label="To date"
+                    />
+                    <FieldError message={errors.dateTo} />
+                  </div>
+                </div>
+              </fieldset>
+            ) : (
             <div className="sm:w-56">
               <label
                 htmlFor="bulk-record-date"
@@ -142,6 +191,7 @@ export default function PriceRecordBulkForm({
               />
               <FieldError message={errors.dateAndTime} />
             </div>
+            )}
             {/* sm:mt-6 drops the button past the date label so it lines up with the field.
                 No Cancel here — the dialog's own Close button dismisses the form. */}
             <div className="flex sm:mt-6">

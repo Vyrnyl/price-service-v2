@@ -21,6 +21,8 @@ interface PriceRecordFormProps {
   submitLoading: boolean;
   newRecord: CreatePriceRecordPayload;
   mode?: "create" | "edit";
+  /** Start and end dates instead of one date & time (PRICE_RECORD_DATE_RANGE_ENABLED). */
+  dateRange?: boolean;
   onChange: (field: keyof CreatePriceRecordPayload, value: string | number) => void;
   onCancel: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void>;
@@ -35,6 +37,7 @@ export default function PriceRecordForm({
   submitLoading,
   newRecord,
   mode = "create",
+  dateRange = false,
   onChange,
   onCancel,
   onSubmit,
@@ -76,6 +79,31 @@ export default function PriceRecordForm({
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3 sm:col-span-2">
+          {dateRange ? (
+            <>
+              {/* Range mode: dateAndTime holds the "YYYY-MM-DD" start, periodEnd the end. */}
+              <FormGroup label="Start date" htmlFor="record-date-from" error={formErrors.dateAndTime}>
+                <Input
+                  id="record-date-from"
+                  type="date"
+                  value={newRecord.dateAndTime}
+                  max={newRecord.periodEnd || undefined}
+                  onChange={(event) => onChange("dateAndTime", event.target.value)}
+                  hasError={Boolean(formErrors.dateAndTime)}
+                />
+              </FormGroup>
+              <FormGroup label="End date" htmlFor="record-date-to" error={formErrors.periodEnd}>
+                <Input
+                  id="record-date-to"
+                  type="date"
+                  value={newRecord.periodEnd ?? ""}
+                  min={newRecord.dateAndTime || undefined}
+                  onChange={(event) => onChange("periodEnd", event.target.value)}
+                  hasError={Boolean(formErrors.periodEnd)}
+                />
+              </FormGroup>
+            </>
+          ) : (
           <FormGroup label="Date & Time" htmlFor="record-date" error={formErrors.dateAndTime}>
             <Input
               id="record-date"
@@ -85,6 +113,7 @@ export default function PriceRecordForm({
               hasError={Boolean(formErrors.dateAndTime)}
             />
           </FormGroup>
+          )}
 
           <FormGroup label="Price" htmlFor="record-price" error={formErrors.price}>
             <Input

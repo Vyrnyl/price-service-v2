@@ -95,6 +95,8 @@ model PriceRecord {
   userId      String    @db.Uuid
   price       Decimal   @db.Decimal(20, 4)
   dateAndTime DateTime
+  /// Last day of the date range the price covers; null = a single date & time. dateAndTime is the start.
+  periodEnd   DateTime?
   status      PriceStatus
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
