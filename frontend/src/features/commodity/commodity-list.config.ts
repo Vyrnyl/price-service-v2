@@ -6,8 +6,8 @@
 //   table's filter panel (admin and officer). `false` removes the dropdown.
 //
 // INLINE_SRP_EDIT_ENABLED — the officer edits SRPs straight in the table:
-//   "Edit SRP" turns every SRP cell on the page into an input, one Effective
-//   Date at the top right applies to all of them, and Save records a new SRP
+//   "Add SRP" (labelled "Edit SRP" until 2026-11-14) turns every SRP cell on
+//   the page into an input, one Effective Date at the top right applies to all of them, and Save records a new SRP
 //   for each row whose price changed (SRPs stay historical — nothing is
 //   overwritten). While it is on, the Edit Commodity dialog no longer shows the
 //   SRP price and effective-date fields. `false` restores the old behaviour:

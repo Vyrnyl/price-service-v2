@@ -164,7 +164,7 @@ export default function CommodityTable({
                   className="w-full sm:w-auto"
                 >
                   <MdEdit size={18} />
-                  Edit SRP
+                  Add SRP
                 </Button>
               )}
             </div>
