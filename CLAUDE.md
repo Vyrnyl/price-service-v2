@@ -20,7 +20,9 @@ Check [context/progress.md](context/progress.md) at the start of every session �
 
 **There is no separate dev database.** Local dev points at the **live production Neon DB**, so any write — seeding, migrations, deletions — is a production change and needs explicit sign-off first. See the 2026-09-09 seeding entry in [context/progress.md](context/progress.md) for the tagged-manifest pattern used when demo data is genuinely wanted.
 
-Verified baseline (2026-11-12): backend `tsc` clean · frontend `tsc` clean · backend `npm test` 157/157 passing.
+Verified baseline (2026-11-14): backend `tsc` clean · frontend `tsc` clean · backend `npm test` 170/170 passing.
+
+**The November client revisions are behind on/off flags, so they can be rolled back.** The officer Commodities changes (category filter, inline SRP edit, SRP date range, filtering/paging while adding SRPs), the Price Records bulk Add form, the date range and the officer SRP history pop-up are each switched on by a constant in `commodity-list.config.ts`, `price-record-form.config.ts` or `srp-history.config.ts`. Roll a part back by setting its flag to `false`, not with `git revert`: several parts share a commit.
 
 ## The one rule that governs everything
 
@@ -100,4 +102,7 @@ These encode the workflow — prefer them over ad-hoc work:
 - **Every screen needs loading, empty, and error states drawn** — a blank state fails the visual-verify gate.
 - [context/build-plan.md](context/build-plan.md) and [context/progress.md](context/progress.md) are tightly coupled: adding a feature to one requires a matching entry and count update in the other.
 - Secrets come from env vars only. Never hardcode them. `.env` is gitignored and correctly untracked — keep it that way.
+- **Run `prisma migrate` against Neon's direct host** (the `DATABASE_URL` hostname without `-pooler`, passed for that one command only; `.env` stays unchanged). Through the pooler, an idle pgbouncer session can keep holding the migration lock (P1002).
+- **Range end dates are labels.** `SRP.effectiveDate` alone decides which SRP is in force; `effectiveEndDate` and `PriceRecord.periodEnd` are for display and never change status or compliance. Range dates are stored as `YYYY-MM-DDT00:00:00.000Z`, the same way SRP dates are.
+- **Bash has no Node on PATH** (fnm). Run `npm`/`npx` from PowerShell after `fnm env --use-on-cd | Out-String | Invoke-Expression`.
 - **Work happens in `price-service-v2`.** The original `price-service` is the untouched backup.
