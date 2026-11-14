@@ -8,6 +8,8 @@ export type SrpHistoryEntry = {
   price: number;
   /** ISO date the SRP took effect; it holds until the next entry's date. */
   effectiveDate: string;
+  /** End of the SRP's date range — a label only; the SRP still holds until the next entry. */
+  effectiveEndDate?: string | null;
 };
 
 /**

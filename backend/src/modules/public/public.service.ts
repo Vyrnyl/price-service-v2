@@ -289,6 +289,8 @@ interface RawSrpHistoryRow {
   id: string;
   price: unknown;
   effectiveDate: Date;
+  /** End of the SRP's date range (label only); absent/null = no range. */
+  effectiveEndDate?: Date | null;
   createdAt: Date;
 }
 
@@ -303,6 +305,8 @@ export interface PublicSrpHistoryEntryDto {
   id: string;
   price: number;
   effectiveDate: Date;
+  /** End of the SRP's date range — display only. null = a single effective date. */
+  effectiveEndDate: Date | null;
 }
 
 export interface PublicSrpHistoryDto {
@@ -323,6 +327,7 @@ export function buildSrpHistoryDto(commodity: RawCommodityWithSrpHistory): Publi
       id: srp.id,
       price: Number(srp.price),
       effectiveDate: srp.effectiveDate,
+      effectiveEndDate: srp.effectiveEndDate ?? null,
     })),
   };
 }

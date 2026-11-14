@@ -20,6 +20,7 @@ import {
   COMMODITY_CATEGORY_FILTER_ENABLED,
   INLINE_SRP_EDIT_ENABLED,
   NEW_COMMODITY_ENABLED,
+  SRP_DATE_RANGE_ENABLED,
 } from "../commodity-list.config";
 import {
   SRP_EFFECTIVE_DATE_MAX_DAYS_AHEAD,
@@ -41,6 +42,7 @@ import { getCategories } from "@/features/category/services/category.api";
 import { getCategoryIcon } from "@/features/category/category-icons";
 import { ApiError, fetchAllPages } from "@/shared/services/api";
 import { formatCurrency } from "@/shared/utils/currency";
+import { formatIsoDateRange, isValidDateRange } from "@/shared/utils/date-range";
 import { createSrp } from "../services/srp.api";
 import type { CreateCommodityFormSchema } from "../commodity.schema";
 import type { UserRole } from "@/shared/services/auth";
@@ -64,7 +66,11 @@ function mapCommodityToRow(item: CommodityItem) {
     // Two decimals everywhere ("₱44.00", not "₱44"), in the cell and the edit input.
     srp: latestSrp ? formatCurrency(Number(latestSrp.price)) : "_",
     srpValue: latestSrp ? Number(latestSrp.price).toFixed(2) : null,
-    effectiveDate: latestSrp ? formatEffectiveDate(latestSrp.effectiveDate) : "_",
+    effectiveDate: latestSrp
+      ? latestSrp.effectiveEndDate
+        ? formatIsoDateRange(latestSrp.effectiveDate, latestSrp.effectiveEndDate)
+        : formatEffectiveDate(latestSrp.effectiveDate)
+      : "_",
     statusClass: "border border-primary text-primary",
     icon: getCategoryIcon(item.category.name, item.category.iconKey),
     iconBg: "bg-primary-container/10 text-primary",
@@ -132,6 +138,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const [srpErrors, setSrpErrors] = useState<Record<string, string>>({});
   const [srpEffectiveDate, setSrpEffectiveDate] = useState(() => getManilaDateString());
   const [srpEffectiveDateError, setSrpEffectiveDateError] = useState<string | null>(null);
+  // Optional end of the range (SRP_DATE_RANGE_ENABLED); "" = no end date.
+  const [srpEffectiveEndDate, setSrpEffectiveEndDate] = useState("");
+  const [srpEffectiveEndDateError, setSrpEffectiveEndDateError] = useState<string | null>(null);
   const { showToast } = useToast();
 
   const loadCommodities = async (page: number) => {
@@ -305,6 +314,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     setSrpDrafts({});
     setSrpErrors({});
     setSrpEffectiveDateError(null);
+    setSrpEffectiveEndDateError(null);
   };
 
   const handleSrpDraftChange = (commodityId: string, value: string) => {
@@ -320,6 +330,12 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
   const handleSrpEffectiveDateChange = (value: string) => {
     setSrpEffectiveDate(value);
     setSrpEffectiveDateError(null);
+    setSrpEffectiveEndDateError(null);
+  };
+
+  const handleSrpEffectiveEndDateChange = (value: string) => {
+    setSrpEffectiveEndDate(value);
+    setSrpEffectiveEndDateError(null);
   };
 
   const handleSaveSrps = async () => {
@@ -343,9 +359,16 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
     } else if (!isSrpEffectiveDateWithinWindow(srpEffectiveDate)) {
       dateError = `Cannot be more than ${SRP_EFFECTIVE_DATE_MAX_DAYS_AHEAD} days ahead (latest: ${getMaxSrpEffectiveDateString()})`;
     }
+    // The end date is optional; when given it can't be before the start.
+    const endDate = SRP_DATE_RANGE_ENABLED ? srpEffectiveEndDate : "";
+    const endDateError =
+      endDate && srpEffectiveDate && !isValidDateRange(srpEffectiveDate, endDate)
+        ? "Can't be before the effective date"
+        : null;
     setSrpErrors(nextErrors);
     setSrpEffectiveDateError(dateError);
-    if (Object.keys(nextErrors).length > 0 || dateError) return;
+    setSrpEffectiveEndDateError(endDateError);
+    if (Object.keys(nextErrors).length > 0 || dateError || endDateError) return;
 
     // One new SRP row per changed commodity through the existing POST /srps
     // (officer-only, audited) — SRPs are historical, so nothing is overwritten.
@@ -358,6 +381,7 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
           commodityId: row.id,
           price: Number(srpDrafts[row.id]),
           effectiveDate: srpEffectiveDate,
+          ...(endDate ? { effectiveEndDate: endDate } : {}),
         }),
       ),
     );
@@ -561,6 +585,13 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
                       onSave: () => void handleSaveSrps(),
                       onDraftChange: handleSrpDraftChange,
                       onEffectiveDateChange: handleSrpEffectiveDateChange,
+                      ...(SRP_DATE_RANGE_ENABLED
+                        ? {
+                            effectiveEndDate: srpEffectiveEndDate,
+                            effectiveEndDateError: srpEffectiveEndDateError,
+                            onEffectiveEndDateChange: handleSrpEffectiveEndDateChange,
+                          }
+                        : {}),
                     }
                   : undefined
               }

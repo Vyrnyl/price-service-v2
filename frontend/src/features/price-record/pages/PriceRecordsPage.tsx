@@ -26,7 +26,7 @@ import {
   rangeStartIso,
   todayInputDate,
   toRecordDateRange,
-} from "../utils/date-range";
+} from "@/shared/utils/date-range";
 import PriceRecordFilters from "../components/PriceRecordFilters";
 import PriceRecordsTable from "../components/PriceRecordsTable";
 import type {

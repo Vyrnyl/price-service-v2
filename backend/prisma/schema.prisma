@@ -67,6 +67,8 @@ model SRP {
   commodityId  String    @db.Uuid
   price        Decimal   @db.Decimal(20, 4)
   effectiveDate DateTime
+  /// Last day of the SRP's date range — display only; effectiveDate alone decides which SRP is in force. null = no range.
+  effectiveEndDate DateTime?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   commodity    Commodity @relation(fields: [commodityId], references: [id])

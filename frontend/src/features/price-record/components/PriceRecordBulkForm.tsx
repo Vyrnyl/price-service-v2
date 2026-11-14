@@ -141,11 +141,15 @@ export default function PriceRecordBulkForm({
           <div className="flex flex-col gap-3 sm:flex-row sm:items-start">
             {dateRange ? (
               <fieldset className="min-w-0">
-                <legend className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-outline">
-                  Date Range
-                </legend>
+                <legend className="sr-only">Date range</legend>
                 <div className="grid grid-cols-2 gap-2">
                   <div className="min-w-0 sm:w-40">
+                    <label
+                      htmlFor="bulk-record-date-from"
+                      className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-outline"
+                    >
+                      Start date
+                    </label>
                     <Input
                       id="bulk-record-date-from"
                       type="date"
@@ -154,11 +158,16 @@ export default function PriceRecordBulkForm({
                       onChange={(event) => dateRange.onFromChange(event.target.value)}
                       hasError={Boolean(errors.dateFrom)}
                       disabled={isSaving}
-                      aria-label="From date"
                     />
                     <FieldError message={errors.dateFrom} />
                   </div>
                   <div className="min-w-0 sm:w-40">
+                    <label
+                      htmlFor="bulk-record-date-to"
+                      className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-outline"
+                    >
+                      End date
+                    </label>
                     <Input
                       id="bulk-record-date-to"
                       type="date"
@@ -167,7 +176,6 @@ export default function PriceRecordBulkForm({
                       onChange={(event) => dateRange.onToChange(event.target.value)}
                       hasError={Boolean(errors.dateTo)}
                       disabled={isSaving}
-                      aria-label="To date"
                     />
                     <FieldError message={errors.dateTo} />
                   </div>

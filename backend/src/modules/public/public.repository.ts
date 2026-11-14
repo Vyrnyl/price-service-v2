@@ -44,7 +44,7 @@ export const publicRepository = {
           { effectiveDate: 'asc' },
           { createdAt: 'asc' },
         ],
-        select: { id: true, price: true, effectiveDate: true, createdAt: true },
+        select: { id: true, price: true, effectiveDate: true, effectiveEndDate: true, createdAt: true },
       },
     },
   }),

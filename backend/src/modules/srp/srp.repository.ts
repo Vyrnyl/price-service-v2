@@ -1,4 +1,5 @@
 import { prisma } from '../../prisma';
+import AppError from '../../shared/utils/AppError';
 import type { Prisma } from '@prisma/client';
 import type { CreateSrpInput, UpdateSrpInput } from './srp.schema';
 
@@ -28,8 +29,19 @@ export const srpRepository = {
       include: { commodity: true },
     }),
 
-  update: (id: string, data: UpdateSrpInput) => {
+  update: async (id: string, data: UpdateSrpInput) => {
     const { commodityId, ...rest } = data;
+
+    // The schema compares the range ends only when both are sent; when one
+    // side is omitted, compare against what is stored.
+    if ((rest.effectiveDate === undefined) !== (rest.effectiveEndDate === undefined)) {
+      const current = await prisma.sRP.findUnique({ where: { id }, select: { effectiveDate: true, effectiveEndDate: true } });
+      const start = rest.effectiveDate ?? current?.effectiveDate;
+      const end = rest.effectiveEndDate !== undefined ? rest.effectiveEndDate : current?.effectiveEndDate;
+      if (start && end && end.getTime() < start.getTime()) {
+        throw new AppError("End date can't be before the effective date", 400);
+      }
+    }
 
     const updateData: Prisma.SRPUpdateInput = {
       ...rest,

@@ -6,7 +6,7 @@
 //   table's filter panel (admin and officer). `false` removes the dropdown.
 //
 // INLINE_SRP_EDIT_ENABLED — the officer edits SRPs straight in the table:
-//   "Add SRP" (labelled "Edit SRP" until 2026-11-14) turns every SRP cell on
+//   "ADD NEW SRP" (labelled "Edit SRP", then "Add SRP", until 2026-11-14) turns every SRP cell on
 //   the page into an input, one Effective Date at the top right applies to all of them, and Save records a new SRP
 //   for each row whose price changed (SRPs stay historical — nothing is
 //   overwritten). While it is on, the Edit Commodity dialog no longer shows the
@@ -20,3 +20,13 @@
 export const COMMODITY_CATEGORY_FILTER_ENABLED = true;
 export const INLINE_SRP_EDIT_ENABLED = true;
 export const NEW_COMMODITY_ENABLED = false;
+
+// SRP_DATE_RANGE_ENABLED — 2026-11-14 client revision. "ADD NEW SRP" takes an
+//   Effective Date range: From (required, the date the SRP takes effect, as
+//   before) and an optional To. The Effective Date column and the SRP history
+//   pop-up show "Jan 1 – Dec 31, 2025" for an SRP with an end date. The end is
+//   a label only: an SRP stays in force until a newer one takes effect, so
+//   status, compliance and the outlook ignore it. `false` brings back the
+//   single Effective Date and saves no end date; SRPs that already have one
+//   keep showing their range.
+export const SRP_DATE_RANGE_ENABLED = true;

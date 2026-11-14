@@ -292,3 +292,16 @@ test('buildPublicCommoditiesPayload: latest store prices are matched to their ow
   assert.equal(payload[0]?.lastUpdatedAt, null);
   assert.equal(payload[1]?.currentPrice, 5);
 });
+
+test('buildSrpHistoryDto: passes an SRP date range end through, null when there is none', () => {
+  const dto = buildSrpHistoryDto({
+    ...srpHistoryCommodity,
+    srps: [
+      { ...srpRow('ranged', '42', '2025-01-01T00:00:00Z', '2025-01-01T00:00:00Z'), effectiveEndDate: new Date('2025-12-31T00:00:00Z') },
+      srpRow('single', '45', '2026-01-01T00:00:00Z', '2026-01-01T00:00:00Z'),
+    ],
+  });
+
+  assert.equal(dto.entries[0]?.effectiveEndDate?.toISOString(), '2025-12-31T00:00:00.000Z');
+  assert.equal(dto.entries[1]?.effectiveEndDate, null);
+});

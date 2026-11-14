@@ -16,6 +16,7 @@ import {
   type SrpProjectionState,
 } from "@/shared/types/srp-history.types";
 import { formatCurrency } from "@/shared/utils/currency";
+import { formatIsoDateRange } from "@/shared/utils/date-range";
 
 type SrpHistoryModalProps = {
   open: boolean;
@@ -435,11 +436,15 @@ function HistoryBody({ entries, projection }: { entries: SrpHistoryEntry[]; proj
               <li key={entry.id} className="flex items-center justify-between gap-4 py-3 first:pt-0 last:pb-0">
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-medium text-on-surface">{formatDate(entry.effectiveDate)}</p>
+                    <p className="text-sm font-medium text-on-surface">
+                      {entry.effectiveEndDate
+                        ? formatIsoDateRange(entry.effectiveDate, entry.effectiveEndDate)
+                        : formatDate(entry.effectiveDate)}
+                    </p>
                     {entry.id === currentId ? <Badge variant="primary">Current</Badge> : null}
                     {isScheduled ? <Badge variant="info">Scheduled</Badge> : null}
                   </div>
-                  <p className="mt-0.5 text-xs text-outline">Effective date</p>
+                  <p className="mt-0.5 text-xs text-outline">{entry.effectiveEndDate ? "Effective period" : "Effective date"}</p>
                 </div>
                 <div className="shrink-0 text-right">
                   <p className="text-sm font-semibold text-on-surface">{formatCurrency(entry.price)}</p>

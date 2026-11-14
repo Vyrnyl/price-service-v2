@@ -1,4 +1,5 @@
-// Helpers for the Price Records date range (PRICE_RECORD_DATE_RANGE_ENABLED).
+// Helpers for date ranges: Price Records (PRICE_RECORD_DATE_RANGE_ENABLED) and
+// SRPs (SRP_DATE_RANGE_ENABLED).
 // Values are the "YYYY-MM-DD" strings an <input type="date"> produces, read as
 // local calendar dates — never through new Date("YYYY-MM-DD"), which is UTC.
 
@@ -101,4 +102,9 @@ export function toRecordDateRange(
     periodEnd: endIso,
     dateRange: { label: formatDateRange(from, to), days: countRangeDays(from, to) },
   };
+}
+
+/** A stored range (two ISO timestamps) as a label: "Jan 1 – Dec 31, 2025". */
+export function formatIsoDateRange(startIso: string, endIso: string): string {
+  return formatDateRange(isoToRangeDate(startIso), isoToRangeDate(endIso));
 }

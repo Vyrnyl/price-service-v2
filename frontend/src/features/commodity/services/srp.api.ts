@@ -5,6 +5,8 @@ export interface SrpItem {
   commodityId: string;
   price: string;
   effectiveDate: string;
+  /** End of the SRP's date range (label only); null = a single effective date. */
+  effectiveEndDate?: string | null;
   createdAt: string;
   commodity?: {
     id: string;
@@ -23,6 +25,8 @@ export interface SrpCreatePayload {
   commodityId: string;
   price: number;
   effectiveDate: string;
+  /** "YYYY-MM-DD"; omitted = no end date. */
+  effectiveEndDate?: string;
 }
 
 export interface SrpCreateResponse {

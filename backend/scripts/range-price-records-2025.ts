@@ -13,7 +13,7 @@
  *   periodEnd    null               →  the last day of the month (00:00 UTC)
  *
  * Calendar dates at 00:00 UTC are the app's convention for range ends and SRP
- * effective dates alike (frontend utils/date-range.ts), so the list reads
+ * effective dates alike (frontend shared/utils/date-range.ts), so the list reads
  * "Jan 1 – Jan 31, 2025 · 31 days".
  *
  * Only records listed in the import's manifest

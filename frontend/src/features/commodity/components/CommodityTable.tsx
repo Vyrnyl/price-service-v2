@@ -51,6 +51,13 @@ export type SrpEditControl = {
   onSave: () => void;
   onDraftChange: (commodityId: string, value: string) => void;
   onEffectiveDateChange: (value: string) => void;
+  /**
+   * Optional end of the Effective Date range (SRP_DATE_RANGE_ENABLED). When
+   * `onEffectiveEndDateChange` is absent the single Effective Date is shown.
+   */
+  effectiveEndDate?: string;
+  effectiveEndDateError?: string | null;
+  onEffectiveEndDateChange?: (value: string) => void;
 };
 
 const PAGE_SIZE = 5;
@@ -113,6 +120,51 @@ export default function CommodityTable({
 
         {srpEdit ? (
           <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-start md:w-auto">
+            {srpEdit.onEffectiveEndDateChange ? (
+              <fieldset className="min-w-0">
+                <legend className="sr-only">Effective date range</legend>
+                <div className="grid grid-cols-2 gap-2">
+                  <div className="min-w-0 sm:w-40">
+                    <label
+                      htmlFor="srp-effective-date"
+                      className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-outline"
+                    >
+                      Start date
+                    </label>
+                    <Input
+                      id="srp-effective-date"
+                      type="date"
+                      max={srpEdit.maxEffectiveDate}
+                      value={srpEdit.effectiveDate}
+                      disabled={!srpEdit.isEditing || srpEdit.isSaving}
+                      hasError={Boolean(srpEdit.effectiveDateError)}
+                      onChange={(event) => srpEdit.onEffectiveDateChange(event.target.value)}
+                      className="disabled:cursor-not-allowed disabled:opacity-60"
+                    />
+                    <FieldError message={srpEdit.effectiveDateError ?? undefined} />
+                  </div>
+                  <div className="min-w-0 sm:w-40">
+                    <label
+                      htmlFor="srp-effective-end-date"
+                      className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-outline"
+                    >
+                      End date <span className="normal-case tracking-normal">(optional)</span>
+                    </label>
+                    <Input
+                      id="srp-effective-end-date"
+                      type="date"
+                      min={srpEdit.effectiveDate || undefined}
+                      value={srpEdit.effectiveEndDate ?? ""}
+                      disabled={!srpEdit.isEditing || srpEdit.isSaving}
+                      hasError={Boolean(srpEdit.effectiveEndDateError)}
+                      onChange={(event) => srpEdit.onEffectiveEndDateChange?.(event.target.value)}
+                      className="disabled:cursor-not-allowed disabled:opacity-60"
+                    />
+                    <FieldError message={srpEdit.effectiveEndDateError ?? undefined} />
+                  </div>
+                </div>
+              </fieldset>
+            ) : (
             <div className="sm:w-44">
               <label
                 htmlFor="srp-effective-date"
@@ -132,6 +184,7 @@ export default function CommodityTable({
               />
               <FieldError message={srpEdit.effectiveDateError ?? undefined} />
             </div>
+            )}
             {/* sm:mt-6 drops the buttons past the date label so they line up with the field. */}
             <div className="flex gap-2 sm:mt-6">
               {srpEdit.isEditing ? (
@@ -164,7 +217,7 @@ export default function CommodityTable({
                   className="w-full sm:w-auto"
                 >
                   <MdEdit size={18} />
-                  Add SRP
+                  ADD NEW SRP
                 </Button>
               )}
             </div>
