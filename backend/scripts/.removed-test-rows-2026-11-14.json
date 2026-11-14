@@ -1,0 +1,64 @@
+{
+  "removedAt": "2026-11-14T01:52:30.695Z",
+  "reason": "user-approved test data removal",
+  "priceRecords": [
+    {
+      "id": "43075c90-0e23-48cc-9c48-33e9e8355f12",
+      "commodityId": "22b373b3-cef8-42e0-a9ab-c14c4027c6c3",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "216.5000",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-13T17:35:29.168Z",
+      "dateAndTime": "2026-11-02T08:00:00.000Z",
+      "updatedAt": "2026-11-13T17:35:55.721Z",
+      "periodEnd": "2026-11-16T07:59:59.999Z"
+    },
+    {
+      "id": "316d9757-746f-4bc4-9c6e-1486fcc92a61",
+      "commodityId": "22b373b3-cef8-42e0-a9ab-c14c4027c6c3",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "216.6500",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-13T17:40:08.561Z",
+      "dateAndTime": "2026-11-02T08:00:00.000Z",
+      "updatedAt": "2026-11-13T17:40:27.328Z",
+      "periodEnd": "2026-11-12T07:59:59.999Z"
+    },
+    {
+      "id": "5b32344d-defe-4748-bf31-9819c65d4f51",
+      "commodityId": "22b373b3-cef8-42e0-a9ab-c14c4027c6c3",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "216.3500",
+      "status": "UNDERPRICE",
+      "createdAt": "2026-11-13T17:43:14.753Z",
+      "dateAndTime": "2026-11-09T08:00:00.000Z",
+      "updatedAt": "2026-11-13T17:43:14.753Z",
+      "periodEnd": "2026-11-14T07:59:59.999Z"
+    },
+    {
+      "id": "90b63cbc-b552-43bd-9507-64bd7b3c6775",
+      "commodityId": "22b373b3-cef8-42e0-a9ab-c14c4027c6c3",
+      "storeId": "6ef54e56-ecab-4e13-8938-d7578fe6beea",
+      "userId": "3b3823e2-71af-4d06-9c99-e8fc36c0fd3e",
+      "price": "216.8000",
+      "status": "OVERPRICE",
+      "createdAt": "2026-11-13T17:44:15.573Z",
+      "dateAndTime": "2026-11-10T08:00:00.000Z",
+      "updatedAt": "2026-11-13T17:44:15.573Z",
+      "periodEnd": "2026-11-14T07:59:59.999Z"
+    }
+  ],
+  "srps": [
+    {
+      "id": "f602606d-bb9d-422a-921f-d31ffb5b367b",
+      "commodityId": "b6728886-be75-4170-aa25-23b5fe7ca812",
+      "price": "36.3500",
+      "effectiveDate": "2026-11-13T16:00:00.000Z",
+      "createdAt": "2026-11-13T17:23:11.256Z",
+      "updatedAt": "2026-11-13T17:23:11.256Z"
+    }
+  ]
+}
