@@ -15,7 +15,7 @@ import AddCommodityDialog, { type CategoryOption } from "../components/AddCommod
 import CommoditySummaryCards from "../components/CommoditySummaryCards";
 import CommodityTable, { type CommodityRow } from "../components/CommodityTable";
 import { SrpHistoryModal } from "../components/SrpHistoryModal";
-import { SRP_HISTORY_ENABLED } from "../srp-history.config";
+import { OFFICER_SRP_HISTORY_ENABLED, SRP_HISTORY_ENABLED } from "../srp-history.config";
 import {
   COMMODITY_CATEGORY_FILTER_ENABLED,
   INLINE_SRP_EDIT_ENABLED,
@@ -525,7 +525,9 @@ export default function CommodityManagementPage({ userRole }: CommodityManagemen
               }}
               onPageChange={handlePageChange}
               onEditCommodity={canManage ? handleEditCommodity : undefined}
-              onViewSrpHistory={SRP_HISTORY_ENABLED ? setHistoryRow : undefined}
+              onViewSrpHistory={
+                SRP_HISTORY_ENABLED || (canManage && OFFICER_SRP_HISTORY_ENABLED) ? setHistoryRow : undefined
+              }
               categoryFilter={
                 COMMODITY_CATEGORY_FILTER_ENABLED
                   ? {
