@@ -16,7 +16,7 @@ type PriceStatus = 'COMPLIANT' | 'OVERPRICE' | 'UNDERPRICE';
  * PRICE_RECORD_REQUIRE_SRP_ENABLED (price-record-form.config.ts) is the
  * matching UI flag; roll back both together.
  */
-export const REQUIRE_SRP_FOR_PRICE_RECORDS = true;
+export const REQUIRE_SRP_FOR_PRICE_RECORDS = false; // rolled back 2026-11-14 at the user's request
 
 /**
  * Status of a price against the SRP in force (`srpPrice`, null when none).

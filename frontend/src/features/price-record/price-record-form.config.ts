@@ -30,4 +30,4 @@ export const PRICE_RECORD_DATE_RANGE_ENABLED = true;
 //   that only takes effect later is refused there with its own row error.
 //   Roll back both flags together; `false` here alone only removes the hints.
 //   Price-only edits of older records without an SRP stay allowed.
-export const PRICE_RECORD_REQUIRE_SRP_ENABLED = true;
+export const PRICE_RECORD_REQUIRE_SRP_ENABLED = false; // rolled back 2026-11-14 at the user's request
