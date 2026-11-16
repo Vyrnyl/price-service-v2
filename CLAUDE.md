@@ -22,7 +22,7 @@ Check [context/progress.md](context/progress.md) at the start of every session �
 
 Verified baseline (2026-11-14): backend `tsc` clean · frontend `tsc` clean · backend `npm test` 170/170 passing.
 
-**The November client revisions are behind on/off flags, so they can be rolled back.** The officer Commodities changes (category filter, inline SRP edit, SRP date range, filtering/paging while adding SRPs), the Price Records bulk Add form, the date range and the officer SRP history pop-up are each switched on by a constant in `commodity-list.config.ts`, `price-record-form.config.ts` or `srp-history.config.ts`. Roll a part back by setting its flag to `false`, not with `git revert`: several parts share a commit.
+**The November client revisions are behind on/off flags, so they can be rolled back.** The officer Commodities changes (category filter, inline SRP edit, SRP date range, filtering/paging while adding SRPs), the Price Records bulk Add form, the date range and the officer SRP history pop-up are each switched on by a constant in `commodity-list.config.ts`, `price-record-form.config.ts` or `srp-history.config.ts`. The Price Trends store averaging (and the rolled-back "count back from the newest record" windows) live in `features/public/price-trends.config.ts`. Roll a part back by setting its flag to `false`, not with `git revert`: several parts share a commit.
 
 ## The one rule that governs everything
 
