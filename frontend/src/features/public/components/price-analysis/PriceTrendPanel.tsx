@@ -20,7 +20,21 @@ export type TrendPoint = {
   label: string;
   x: number;
   y: number;
+  /** Set when the point averages several store prices (PRICE_TRENDS_STORE_AVERAGE_ENABLED). */
+  storeCount?: number;
+  minPrice?: number | null;
+  maxPrice?: number | null;
 };
+
+/** "Average of 3 stores · ₱11.75–₱12.25", or null for a plain single-record point. */
+function describeAverage(point: TrendPoint | null | undefined): string | null {
+  if (!point || point.storeCount == null || point.storeCount === 0) return null;
+  if (point.storeCount === 1) return "1 store";
+  const spread = point.minPrice != null && point.maxPrice != null && point.minPrice !== point.maxPrice
+    ? ` · ${formatCurrency(point.minPrice)}–${formatCurrency(point.maxPrice)}`
+    : "";
+  return `Average of ${point.storeCount} stores${spread}`;
+}
 
 type PriceInsight = {
   title: string;
@@ -38,6 +52,8 @@ type PriceTrendPanelProps = {
   rangeOptions: readonly PriceRange[];
   rangeLabels: Record<PriceRange, string>;
   points: TrendPoint[];
+  /** Shown under the title when the window counts back from an older latest record. */
+  anchorNote?: string | null;
   /** The price history is still loading — say so instead of "No price records". */
   isLoading?: boolean;
   selectedPointIndex: number | null;
@@ -91,6 +107,7 @@ export function PriceTrendPanel({
   rangeOptions,
   rangeLabels,
   points,
+  anchorNote = null,
   isLoading = false,
   selectedPointIndex,
   customStartDate,
@@ -208,6 +225,8 @@ export function PriceTrendPanel({
         callbacks: {
           label: (context: { parsed: { y: number | null } }) =>
             formatCurrency(context.parsed.y),
+          afterLabel: (context: { dataIndex: number }) =>
+            describeAverage(points[context.dataIndex]) ?? "",
         },
       },
     },
@@ -254,6 +273,7 @@ export function PriceTrendPanel({
             {activeInsight.change}
             {activeInsight.confidence ? ` • ${activeInsight.confidence} confidence` : ""}
           </p>
+          {anchorNote ? <p className="mt-1 text-xs text-outline">{anchorNote}</p> : null}
         </div>
 
         <div className="flex flex-wrap gap-2">
@@ -301,6 +321,18 @@ export function PriceTrendPanel({
       ) : null}
 
       <div className="overflow-hidden rounded-xl border border-outline-variant/70 bg-surface-container p-3 shadow-inner sm:p-4">
+        {/* Above the chart, not over it, so it never hides the line it describes. */}
+        {points.length > 0 ? (
+          <div className="mb-3 flex flex-wrap items-baseline gap-x-3 gap-y-1 rounded-lg border border-outline-variant/70 bg-surface-container-lowest px-3 py-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline">Selected point</p>
+            <p className="text-lg font-semibold text-on-surface">{selectedPoint ? formatCurrency(selectedPoint.price) : activeInsight.price}</p>
+            <p className="text-sm text-success">{selectedDateLabel}</p>
+            {describeAverage(selectedPoint) ? (
+              <p className="text-xs text-on-surface-variant">{describeAverage(selectedPoint)}</p>
+            ) : null}
+          </div>
+        ) : null}
+
         <div className="relative h-60 sm:h-70 md:h-80 lg:h-90">
           <div className="pointer-events-none absolute inset-0 flex flex-col justify-between">
             {[0, 1, 2, 3, 4].map((line) => (
@@ -318,13 +350,7 @@ export function PriceTrendPanel({
                 {isLoading ? "Loading price history..." : "No price records in this range."}
               </p>
             </div>
-          ) : (
-            <div className="mt-3 w-full rounded-xl border border-outline-variant/70 bg-surface-container-lowest p-3 data-card-shadow sm:absolute sm:inset-x-3 sm:bottom-3 sm:mt-0 sm:w-auto sm:max-w-56 md:left-[60%] md:right-auto md:top-4 md:bottom-auto md:max-w-60">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-outline">Selected point</p>
-              <p className="text-lg font-semibold text-on-surface sm:text-xl">{selectedPoint ? formatCurrency(selectedPoint.price) : activeInsight.price}</p>
-              <p className="text-sm text-success">{selectedDateLabel}</p>
-            </div>
-          )}
+          ) : null}
         </div>
 
         {activeInsight.labels.length <= 31 ? (

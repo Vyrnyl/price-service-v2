@@ -15,6 +15,18 @@ import {
   type PublicCommodityPriceRecord,
 } from "@/features/commodity";
 import PageShell from "@/shared/components/PageShell";
+import {
+  PRICE_TRENDS_ANCHOR_ON_LATEST_ENABLED,
+  PRICE_TRENDS_STORE_AVERAGE_ENABLED,
+} from "../price-trends.config";
+import {
+  averageRecordsByDay,
+  computeSeriesChanges,
+  filterWithinDaysBefore,
+  latestRecordTime,
+  manilaDayKey,
+  type AveragedTrendRecord,
+} from "../utils/price-trend-series";
 import { DailyChangesPanel } from "../components/price-analysis/DailyChangesPanel";
 import { ForecastDetailModal } from "../components/price-analysis/ForecastDetailModal";
 import { ForecastMethodPanel } from "../components/price-analysis/ForecastMethodPanel";
@@ -295,6 +307,8 @@ export default function PriceAnalysisPage() {
   // and compliance), so 3M/6M/1Y/Custom had nothing older to draw from.
   const [history, setHistory] = useState<{ commodityId: string; records: PublicCommodityPriceRecord[] } | null>(null);
   const [historyError, setHistoryError] = useState(false);
+  // "Now" for the rolling windows, read once on mount — render must stay pure.
+  const [nowTime] = useState(() => Date.now());
   const categoryOptions = uniqueTrimmed(commodities.map((commodity) => commodity.category))
     .sort((a, b) => a.localeCompare(b));
   const commodityOptions = commodityNamesInCategory(commodities, selectedCategory);
@@ -341,15 +355,38 @@ export default function PriceAnalysisPage() {
   const historyReady = history != null && history.commodityId === selectedCommodityId;
   const isHistoryLoading = selectedCommodityId != null && !historyReady && !historyError;
   const chartSourceRecords = historyReady ? history.records : allRecords;
-
-  const rangeDescriptor = RANGE_DESCRIPTORS[activeRange];
-  const recordsInRange = rangeDescriptor.days != null
-    ? filterRecordsWithinRealWindow(chartSourceRecords, rangeDescriptor.days)
-    : filterRecordsWithinDateRange(chartSourceRecords, customStartDate, customEndDate);
-  const windowedRecords = recordsInRange.map((record) => ({
+  const numericSourceRecords = chartSourceRecords.map((record) => ({
     price: record.price != null ? Number(record.price) : null,
     dateAndTime: record.dateAndTime,
   }));
+  // With averaging on, every point is one Manila calendar day: the mean of the
+  // stores' prices recorded that day. Averaged over the full history before
+  // the window is cut, so a window edge can never split a day's stores.
+  const sourceSeries: Array<WindowedRecord & Partial<AveragedTrendRecord>> = PRICE_TRENDS_STORE_AVERAGE_ENABLED
+    ? averageRecordsByDay(numericSourceRecords)
+    : numericSourceRecords;
+
+  // The rolling windows count back from the newest record (flag on) or from now.
+  const newestRecordTime = latestRecordTime(numericSourceRecords);
+  const anchorTime = PRICE_TRENDS_ANCHOR_ON_LATEST_ENABLED && newestRecordTime != null
+    ? Math.min(newestRecordTime, nowTime)
+    : nowTime;
+  const anchorNote = PRICE_TRENDS_ANCHOR_ON_LATEST_ENABLED
+    && newestRecordTime != null
+    && nowTime - anchorTime > 24 * 60 * 60 * 1000
+    ? `Counted back from the latest recorded price, ${new Date(anchorTime).toLocaleDateString("en-PH", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+      })}.`
+    : null;
+
+  const rangeDescriptor = RANGE_DESCRIPTORS[activeRange];
+  const windowedRecords = rangeDescriptor.days != null
+    ? PRICE_TRENDS_ANCHOR_ON_LATEST_ENABLED
+      ? filterWithinDaysBefore(sourceSeries, rangeDescriptor.days, anchorTime)
+      : filterRecordsWithinRealWindow(sourceSeries, rangeDescriptor.days)
+    : filterRecordsWithinDateRange(sourceSeries, customStartDate, customEndDate);
   const activeInsight = buildTrendInsight({
     activeRange,
     records: windowedRecords,
@@ -374,10 +411,41 @@ export default function PriceAnalysisPage() {
       label: formatTrendLabel(record.dateAndTime, index),
       x,
       y: Number.isNaN(y) ? 160 : y,
+      storeCount: record.storeCount,
+      minPrice: record.minPrice,
+      maxPrice: record.maxPrice,
     };
   });
 
-  const dailyChanges = [
+  const formatDay = (date: string | null) =>
+    date ? new Date(date).toLocaleDateString("en-PH", { month: "short", day: "numeric", year: "numeric" }) : "—";
+  const seriesChanges = PRICE_TRENDS_STORE_AVERAGE_ENABLED
+    ? computeSeriesChanges(sourceSeries as AveragedTrendRecord[], anchorTime)
+    : null;
+
+  const dailyChanges = seriesChanges ? [
+    {
+      label: "Latest change",
+      value: formatChange(seriesChanges.latest ? seriesChanges.latest.to.price! - seriesChanges.latest.from.price! : null),
+      note: seriesChanges.latest
+        ? `Store average from ${formatCurrency(seriesChanges.latest.from.price)} (${formatDay(seriesChanges.latest.from.dateAndTime)}) to ${formatCurrency(seriesChanges.latest.to.price)} (${formatDay(seriesChanges.latest.to.dateAndTime)})`
+        : "Not enough recorded prices",
+    },
+    {
+      label: "This week",
+      value: formatChange(seriesChanges.week ? seriesChanges.week.current - seriesChanges.week.previous : null),
+      note: seriesChanges.week
+        ? `Average of the last 7 days (${formatCurrency(seriesChanges.week.current)}) against the 7 days before (${formatCurrency(seriesChanges.week.previous)})`
+        : "No prices in both of the last two weeks",
+    },
+    {
+      label: "30-day trend",
+      value: formatChange(seriesChanges.month ? seriesChanges.month.to.price! - seriesChanges.month.from.price! : null),
+      note: seriesChanges.month
+        ? `Store average from ${formatDay(seriesChanges.month.from.dateAndTime)} to ${formatDay(seriesChanges.month.to.dateAndTime)}`
+        : "Not enough recorded prices in the last 30 days",
+    },
+  ] : [
     {
       label: "Today",
       value: formatChange(latestPrice != null && previousPrice != null ? latestPrice - previousPrice : null),
@@ -568,11 +636,22 @@ export default function PriceAnalysisPage() {
             rangeOptions={rangeOptions}
             rangeLabels={rangeLabels}
             points={trendPoints}
+            anchorNote={activeRange === "Custom" ? null : anchorNote}
             isLoading={isHistoryLoading && trendPoints.length === 0}
             selectedPointIndex={selectedPointIndex}
             customStartDate={customStartDate}
             customEndDate={customEndDate}
             onRangeChange={(range) => {
+              // Today-based defaults would show an empty Custom range when the
+              // latest prices are older; preset the 30 days up to that record.
+              if (range === "Custom" && activeRange !== "Custom" && anchorNote) {
+                const anchorDay = manilaDayKey(new Date(anchorTime).toISOString());
+                const startDay = manilaDayKey(new Date(anchorTime - 30 * 24 * 60 * 60 * 1000).toISOString());
+                if (anchorDay && startDay) {
+                  setCustomStartDate(startDay);
+                  setCustomEndDate(anchorDay);
+                }
+              }
               setActiveRange(range);
               setSelectedPointIndex(null);
             }}
