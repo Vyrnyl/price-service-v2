@@ -33,7 +33,8 @@ const DEFAULT_CATEGORIES: CategoryOption[] = [
   { value: "ALL", label: "All Categories" },
 ];
 
-const MAX_CUSTOM_RANGE_DAYS = 30;
+/** Longest Custom range, in calendar years (was 30 days before 2026-11-21). */
+const MAX_CUSTOM_RANGE_YEARS = 2;
 
 type RangeKey = "Week" | "Month" | "3M" | "6M" | "1Y" | "Custom";
 
@@ -59,10 +60,21 @@ function toIsoDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
-function addDaysToDate(value: string, days: number) {
-  const date = new Date(value);
-  date.setDate(date.getDate() + days);
-  return toIsoDate(date);
+/** Same day `years` later ("2024-02-29" + 2 → "2026-02-28"), worked on the YYYY-MM-DD parts so time zones can't shift it. */
+function addYearsToDate(value: string, years: number) {
+  const [year, month, day] = value.split("-").map(Number);
+  const targetYear = year + years;
+  const lastDayOfMonth = new Date(Date.UTC(targetYear, month, 0)).getUTCDate();
+  return toIsoDate(new Date(Date.UTC(targetYear, month - 1, Math.min(day, lastDayOfMonth))));
+}
+
+function formatIsoDate(value: string) {
+  return new Date(`${value}T00:00:00Z`).toLocaleDateString("en-PH", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "UTC",
+  });
 }
 
 /** Earlier of two ISO dates — the end picker is bounded by both the cap and today. */
@@ -82,9 +94,9 @@ function getDateRangeError(startDate: string, endDate: string) {
     return "Start date cannot be after the end date.";
   }
 
-  const diffInDays = Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffInDays > MAX_CUSTOM_RANGE_DAYS) {
-    return `Selected range is ${diffInDays} days — a custom range cannot exceed ${MAX_CUSTOM_RANGE_DAYS} days. Pick a shorter range, or use a preset above for a longer period.`;
+  const latestEndDate = addYearsToDate(startDate, MAX_CUSTOM_RANGE_YEARS);
+  if (endDate > latestEndDate) {
+    return `A custom range can't be longer than ${MAX_CUSTOM_RANGE_YEARS} years. From this start date, the latest end date is ${formatIsoDate(latestEndDate)}.`;
   }
 
   return null;
@@ -154,9 +166,8 @@ export default function ReportGenerationPage() {
   const isCustomRange = activeRange === "Custom";
 
   /**
-   * Preset pills resolve to a rolling window ending today and deliberately bypass
-   * the 30-day cap — that cap exists to stop an unbounded hand-typed range, and a
-   * 3M/6M/1Y preset is an explicit, bounded choice. Only Custom stays capped.
+   * Preset pills resolve to a rolling window ending today. Only Custom is capped
+   * (MAX_CUSTOM_RANGE_YEARS), to stop an unbounded hand-typed range.
    */
   const resolvedPeriod = useMemo(() => {
     if (isCustomRange) {
@@ -416,7 +427,7 @@ export default function ReportGenerationPage() {
                             type="date"
                             value={endDate}
                             min={startDate || undefined}
-                            max={startDate ? minIsoDate(addDaysToDate(startDate, MAX_CUSTOM_RANGE_DAYS), today) : today}
+                            max={startDate ? minIsoDate(addYearsToDate(startDate, MAX_CUSTOM_RANGE_YEARS), today) : today}
                             aria-label="Custom range end date"
                             aria-invalid={Boolean(rangeError)}
                             onChange={(event) => handleEndDateChange(event.target.value)}
@@ -429,7 +440,7 @@ export default function ReportGenerationPage() {
                       ) : (
                         <p className="text-sm text-on-surface-variant">
                           {isCustomRange
-                            ? `Custom range is limited to ${MAX_CUSTOM_RANGE_DAYS} days.`
+                            ? `Custom range is limited to ${MAX_CUSTOM_RANGE_YEARS} years.`
                             : `Covers ${period.replace(" to ", " – ")}.`}
                         </p>
                       )}
