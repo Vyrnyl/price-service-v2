@@ -10,9 +10,15 @@ interface PaginationProps {
   className?: string;
 }
 
-const SIZE_CLASSES: Record<PaginationSize, { button: string; icon: number }> = {
-  sm: { button: "h-8 w-8 text-[11px] sm:h-9 sm:w-9 sm:text-sm", icon: 18 },
-  md: { button: "h-10 w-10 text-sm", icon: 20 },
+// `button` is the square prev/next arrow. `page` keeps the same square as a
+// minimum but grows with padding, so 5-digit page numbers (28,249) stay inside their box.
+const SIZE_CLASSES: Record<PaginationSize, { button: string; page: string; icon: number }> = {
+  sm: {
+    button: "h-8 w-8 text-[11px] sm:h-9 sm:w-9 sm:text-sm",
+    page: "h-8 min-w-8 px-2 text-[11px] sm:h-9 sm:min-w-9 sm:text-sm",
+    icon: 18,
+  },
+  md: { button: "h-10 w-10 text-sm", page: "h-10 min-w-10 px-2.5 text-sm", icon: 20 },
 };
 
 const MAX_VISIBLE_WITHOUT_WINDOWING = 7;
@@ -44,7 +50,7 @@ export default function Pagination({
 }: PaginationProps) {
   if (totalPages <= 1) return null;
 
-  const { button: buttonClasses, icon: iconSize } = SIZE_CLASSES[size];
+  const { button: buttonClasses, page: pageClasses, icon: iconSize } = SIZE_CLASSES[size];
   const FOCUS_RING_CLASSES =
     "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
   const navButtonClasses = `flex items-center justify-center rounded-lg border border-outline-variant bg-surface-container-lowest text-outline transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-50 ${FOCUS_RING_CLASSES} ${buttonClasses}`;
@@ -70,15 +76,16 @@ export default function Pagination({
           <button
             key={page}
             type="button"
-            className={`flex items-center justify-center rounded-lg border font-semibold transition-colors ${FOCUS_RING_CLASSES} ${buttonClasses} ${
+            className={`flex shrink-0 items-center justify-center rounded-lg border font-semibold tabular-nums transition-colors ${FOCUS_RING_CLASSES} ${pageClasses} ${
               currentPage === page
                 ? "border-primary bg-primary text-on-primary"
                 : "border-outline-variant bg-surface-container-lowest text-on-surface-variant hover:bg-surface-container-high"
             }`}
             onClick={() => onPageChange(page)}
             aria-current={currentPage === page ? "page" : undefined}
+            aria-label={`Page ${page}`}
           >
-            {page}
+            {page.toLocaleString("en-US")}
           </button>
         ),
       )}

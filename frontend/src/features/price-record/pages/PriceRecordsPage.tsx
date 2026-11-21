@@ -569,7 +569,7 @@ export default function PriceRecordsPage({
                   Price Records
                 </h1>
                 <p className="mt-1 text-body-sm text-on-surface-variant">
-                  Showing {total} validated entries.
+                  Showing {total.toLocaleString("en-US")} validated entries.
                 </p>
               </div>
               {canCreateRecord ? (
@@ -714,7 +714,7 @@ export default function PriceRecordsPage({
             {total > PAGE_SIZE ? (
               <div className="mt-3 flex flex-col gap-3 border-t border-outline-variant bg-surface-container-low px-3 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-4">
                 <p className="text-[11px] text-on-surface-variant sm:text-sm">
-                  Showing {total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1}-{Math.min(safePage * PAGE_SIZE, total)} of {total} records
+                  Showing {(total === 0 ? 0 : (safePage - 1) * PAGE_SIZE + 1).toLocaleString("en-US")}–{Math.min(safePage * PAGE_SIZE, total).toLocaleString("en-US")} of {total.toLocaleString("en-US")} records
                 </p>
                 <Pagination currentPage={safePage} totalPages={totalPages} onPageChange={setCurrentPage} size="sm" />
               </div>
