@@ -120,9 +120,10 @@ export default function AdminDashboardPage() {
           apiFetch<{ status: string; data: unknown[]; total: number }>('/api/users?pageSize=1'),
         ]);
 
-        const totalCommodities = String(commodityResponse.total);
-        const totalStores = String(storeResponse.total);
-        const totalUsers = String(userResponse.total);
+        // Thousands separators on the cards, e.g. 126,960 (same format as the public SummaryStats).
+        const totalCommodities = commodityResponse.total.toLocaleString("en-US");
+        const totalStores = storeResponse.total.toLocaleString("en-US");
+        const totalUsers = userResponse.total.toLocaleString("en-US");
         const monitoredPrices = String(0);
 
         setStats([

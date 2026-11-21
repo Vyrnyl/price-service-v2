@@ -118,7 +118,7 @@ export default function MonitoringOfficerDashboardPage() {
                         {stat.label}
                       </p>
                       <h3 className="text-[28px] font-bold leading-none text-on-surface">
-                        {value}
+                        {value.toLocaleString("en-US")}
                       </h3>
                     </div>
                   );
